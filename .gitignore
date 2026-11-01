@@ -16,3 +16,9 @@ node_modules/
 *.iml
 local.properties
 leak*.txt
+
+# Release artifacts produced by .github/workflows/release.yml (never committed)
+/tlc-*.apk
+/tlc-*.txt
+/SHA256SUMS
+/apksigner.txt

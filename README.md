@@ -22,14 +22,42 @@ entry kind — both enforced by tests, not by comment.
 make doctor        # toolchain + secret presence (never prints secrets)
 make verify        # compile + all 56 invariant tests, no Android SDK needed
 make ledger-verify # chain verification, including deliberate tampering
+make check-foss    # prove the foss channel has no Play Services / Firebase / tracking
 make shell-check   # type-check the shell without AAPT2 (any CPU)
-make android-build # debug APK (x86_64 host: AAPT2 ships x86-64 only)
+make android-build # foss debug APK (x86_64 host: AAPT2 ships x86-64 only)
 ```
 
 JDK 21 is the only hard requirement for `verify`. The Android module joins the build only when
 `ANDROID_HOME` is set (see `settings.gradle.kts`), so the core stays testable everywhere.
-On an arm64 host `assembleDebug` cannot run (Google ships AAPT2 as an x86-64 binary); use
+On an arm64 host `assembleFossDebug` cannot run (Google ships AAPT2 as an x86-64 binary); use
 `make shell-check` locally and let CI produce the APK.
+
+## Two flavours, one identity
+
+| Flavour | Contains | Ships to |
+|---|---|---|
+| `foss` | no Play Services, no Firebase, no analytics, no proprietary SDK | GitHub Releases, F-Droid, Orion Store |
+| `full` | optional first-party integrations, never required for a core flow | GitHub Releases |
+
+Both use `culture.thelove.tlc` and one signing key, so a user can move between channels without
+losing data. `verifyFossOnly` fails the build if a proprietary dependency reaches `foss`.
+
+## Release
+
+Version identity lives in one file (`version.properties`); the git tag must equal `v<versionName>`.
+
+```bash
+./scripts/bump-version.sh patch
+git add version.properties && git commit -m "release: v0.0.2"
+git tag v0.0.2 && git push origin main v0.0.2
+```
+
+`.github/workflows/release.yml` then verifies the tag against `version.properties`, rejects a
+non-increasing `versionCode`, refuses to build without the signing key, runs the core invariants and
+the FOSS guard, signs `assembleFossRelease`, verifies the signature with `apksigner`, and publishes
+an **immutable** GitHub Release with the APK, `SHA256SUMS`, the dependency manifest, the signature
+block and a build-provenance attestation. The same signed APK is what F-Droid and Orion receive —
+never a different build.
 
 ## Structure
 
@@ -45,3 +73,8 @@ docs/             (next) ADRs, threat model, runbooks
 
 Wallet, balance, escrow, card data, admin superuser, analytics on amounts.
 Every one of those is a licence or a breach waiting to happen (CONTEXT §9).
+
+## Licence
+
+**GPL-3.0-or-later** — see [`LICENSE`](LICENSE). This is the licence F-Droid expects and it keeps the
+reciprocity the doctrine asks for. Privacy: [`PRIVACY.md`](PRIVACY.md). Security: [`SECURITY.md`](SECURITY.md).

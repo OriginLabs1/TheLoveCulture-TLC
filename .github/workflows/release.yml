@@ -1,0 +1,220 @@
+name: release
+
+# One tag, one immutable release. Every asset that reaches GitHub Releases, F-Droid and Orion
+# Store is produced here from the same commit, the same version file and the same signing key.
+#
+#   ./scripts/bump-version.sh patch
+#   git add version.properties && git commit -m "release: v0.0.1"
+#   git tag v0.0.1 && git push origin main v0.0.1
+#
+# Required repository secrets:
+#   ANDROID_KEYSTORE_BASE64     base64 of the upload keystore (.jks) — never committed
+#   ANDROID_KEYSTORE_PASSWORD
+#   ANDROID_KEY_ALIAS
+#   ANDROID_KEY_PASSWORD
+#
+# If any secret is missing the job fails before building: an unsigned release must never ship.
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to (re)build, e.g. v0.0.1"
+        required: true
+        type: string
+
+permissions:
+  contents: write       # create the release and upload assets
+  id-token: write       # build provenance attestation
+  attestations: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx3g -Dfile.encoding=UTF-8"
+
+jobs:
+  release:
+    name: signed foss release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.tag || github.ref }}
+
+      - name: Resolve tag and guard release identity
+        id: identity
+        run: |
+          set -euo pipefail
+          TAG="${{ inputs.tag || github.ref_name }}"
+          case "$TAG" in
+            v*) ;;
+            *) echo "✗ tag must start with 'v': $TAG"; exit 1 ;;
+          esac
+
+          VERSION="$(sed -nE 's/^versionName=//p' version.properties)"
+          CODE="$(sed -nE 's/^versionCode=//p' version.properties)"
+          [ -n "$VERSION" ] && [ -n "$CODE" ] || { echo "✗ version.properties incomplete"; exit 1; }
+
+          if [ "$TAG" != "v$VERSION" ]; then
+            echo "✗ tag $TAG does not match version.properties ($VERSION)"
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "code=$CODE" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+          # versionCode must increase forever, even across withdrawn releases.
+          PREV_TAG="$(git describe --tags --abbrev=0 "${TAG}^" 2>/dev/null || true)"
+          if [ -n "$PREV_TAG" ]; then
+            PREV_CODE="$(git show "$PREV_TAG:version.properties" | sed -nE 's/^versionCode=//p')"
+            if [ -n "$PREV_CODE" ] && [ "$CODE" -le "$PREV_CODE" ]; then
+              echo "✗ versionCode $CODE is not greater than $PREV_TAG ($PREV_CODE)"
+              exit 1
+            fi
+            echo "✓ versionCode $CODE > $PREV_CODE ($PREV_TAG)"
+          fi
+
+          # Reproducibility: pin the build clock to the commit.
+          echo "SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)" >> "$GITHUB_ENV"
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - uses: android-actions/setup-android@v4
+        with:
+          packages: |
+            platforms;android-35
+            build-tools;35.0.0
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      - name: Fail on a missing signing key (never ship unsigned)
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          missing=""
+          for name in KEYSTORE_B64 STORE_PASSWORD KEY_ALIAS KEY_PASSWORD; do
+            [ -n "${!name:-}" ] || missing="$missing $name"
+          done
+          if [ -n "$missing" ]; then
+            echo "✗ release secrets missing:$missing"
+            echo "  An unsigned APK is not a release. Add the secrets and re-run."
+            exit 1
+          fi
+
+          KEYSTORE="$RUNNER_TEMP/tlc-upload.jks"
+          printf '%s' "$KEYSTORE_B64" | base64 -d > "$KEYSTORE"
+          [ -s "$KEYSTORE" ] || { echo "✗ keystore decoded to an empty file"; exit 1; }
+          echo "TLC_KEYSTORE_PATH=$KEYSTORE" >> "$GITHUB_ENV"
+          {
+            echo "TLC_KEYSTORE_PASSWORD=$STORE_PASSWORD"
+            echo "TLC_KEY_ALIAS=$KEY_ALIAS"
+            echo "TLC_KEY_PASSWORD=$KEY_PASSWORD"
+          } >> "$GITHUB_ENV"
+
+      - name: Core invariants
+        run: ./gradlew verify --console=plain
+
+      - name: FOSS guard (no Play Services / Firebase / tracking)
+        run: ./scripts/check-foss.sh
+
+      - name: Assemble signed release APK
+        run: ./gradlew :apps:android:assembleFossRelease --console=plain
+
+      - name: Verify signature, then pack assets
+        id: pack
+        run: |
+          set -euo pipefail
+          VERSION="${{ steps.identity.outputs.version }}"
+          APK="$(find apps/android/build/outputs/apk/foss/release -name '*.apk' -print -quit)"
+          [ -n "$APK" ] || { echo "✗ no APK produced"; exit 1; }
+
+          BUILD_TOOLS="$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)"
+          "$BUILD_TOOLS/apksigner" verify --verbose --print-certs "$APK" | tee apksigner.txt
+          if grep -qi 'does not verify\|ERROR' apksigner.txt; then
+            echo "✗ APK signature did not verify"
+            exit 1
+          fi
+
+          ASSET="tlc-$VERSION-foss.apk"
+          cp "$APK" "$ASSET"
+
+          # Dependency manifest: exactly what went into this binary.
+          ./gradlew :apps:android:dependencies \
+            --configuration fossReleaseRuntimeClasspath --console=plain \
+            > "tlc-$VERSION-foss.dependencies.txt"
+
+          # F-Droid metadata can pin this key; the hash lets users check any channel.
+          {
+            echo "TLC $VERSION"
+            echo "commit: $GITHUB_SHA"
+            echo "apk: $ASSET"
+            echo "applicationId: culture.thelove.tlc"
+            echo "signing certificate:"
+            grep -iE 'Signer #1 certificate (DN|SHA-256)' apksigner.txt || true
+          } > "tlc-$VERSION-foss.signature.txt"
+
+          sha256sum \
+            "$ASSET" \
+            "tlc-$VERSION-foss.dependencies.txt" \
+            "tlc-$VERSION-foss.signature.txt" > SHA256SUMS
+
+          echo "asset=$ASSET" >> "$GITHUB_OUTPUT"
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v4
+        with:
+          subject-path: ${{ steps.pack.outputs.asset }}
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          TAG="${{ steps.identity.outputs.tag }}"
+          VERSION="${{ steps.identity.outputs.version }}"
+
+          # Immutable assets: never overwrite a published version, withdraw and bump instead.
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "✗ release $TAG already exists — assets are immutable. Bump the version."
+            exit 1
+          fi
+
+          gh release create "$TAG" \
+            --verify-tag \
+            --title "TLC $VERSION" \
+            --generate-notes \
+            --latest \
+            "${{ steps.pack.outputs.asset }}" \
+            "tlc-$VERSION-foss.dependencies.txt" \
+            "tlc-$VERSION-foss.signature.txt" \
+            SHA256SUMS
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "## TLC ${{ steps.identity.outputs.version }}"
+            echo
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Tag | \`${{ steps.identity.outputs.tag }}\` |"
+            echo "| versionCode | \`${{ steps.identity.outputs.code }}\` |"
+            echo "| Asset | \`${{ steps.pack.outputs.asset }}\` |"
+            echo "| Commit | \`$GITHUB_SHA\` |"
+            echo
+            echo "Next: submit the same signed APK to F-Droid (or let the fixture build it) and Orion Store."
+          } >> "$GITHUB_STEP_SUMMARY"

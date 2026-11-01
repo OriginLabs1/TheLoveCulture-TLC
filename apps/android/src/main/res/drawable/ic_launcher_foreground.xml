@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- TLC mark: a heart drawn as one continuous gesture, inside the 66dp adaptive safe zone. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#7A2E3A"
+        android:pathData="M54,79 C54,79 27,62.5 27,45.5 C27,36.2 34.2,30 42.3,30 C47.6,30 52,33.2 54,37.4 C56,33.2 60.4,30 65.7,30 C73.8,30 81,36.2 81,45.5 C81,62.5 54,79 54,79 Z" />
+</vector>
