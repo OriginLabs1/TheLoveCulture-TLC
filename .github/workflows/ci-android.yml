@@ -32,9 +32,8 @@ jobs:
           java-version: "21"
       - uses: android-actions/setup-android@v4
         with:
-          packages: |
-            platforms;android-35
-            build-tools;35.0.0
+          # setup-android splits this on whitespace: keep it on one line.
+          packages: "platforms;android-35 build-tools;35.0.0"
       - uses: gradle/actions/setup-gradle@v6
 
       # The flavour split is a legal promise to F-Droid users, so it is a gate, not a convention.
@@ -73,9 +72,8 @@ jobs:
           java-version: "21"
       - uses: android-actions/setup-android@v4
         with:
-          packages: |
-            platforms;android-35
-            build-tools;35.0.0
+          # setup-android splits this on whitespace: keep it on one line.
+          packages: "platforms;android-35 build-tools;35.0.0"
       - uses: gradle/actions/setup-gradle@v6
       - name: enable KVM
         run: |
