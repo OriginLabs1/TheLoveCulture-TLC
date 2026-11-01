@@ -1,0 +1,30 @@
+TLC (The Love Culture) is a local-first app for recognising care and contribution between people who trust each other.
+
+It exists for one narrow purpose: to make good work visible, and to make the record of it impossible to quietly rewrite.
+
+WHAT TLC DOES
+
+• Records recognition — a note of appreciation for something someone actually did.
+• Keeps that record on your device, in an append-only log where every entry is chained to the one before it. Change a past entry and the chain no longer verifies.
+• Keeps stewardship in human hands. Two people hold authority at any time — a Primary Steward and a Co-Steward — and either can block a change to the record. There is no admin who can act alone.
+• Stays offline-first. Read and write without a connection; nothing leaves the device unless you choose to share it.
+
+WHAT TLC DELIBERATELY DOES NOT DO
+
+• It never holds, moves, pools or escrows money. There is no wallet, no balance, no payment rail, and no card data anywhere in the app.
+• Recognition tokens in TLC are signals of appreciation. They are not currency, cannot be bought, sold, redeemed or exchanged, and are not any kind of cryptoasset.
+• There is no analytics on amounts, no advertising identifier and no third-party tracking.
+• There is no generic admin account, and no way for the software to overrule the two stewards.
+
+WHO IT IS FOR
+
+Families, small circles, community groups and cooperatives — anyone who wants a trustworthy record of who showed up for whom, without handing that record to a company.
+
+TLC is early software. This release is the foundation: the core rules, the tamper-evident log and the Android shell. Features arrive as they can be proven, not as they can be promised.
+
+FREE AND OPEN SOURCE
+
+TLC is licensed GPL-3.0-or-later, contains no proprietary SDKs and no Google Play Services, and the same signed build is published to GitHub Releases, F-Droid and Orion Store.
+
+Privacy policy: https://github.com/OriginLabs1/TheLoveCulture-TLC/blob/main/PRIVACY.md
+Source code: https://github.com/OriginLabs1/TheLoveCulture-TLC

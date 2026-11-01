@@ -1,0 +1,6 @@
+First public release (0.0.1).
+
+• Append-only, hash-chained record of recognition — edit one past entry and verification fails.
+• Two-steward authority: a Primary Steward and a Co-Steward, each able to veto.
+• The foss build contains no Play Services, no Firebase, no analytics and no proprietary SDK.
+• No wallet, no balance, no escrow, no payment rail, no card data. Tokens are recognition signals only.
