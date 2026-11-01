@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TLC</string>
+    <string name="fee_flow_title">Activation</string>
+    <string name="fee_flow_caption">The app never moves money. It shows where to send it, then records the evidence you bring back.</string>
+    <string name="label_token">Token: %1$s</string>
+    <string name="label_amount">Amount: %1$s</string>
+    <string name="label_state">State: %1$s</string>
+    <string name="label_effects">Effects</string>
+    <string name="action_instruction">Get details</string>
+    <string name="action_proof">Submit proof</string>
+    <string name="action_attest">Attest</string>
+    <string name="ledger_ok">Ledger verified · %1$d entries</string>
+    <string name="ledger_failed">Ledger FAILED · %1$d problems</string>
+    <string name="ledger_head">head %1$s…</string>
+    <string name="notice_title">TLC Financial Notice</string>
+</resources>
