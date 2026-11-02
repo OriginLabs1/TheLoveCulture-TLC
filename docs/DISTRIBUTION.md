@@ -8,6 +8,7 @@ must carry the same signed APK, never a re-signed copy.
 | Channel | Status | Where |
 |---|---|---|
 | GitHub Releases | **Published** | <https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/tag/v0.0.4> |
+| GitHub Pages install page | **Live** | <https://originlabs1.github.io/TheLoveCulture-TLC/> |
 | Obtainium | **Available** | add `https://github.com/OriginLabs1/TheLoveCulture-TLC` as a source |
 
 Release facts:

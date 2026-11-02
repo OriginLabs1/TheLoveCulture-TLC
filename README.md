@@ -16,7 +16,8 @@ signals because the valuation and transfer rules do not exist yet.
 ## Install v0.0.4
 
 **[Download `tlc-0.0.4-foss.apk`](https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.4/tlc-0.0.4-foss.apk)**
-· [release page](https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/tag/v0.0.4) ·
+· [install page](https://originlabs1.github.io/TheLoveCulture-TLC/) ·
+[release page](https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/tag/v0.0.4) ·
 [SHA256SUMS](https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.4/SHA256SUMS) ·
 [signature](https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.4/tlc-0.0.4-foss.signature.txt)
 
