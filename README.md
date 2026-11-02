@@ -13,6 +13,24 @@ sync and cross-device invitations are the next milestone. The store copy says th
 v0.0.5 is recorded in [`docs/SEF.md`](docs/SEF.md); v0.0.4 still describes tokens as recognition
 signals because the valuation and transfer rules do not exist yet.
 
+## Install v0.0.4
+
+**[Download `tlc-0.0.4-foss.apk`](https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.4/tlc-0.0.4-foss.apk)**
+· [release page](https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/tag/v0.0.4) ·
+[SHA256SUMS](https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.4/SHA256SUMS) ·
+[signature](https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.4/tlc-0.0.4-foss.signature.txt)
+
+```sh
+sha256sum -c SHA256SUMS     # 9d73ad59b4c40ce7b2e42036376ea8038eb2287decc33c567cc25fee11d0e79d
+apksigner verify --print-certs tlc-0.0.4-foss.apk
+# certificate SHA-256: e04cb8aa2cf5fdeec043d917a74a5ba634121f2a0b98df92869a42bb4acb732c
+```
+
+Android 7.0 or newer. The APK asks for no `INTERNET` permission. Add
+`https://github.com/OriginLabs1/TheLoveCulture-TLC` to Obtainium for update checks straight from
+these releases. F-Droid, Orion Store and Uptodown receive the same signed file; see
+[`docs/DISTRIBUTION.md`](docs/DISTRIBUTION.md) for their status and the submission rules.
+
 ## What exists (and is proven by tests)
 
 | Layer | Path | Status |

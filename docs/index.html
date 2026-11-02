@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TLC — recognition, kept honestly</title>
+<meta name="description" content="TLC is a local-first, non-custodial record of recognition and contribution. Download the signed v0.0.4 APK.">
+<style>
+  :root { color-scheme: light dark; --bg:#faf6f1; --ink:#2b1f22; --muted:#6b5a5f; --line:#e3d6d0; --accent:#7a2e3a; --card:#fffdfb; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#171214; --ink:#f3e9e6; --muted:#b9a6a9; --line:#3a2c30; --accent:#e0a0aa; --card:#211a1d; } }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif; }
+  main { max-width: 46rem; margin: 0 auto; padding: 4rem 1.25rem 5rem; }
+  .mark { width:56px; height:56px; border-radius: 50%; background: var(--accent); display:grid; place-items:center; color:var(--bg); font-size:28px; }
+  h1 { font-size: clamp(2rem, 7vw, 3.2rem); line-height:1.1; letter-spacing:-.03em; margin:1.5rem 0 .75rem; }
+  h2 { font-size:1.15rem; margin:2.5rem 0 .75rem; }
+  p { margin: .75rem 0; }
+  .lede { font-size:1.15rem; color:var(--muted); max-width: 36rem; }
+  .actions { display:flex; flex-wrap:wrap; gap:.75rem; margin:2rem 0 1rem; }
+  .button { display:inline-block; background:var(--accent); color:var(--bg); text-decoration:none; font-weight:650; padding:.85rem 1.2rem; border-radius:.6rem; }
+  .button.secondary { background:transparent; color:var(--accent); border:1px solid var(--accent); }
+  .meta { color:var(--muted); font-size:.9rem; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:.9rem; padding:1.1rem 1.25rem; margin:1.5rem 0; }
+  code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:.88em; }
+  pre { background:var(--card); border:1px solid var(--line); border-radius:.6rem; padding:1rem; overflow:auto; }
+  a { color:var(--accent); }
+  ul { padding-left:1.2rem; }
+  footer { border-top:1px solid var(--line); margin-top:3rem; padding-top:1.5rem; color:var(--muted); font-size:.9rem; }
+  .pill { display:inline-block; border:1px solid var(--line); border-radius:999px; padding:.15rem .6rem; font-size:.8rem; color:var(--muted); margin-right:.35rem; }
+</style>
+</head>
+<body>
+<main>
+  <div class="mark" aria-hidden="true">♥</div>
+  <h1>Recognition,<br>kept honestly.</h1>
+  <p class="lede">TLC is a local-first, non-custodial record of care and contribution. It keeps a
+  tamper-evident journal for families, circles, community groups and cooperatives — without an
+  account, a sync server or a company holding the memory.</p>
+
+  <div class="actions">
+    <a class="button" href="https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.4/tlc-0.0.4-foss.apk">Download v0.0.4 APK</a>
+    <a class="button secondary" href="https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/tag/v0.0.4">Release notes</a>
+  </div>
+  <p class="meta">Android 7.0+ · 1.3 MB · GPL-3.0-or-later · no <code>INTERNET</code> permission</p>
+
+  <div class="card">
+    <strong>Verify before you install.</strong>
+    <pre><code>sha256sum -c SHA256SUMS
+apksigner verify --print-certs tlc-0.0.4-foss.apk</code></pre>
+    <p class="meta">APK SHA-256: <code>9d73ad59b4c40ce7b2e42036376ea8038eb2287decc33c567cc25fee11d0e79d</code><br>
+    Certificate SHA-256: <code>e04cb8aa2cf5fdeec043d917a74a5ba634121f2a0b98df92869a42bb4acb732c</code></p>
+    <p class="meta"><a href="https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.4/SHA256SUMS">SHA256SUMS</a> ·
+    <a href="https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.4/tlc-0.0.4-foss.signature.txt">signature block</a> ·
+    <a href="https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.4/tlc-0.0.4-foss.dependencies.txt">dependency manifest</a></p>
+  </div>
+
+  <h2>What this build does</h2>
+  <ul>
+    <li>Onboarding and a local profile, then Today, Journal, Grants, Dues, Circle, Settings and About.</li>
+    <li>An append-only, hash-chained record that is re-verified on every launch and opens read-only if it does not check out.</li>
+    <li>Growth Grants with evidence and witness stages; Pioneer dues that stop at proof submission.</li>
+    <li>Verified backup and restore, Merkle proofs per entry, and an export the <code>ledger-verify</code> tool reads.</li>
+  </ul>
+
+  <h2>What it will never do</h2>
+  <p>TLC never holds, pools, escrows or moves money. There is no wallet, no balance, no payment rail
+  and no card data. A transfer happens bank to bank between two private accounts; TLC records the
+  intent, the instruction and the evidence.</p>
+  <p>Pioneer bank details are not in this build and are never compiled in. When the fee flow ships,
+  they are released only to the payer, only after the due exists, for the reason the due describes,
+  and they expire.</p>
+
+  <h2>Direction for v0.0.5: the SEF Token</h2>
+  <p>The unit of TLC's Standard Economic Framework is the <strong>Token</strong>: a record of a
+  meaningful resource, item, gift or monetary value. Tokens may be curated, transferred or
+  distributed in monetary form for convenience. The non-custody line does not change — a Token is a
+  record of value, not a balance, and settlement stays bank to bank. This is recorded in
+  <a href="https://github.com/OriginLabs1/TheLoveCulture-TLC/blob/main/docs/SEF.md">docs/SEF.md</a>
+  and is <strong>not in v0.0.4</strong>; this build still describes tokens as recognition signals
+  because the valuation and transfer rules do not exist yet.</p>
+
+  <h2>Other ways to install</h2>
+  <p>Add <a href="https://github.com/OriginLabs1/TheLoveCulture-TLC">OriginLabs1/TheLoveCulture-TLC</a>
+  to Obtainium for updates straight from GitHub Releases. F-Droid, Orion Store and Uptodown receive
+  the same signed APK; their status is in
+  <a href="https://github.com/OriginLabs1/TheLoveCulture-TLC/blob/main/docs/DISTRIBUTION.md">docs/DISTRIBUTION.md</a>.</p>
+
+  <footer>
+    <p><span class="pill">local-first</span><span class="pill">non-custodial</span><span class="pill">GPL-3.0</span></p>
+    <p>Pioneer: <a href="https://sircollins.coreconcept1.net">sircollins.coreconcept1.net</a> ·
+    <a href="https://t.me/CollinsRoyalMedium">Telegram</a> ·
+    <a href="mailto:tlcfounder@protonmail.com">tlcfounder@protonmail.com</a></p>
+    <p><a href="https://github.com/OriginLabs1/TheLoveCulture-TLC">Source</a> ·
+    <a href="https://github.com/OriginLabs1/TheLoveCulture-TLC/blob/main/PRIVACY.md">Privacy</a> ·
+    <a href="https://github.com/OriginLabs1/TheLoveCulture-TLC/blob/main/SECURITY.md">Security</a></p>
+  </footer>
+</main>
+</body>
+</html>
