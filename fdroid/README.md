@@ -13,10 +13,13 @@ so a user who moved between GitHub and F-Droid could not update without uninstal
 
 ## Before opening the merge request
 
-1. **Reproducibility.** Build `v0.0.2` twice in CI and compare hashes (`SOURCE_DATE_EPOCH` is pinned
-   to the commit by the release workflow, but R8 output has not yet been proven stable across
-   environments). If the buildserver cannot reproduce the APK, the build fails instead of shipping a
-   different signature — the correct failure, but it needs fixing before submission.
+1. **Reproducibility.** `SOURCE_DATE_EPOCH` is pinned to the commit and two independent runners
+   produce identical app content: `apksigcopier compare` reports no difference between build A,
+   build B and the published `v0.0.2` asset. Only the APK signature block differs from run to run,
+   which is expected and is exactly what `apksigcopier` is designed to ignore — F-Droid's
+   buildserver uses the same comparison for developer-signed apps.
+   Run [`.github/workflows/reproducible.yml`](../.github/workflows/reproducible.yml) against any tag
+   to re-check it.
 2. **Preview status.** F-Droid reviewers may consider a demonstration-only build too thin for the
    main repository. If so, the honest routes are: wait for on-device persistence (0.1.0), or ask the
    reviewers directly whether a preview is acceptable.

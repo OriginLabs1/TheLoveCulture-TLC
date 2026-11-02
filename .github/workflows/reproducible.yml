@@ -89,6 +89,21 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - uses: android-actions/setup-android@v4
+        with:
+          packages: "build-tools;35.0.0"
+
+      - name: Install apksigcopier
+        run: pipx install apksigcopier
+
+      - name: Put apksigner on PATH
+        run: echo "$ANDROID_HOME/build-tools/35.0.0" >> "$GITHUB_PATH"
+
       - uses: actions/download-artifact@v5
         with:
           pattern: apk-*
@@ -101,8 +116,12 @@ jobs:
           B="$(cut -d' ' -f1 tlc-b.sha256)"
           echo "build a: $A"
           echo "build b: $B"
+          echo "Published builds carry a signature block, and the block's bytes are not part of the"
+          echo "app's content. apksigcopier compares everything else — which is what F-Droid's"
+          echo "buildserver checks for a developer-signed app."
+
           {
-            echo "## Reproducible build — ${{ inputs.tag }}"
+            echo "## Reproducible content — ${{ inputs.tag }}"
             echo
             echo "| build | apk sha256 |"
             echo "|---|---|"
@@ -110,9 +129,27 @@ jobs:
             echo "| b | \`$B\` |"
             echo
           } >> "$GITHUB_STEP_SUMMARY"
-          if [ "$A" = "$B" ]; then
-            echo "✓ byte-identical across two runners" | tee -a "$GITHUB_STEP_SUMMARY"
+
+          fail=0
+          if apksigcopier compare tlc-a.apk tlc-b.apk; then
+            echo "✓ two independent runners produced the same app content" | tee -a "$GITHUB_STEP_SUMMARY"
           else
             echo "✗ the two builds differ — do not pin this build in F-Droid metadata yet" | tee -a "$GITHUB_STEP_SUMMARY"
-            exit 1
+            fail=1
           fi
+
+          # The strongest statement: the published asset is the same app as a rebuild of the tag.
+          VERSION="${{ inputs.tag }}"; VERSION="${VERSION#v}"
+          URL="https://github.com/$GITHUB_REPOSITORY/releases/download/${{ inputs.tag }}/tlc-$VERSION-foss.apk"
+          if curl -fsSL -o published.apk "$URL"; then
+            if apksigcopier compare published.apk tlc-a.apk; then
+              echo "✓ the published APK matches a rebuild of this tag" | tee -a "$GITHUB_STEP_SUMMARY"
+            else
+              echo "✗ the published APK does NOT match a rebuild of this tag" | tee -a "$GITHUB_STEP_SUMMARY"
+              fail=1
+            fi
+          else
+            echo "– no published APK for ${{ inputs.tag }} yet, compared the two builds only" | tee -a "$GITHUB_STEP_SUMMARY"
+          fi
+
+          exit "$fail"
