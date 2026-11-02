@@ -1,30 +1,32 @@
-TLC (The Love Culture) is a local-first app for recognising care and contribution between people who trust each other.
+TLC is a preview of an app for recognising care and contribution between people who trust each other — and for keeping a record of it that cannot be quietly rewritten.
 
-It exists for one narrow purpose: to make good work visible, and to make the record of it impossible to quietly rewrite.
+It exists for one narrow purpose: to make good work visible, and to make the record of it tamper-evident.
 
-WHAT TLC DOES
+WHAT THIS PREVIEW BUILD ACTUALLY DOES
 
-• Records recognition — a note of appreciation for something someone actually did.
-• Keeps that record on your device, in an append-only log where every entry is chained to the one before it. Change a past entry and the chain no longer verifies.
-• Keeps stewardship in human hands. Two people hold authority at any time — a Primary Steward and a Co-Steward — and either can block a change to the record. There is no admin who can act alone.
-• Stays offline-first. Read and write without a connection; nothing leaves the device unless you choose to share it.
+• Walks the activation flow: get details, bring back proof, receive an attestation, reach a receipt.
+• Every step is decided by the same rules the tests cover — the screen has no second copy of them.
+• Shows a hash-chained ledger: each entry carries the hash of the one before it, so editing history breaks verification.
+• Works with the radio off. This build contains no networking code at all, and its APK does not request the INTERNET permission.
 
-WHAT TLC DELIBERATELY DOES NOT DO
+WHAT IT DOES NOT DO YET
 
-• It never holds, moves, pools or escrows money. There is no wallet, no balance, no payment rail, and no card data anywhere in the app.
-• Recognition tokens in TLC are signals of appreciation. They are not currency, cannot be bought, sold, redeemed or exchanged, and are not any kind of cryptoasset.
-• There is no analytics on amounts, no advertising identifier and no third-party tracking.
-• There is no generic admin account, and no way for the software to overrule the two stewards.
+Be clear about this: version 0.0.2 is a preview. The flow uses demonstration data, the ledger lives in memory for the length of a session, and records are not yet kept between launches. There is no account, no sync and no sharing yet. On-device persistence and the two-steward flow are the next milestone, not a promise about this build.
+
+WHAT TLC WILL NEVER DO
+
+• It never holds, moves, pools or escrows money. There is no wallet, no balance, no payment rail, no card data.
+• The app shows where to send a payment and records the evidence you bring back. The money moves between two private bank accounts, bank to bank, and TLC is not a party to it.
+• Recognition tokens are signals of appreciation: not currency, not transferable, not redeemable, not crypto.
+• No analytics on amounts, no advertising identifier, no third-party tracking.
 
 WHO IT IS FOR
 
 Families, small circles, community groups and cooperatives — anyone who wants a trustworthy record of who showed up for whom, without handing that record to a company.
 
-TLC is early software. This release is the foundation: the core rules, the tamper-evident log and the Android shell. Features arrive as they can be proven, not as they can be promised.
-
 FREE AND OPEN SOURCE
 
-TLC is licensed GPL-3.0-or-later, contains no proprietary SDKs and no Google Play Services, and the same signed build is published to GitHub Releases, F-Droid and Orion Store.
+GPL-3.0-or-later, no proprietary SDKs, no Google Play Services. The same signed build is published to GitHub Releases, F-Droid and Orion Store.
 
-Privacy policy: https://github.com/OriginLabs1/TheLoveCulture-TLC/blob/main/PRIVACY.md
+Privacy notice: https://github.com/OriginLabs1/TheLoveCulture-TLC/blob/main/PRIVACY.md
 Source code: https://github.com/OriginLabs1/TheLoveCulture-TLC
