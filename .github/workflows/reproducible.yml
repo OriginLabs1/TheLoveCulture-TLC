@@ -1,0 +1,118 @@
+name: reproducible
+
+# Proves that the release APK is a function of the commit and not of the machine that built it.
+# Two independent runners build the same tag; the third job compares the bytes.
+#
+# This is the evidence F-Droid's buildserver needs when a metadata entry pins the signing key with
+# AllowedAPKSigningKeys and Binaries: it must be able to rebuild the APK exactly.
+#
+# Run it manually before opening an F-Droid merge request, or after changing the build.
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to rebuild, e.g. v0.0.2"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: build ${{ matrix.run }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        run: ["a", "b"]
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.tag }}
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - uses: android-actions/setup-android@v4
+        with:
+          packages: "platforms;android-35 build-tools;35.0.0"
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      - name: Pin the build clock to the commit
+        run: echo "SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)" >> "$GITHUB_ENV"
+
+      - name: Sign with the project key
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          [ -n "$KEYSTORE_B64" ] || { echo "✗ the keystore secret is missing"; exit 1; }
+          KEYSTORE="$RUNNER_TEMP/tlc-upload.jks"
+          printf '%s' "$KEYSTORE_B64" | base64 -d > "$KEYSTORE"
+          {
+            echo "TLC_KEYSTORE_PATH=$KEYSTORE"
+            echo "TLC_KEYSTORE_PASSWORD=$STORE_PASSWORD"
+            echo "TLC_KEY_ALIAS=$KEY_ALIAS"
+            echo "TLC_KEY_PASSWORD=$KEY_PASSWORD"
+          } >> "$GITHUB_ENV"
+
+      - name: Assemble
+        run: ./gradlew :apps:android:assembleFossRelease --console=plain
+
+      - name: Record the hash
+        run: |
+          set -euo pipefail
+          APK="$(find apps/android/build/outputs/apk/foss/release -name '*.apk' -print -quit)"
+          cp "$APK" "tlc-${{ matrix.run }}.apk"
+          sha256sum "tlc-${{ matrix.run }}.apk" | tee "tlc-${{ matrix.run }}.sha256"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: apk-${{ matrix.run }}
+          path: |
+            tlc-${{ matrix.run }}.apk
+            tlc-${{ matrix.run }}.sha256
+          if-no-files-found: error
+          retention-days: 7
+
+  compare:
+    name: compare
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: apk-*
+          merge-multiple: true
+
+      - name: Compare the two builds
+        run: |
+          set -euo pipefail
+          A="$(cut -d' ' -f1 tlc-a.sha256)"
+          B="$(cut -d' ' -f1 tlc-b.sha256)"
+          echo "build a: $A"
+          echo "build b: $B"
+          {
+            echo "## Reproducible build — ${{ inputs.tag }}"
+            echo
+            echo "| build | apk sha256 |"
+            echo "|---|---|"
+            echo "| a | \`$A\` |"
+            echo "| b | \`$B\` |"
+            echo
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ "$A" = "$B" ]; then
+            echo "✓ byte-identical across two runners" | tee -a "$GITHUB_STEP_SUMMARY"
+          else
+            echo "✗ the two builds differ — do not pin this build in F-Droid metadata yet" | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi

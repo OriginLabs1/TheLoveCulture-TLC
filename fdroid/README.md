@@ -1,0 +1,45 @@
+# F-Droid submission
+
+`metadata/culture.thelove.tlc.yml` is the exact file that goes into F-Droid's
+[`fdroiddata`](https://gitlab.com/fdroid/fdroiddata) repository at
+`metadata/culture.thelove.tlc.yml`.
+
+## Why the signing key is pinned
+
+`AllowedAPKSigningKeys` plus `Binaries` tells F-Droid: build this commit from source, prove the result
+is byte-identical to the APK at that URL, and publish *that* APK with *that* signature. Without it,
+F-Droid would sign with its own key, and the same application id would exist with two signatures —
+so a user who moved between GitHub and F-Droid could not update without uninstalling.
+
+## Before opening the merge request
+
+1. **Reproducibility.** Build `v0.0.2` twice in CI and compare hashes (`SOURCE_DATE_EPOCH` is pinned
+   to the commit by the release workflow, but R8 output has not yet been proven stable across
+   environments). If the buildserver cannot reproduce the APK, the build fails instead of shipping a
+   different signature — the correct failure, but it needs fixing before submission.
+2. **Preview status.** F-Droid reviewers may consider a demonstration-only build too thin for the
+   main repository. If so, the honest routes are: wait for on-device persistence (0.1.0), or ask the
+   reviewers directly whether a preview is acceptable.
+3. **Description provenance.** The text in the metadata must match the app; if the app changes, the
+   metadata changes in the same merge request.
+
+## Opening the merge request
+
+```sh
+git clone --depth 1 https://gitlab.com/fdroid/fdroiddata.git
+cp fdroid/metadata/culture.thelove.tlc.yml fdroiddata/metadata/
+cd fdroiddata
+git checkout -b culture.thelove.tlc
+git add metadata/culture.thelove.tlc.yml
+git commit -m "New app: culture.thelove.tlc"
+git push -o merge_request.create -o merge_request.title="New app: TLC" origin culture.thelove.tlc
+```
+
+`fdroid checkupdates culture.thelove.tlc` and `fdroid lint culture.thelove.tlc` run locally if the
+`fdroidserver` tools are installed.
+
+## Self-hosted alternative
+
+If F-Droid's main repository declines a preview build, the same APK can be served from a self-hosted
+F-Droid repository (one `fdroid update` over the release artifacts, signed with a repo key that is
+separate from the app key). That keeps the app key untouched and the download path independent.

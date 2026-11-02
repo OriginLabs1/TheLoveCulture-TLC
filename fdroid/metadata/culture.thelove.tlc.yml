@@ -1,0 +1,66 @@
+# Metadata for F-Droid's fdroiddata repository.
+#
+# Destination in that repository: metadata/culture.thelove.tlc.yml
+# This copy lives here so the store entry is reviewed with the code it describes.
+# The signing certificate is pinned: F-Droid must publish *this* signed APK, not one re-signed with
+# an F-Droid key, or the same package id would exist with two signatures and updates would break
+# depending on where a user installed from.
+
+Categories:
+  - Social
+
+License: GPL-3.0-or-later
+
+AuthorName: Collins Christopher
+AuthorEmail: concept-pioneer@theloveculture.app
+
+WebSite: https://github.com/OriginLabs1/TheLoveCulture-TLC
+SourceCode: https://github.com/OriginLabs1/TheLoveCulture-TLC
+IssueTracker: https://github.com/OriginLabs1/TheLoveCulture-TLC/issues
+Changelog: https://github.com/OriginLabs1/TheLoveCulture-TLC/releases
+
+Name: TLC
+Summary: A tamper-evident record of recognition, not money
+Description: |
+  TLC records recognition — who showed up for whom — in a log that cannot be quietly rewritten.
+
+  This is a preview build. It walks the activation flow (get details, bring back proof, receive an
+  attestation, reach a receipt), decides every step with the same rules the unit tests cover, and
+  shows a hash-chained ledger in which each entry carries the hash of the one before it. The flow
+  uses demonstration data and the ledger is held in memory for the session; records are not yet
+  kept between launches.
+
+  TLC never holds, moves, pools or escrows money. There is no wallet, no balance, no payment rail
+  and no card data. The app shows where to send a payment and records the evidence you bring back;
+  the transfer itself happens bank to bank between two private accounts. Recognition tokens are
+  signals of appreciation — not currency, not transferable, not redeemable, not crypto.
+
+  The build contains no networking code and its APK does not request the INTERNET permission. It
+  contains no Google Play Services, no Firebase, no analytics and no proprietary SDK.
+
+  The record is append-only and hash-chained, and the same verification is available outside the
+  app through the ledger-verify command-line tool in the source repository.
+
+RepoType: git
+Repo: https://github.com/OriginLabs1/TheLoveCulture-TLC
+
+Builds:
+  - versionName: 0.0.2
+    versionCode: 2
+    commit: v0.0.2
+    gradle:
+      - assembleFossRelease
+    output: apps/android/build/outputs/apk/foss/release/*.apk
+    scanignore:
+      - gradle/wrapper/gradle-wrapper.jar
+
+# The same signed binary that GitHub Releases serves. F-Droid's buildserver builds from source and
+# verifies that its output matches this APK byte for byte; if it does not, the build fails rather
+# than silently shipping a differently-signed copy.
+Binaries: https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.2/tlc-0.0.2-foss.apk
+AllowedAPKSigningKeys: e04cb8aa2cf5fdeec043d917a74a5ba634121f2a0b98df92869a42bb4acb732c
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 0.0.2
+CurrentVersionCode: 2
