@@ -1,6 +1,6 @@
 # Privacy Notice — TLC
 
-**Version:** 0.0.1 · **Applies to:** the TLC Android app and `tlc.app`
+**Version:** 0.0.2 · **Applies to:** the TLC Android app and `tlc.app`
 **Data regime:** Nigeria Data Protection Act 2023 (NDPA), GDPR-shaped by design (INV-10)
 **Contact:** concept-pioneer@theloveculture.app
 
@@ -32,9 +32,11 @@ happened between two private bank accounts (INV-01).
 ## 3. The `foss` build is telemetry-free
 
 The `foss` flavour ships with **no** Google Play Services, Firebase, Crashlytics, ad SDK or
-third-party analytics. It makes network requests only when you ask it to (sync, proof upload).
-The `full` flavour may add first-party integrations; each one is opt-in and listed in the release
-notes for that version.
+third-party analytics. Version 0.0.2 contains no networking code at all and its APK does not request
+the `INTERNET` permission — the release workflow checks both. When a networked feature arrives, this
+notice changes in the same release, and the app asks only for what that feature needs. The `full`
+flavour may add first-party integrations; each one is opt-in and listed in the release notes for
+that version.
 
 ## 4. Lawful bases
 

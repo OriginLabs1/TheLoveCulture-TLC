@@ -133,7 +133,7 @@ jobs:
       - name: Assemble signed release APK
         run: ./gradlew :apps:android:assembleFossRelease --console=plain
 
-      - name: Verify signature, then pack assets
+      - name: Verify the binary, then pack assets
         id: pack
         run: |
           set -euo pipefail
@@ -143,10 +143,49 @@ jobs:
 
           BUILD_TOOLS="$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)"
           "$BUILD_TOOLS/apksigner" verify --verbose --print-certs "$APK" | tee apksigner.txt
-          if grep -qi 'does not verify\|ERROR' apksigner.txt; then
+          if grep -qi 'does not verify' apksigner.txt; then
             echo "✗ APK signature did not verify"
             exit 1
           fi
+
+          # The certificate is pinned in release-key.properties. A valid signature from the wrong
+          # key is still not a TLC release: it would split updates across two signing identities.
+          EXPECTED="$(sed -nE 's/^certificateSha256=//p' release-key.properties | tr -d '[:space:]' | tr 'A-F' 'a-f')"
+          # apksigner changed its wording between build-tools versions ("Signer #1 certificate
+          # SHA-256 digest" vs "V2 Signer: certificate SHA-256 digest"), so match the tail.
+          ACTUAL="$(grep -oiE 'certificate SHA-256 digest:[[:space:]]*[0-9a-f]{64}' apksigner.txt | head -1 | grep -oiE '[0-9a-f]{64}$' | tr 'A-F' 'a-f')"
+          [ -n "$EXPECTED" ] && [ -n "$ACTUAL" ] || { echo "✗ could not read a certificate fingerprint"; exit 1; }
+          if [ "$EXPECTED" != "$ACTUAL" ]; then
+            echo "✗ signed by the wrong certificate — refusing to publish"
+            echo "  expected: $EXPECTED"
+            echo "  actual:   $ACTUAL"
+            exit 1
+          fi
+          echo "✓ certificate $ACTUAL matches release-key.properties"
+
+          # The privacy policy says the app does not reach the network. Prove it on the binary.
+          # Capture the output first: a piped `if cmd | grep` would treat a broken aapt2 as a pass.
+          PERMS="$("$BUILD_TOOLS/aapt2" dump permissions "$APK")" || {
+            echo "✗ aapt2 could not read the manifest"; exit 1;
+          }
+          if grep -qi 'android.permission.INTERNET' <<<"$PERMS"; then
+            echo "✗ the foss APK requests INTERNET but this release has no networking code"
+            echo "  A networked feature must change PRIVACY.md and this guard in the same commit."
+            echo "$PERMS"
+            exit 1
+          fi
+          echo "✓ no INTERNET permission"
+
+          # A dependency-graph check can be satisfied while classes still arrive in the dex.
+          unzip -l "$APK" | grep -qE 'classes[0-9]*\.dex' || {
+            echo "✗ the APK contains no dex — this is not a runnable app"; exit 1;
+          }
+          GMS_HITS="$(unzip -p "$APK" 'classes*.dex' | grep -ac 'com/google/android/gms' || true)"
+          if [ "${GMS_HITS:-0}" -gt 0 ]; then
+            echo "✗ proprietary Play Services classes found inside the dex"
+            exit 1
+          fi
+          echo "✓ no Play Services classes in the dex"
 
           ASSET="tlc-$VERSION-foss.apk"
           cp "$APK" "$ASSET"
@@ -156,14 +195,17 @@ jobs:
             --configuration fossReleaseRuntimeClasspath --console=plain \
             > "tlc-$VERSION-foss.dependencies.txt"
 
-          # F-Droid metadata can pin this key; the hash lets users check any channel.
+          # What a user needs in order to check the download by hand.
           {
             echo "TLC $VERSION"
             echo "commit: $GITHUB_SHA"
             echo "apk: $ASSET"
             echo "applicationId: culture.thelove.tlc"
-            echo "signing certificate:"
-            grep -iE 'Signer #1 certificate (DN|SHA-256)' apksigner.txt || true
+            echo "versionCode: ${{ steps.identity.outputs.code }}"
+            echo "signature schemes: $(grep -oiE 'Verified using v[0-9.]+ scheme[^:]*: true' apksigner.txt | sed -E 's/Verified using (v[0-9.]+) scheme.*/\1/' | tr '\n' ' ')"
+            echo "certificate:"
+            grep -iE 'certificate (DN|SHA-256)' apksigner.txt | sed -E 's/^[A-Za-z0-9 #.:]+certificate/certificate/' || true
+            echo "certificateSha256: $ACTUAL"
           } > "tlc-$VERSION-foss.signature.txt"
 
           sha256sum \
@@ -172,6 +214,8 @@ jobs:
             "tlc-$VERSION-foss.signature.txt" > SHA256SUMS
 
           echo "asset=$ASSET" >> "$GITHUB_OUTPUT"
+          echo "sha256=$(sha256sum "$ASSET" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+          echo "cert=$ACTUAL" >> "$GITHUB_OUTPUT"
 
       - name: Attest build provenance
         uses: actions/attest-build-provenance@v4
@@ -185,6 +229,7 @@ jobs:
           set -euo pipefail
           TAG="${{ steps.identity.outputs.tag }}"
           VERSION="${{ steps.identity.outputs.version }}"
+          ASSET="${{ steps.pack.outputs.asset }}"
 
           # Immutable assets: never overwrite a published version, withdraw and bump instead.
           if gh release view "$TAG" >/dev/null 2>&1; then
@@ -192,12 +237,38 @@ jobs:
             exit 1
           fi
 
+          # Notes live in the repository, next to the commit they describe, so they are reviewable.
+          NOTES="release-notes/$TAG.md"
+          [ -f "$NOTES" ] || { echo "✗ $NOTES missing — every release needs human-written notes"; exit 1; }
+
+          {
+            cat "$NOTES"
+            echo
+            echo "---"
+            echo
+            echo "### Verify this download"
+            echo
+            echo '```sh'
+            echo "sha256sum -c SHA256SUMS"
+            echo "apksigner verify --print-certs $ASSET   # certificate SHA-256 must be:"
+            echo "${{ steps.pack.outputs.cert }}"
+            echo '```'
+            echo
+            echo "| | |"
+            echo "|---|---|"
+            echo "| APK SHA-256 | \`${{ steps.pack.outputs.sha256 }}\` |"
+            echo "| Signing certificate SHA-256 | \`${{ steps.pack.outputs.cert }}\` |"
+            echo "| versionCode | \`${{ steps.identity.outputs.code }}\` |"
+            echo "| Commit | \`$GITHUB_SHA\` |"
+            echo "| Provenance | \`gh attestation verify $ASSET --repo $GITHUB_REPOSITORY\` |"
+          } > notes.md
+
           gh release create "$TAG" \
             --verify-tag \
             --title "TLC $VERSION" \
-            --generate-notes \
             --latest \
-            "${{ steps.pack.outputs.asset }}" \
+            --notes-file notes.md \
+            "$ASSET" \
             "tlc-$VERSION-foss.dependencies.txt" \
             "tlc-$VERSION-foss.signature.txt" \
             SHA256SUMS

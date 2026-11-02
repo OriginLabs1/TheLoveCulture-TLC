@@ -54,10 +54,13 @@ git tag v0.0.2 && git push origin main v0.0.2
 
 `.github/workflows/release.yml` then verifies the tag against `version.properties`, rejects a
 non-increasing `versionCode`, refuses to build without the signing key, runs the core invariants and
-the FOSS guard, signs `assembleFossRelease`, verifies the signature with `apksigner`, and publishes
-an **immutable** GitHub Release with the APK, `SHA256SUMS`, the dependency manifest, the signature
-block and a build-provenance attestation. The same signed APK is what F-Droid and Orion receive —
-never a different build.
+the FOSS guard, signs `assembleFossRelease`, verifies the signature, pins the signing certificate
+against [`release-key.properties`](release-key.properties), proves the APK requests no `INTERNET`
+permission and carries no Play Services classes, and publishes an **immutable** GitHub Release with
+the APK, `SHA256SUMS`, the dependency manifest, the signature block and a build-provenance
+attestation. The same signed APK is what F-Droid and Orion receive — never a different build.
+
+Key handling, rotation and store submission: [`RELEASING.md`](RELEASING.md).
 
 ## Structure
 

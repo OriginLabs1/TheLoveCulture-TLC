@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- No INTERNET permission. v0.0.1 has no networking code and no HTTP client on its
+         classpath, so asking for network access would be a promise the app cannot keep in
+         either direction: it would let a future mistake send data out, and it would make
+         "nothing leaves the device" a claim users have to take on trust. The permission
+         returns only when a feature needs it, and then the privacy policy changes first. -->
 
     <application
         android:allowBackup="false"
@@ -24,13 +28,11 @@
             </intent-filter>
 
             <!-- Link doctrine: one link, correct destination, meaningful fallback (CONTEXT §7).
-                 Possession of the link never authorises an action; the app re-authenticates. -->
-            <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" android:host="tlc.app" />
-            </intent-filter>
+                 The universal-link filter for https://tlc.app is deliberately absent until that
+                 host serves /.well-known/assetlinks.json with this app's signing certificate.
+                 An unverifiable app link cannot open the app, so shipping the filter would claim
+                 a domain the project does not yet control. Add it (and the assetlinks file) in
+                 the same change that makes it true. -->
         </activity>
     </application>
 </manifest>
