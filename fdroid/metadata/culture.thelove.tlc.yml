@@ -74,7 +74,7 @@ Builds:
       - gradle/wrapper/gradle-wrapper.jar
   - versionName: 0.0.4
     versionCode: 4
-    commit: v0.0.4
+    commit: 81f23fab7b71065c6a34383bc76095e2d90aea5d
     gradle:
       - assembleFossRelease
     output: apps/android/build/outputs/apk/foss/release/*.apk
