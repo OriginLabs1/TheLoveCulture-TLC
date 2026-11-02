@@ -9,7 +9,9 @@ searchable Journal with per-entry proofs, Growth Grants with evidence and witnes
 dues that stop at proof submission, a two-seat Circle with two-key decisions, preferences, verified
 backup and restore, and an About screen that separates what exists from what does not. Accounts,
 sync and cross-device invitations are the next milestone. The store copy says the same thing — see
-[`fastlane/metadata`](fastlane/metadata/android/en-US/full_description.txt).
+[`fastlane/metadata`](fastlane/metadata/android/en-US/full_description.txt). The Token direction for
+v0.0.5 is recorded in [`docs/SEF.md`](docs/SEF.md); v0.0.4 still describes tokens as recognition
+signals because the valuation and transfer rules do not exist yet.
 
 ## What exists (and is proven by tests)
 
@@ -92,7 +94,7 @@ core/domain       roles, tokens, dyad authority, fee state machine
 core/experience   use cases, durable state, grant and due lifecycles, backup bundles
 core/ledger       append-only hash chain, durable storage, Merkle anchor, verification
 tools/ledger-verify  nightly proof that nothing was rewritten
-docs/             (next) ADRs, threat model, runbooks
+docs/SEF.md       the Token direction for v0.0.5, and the non-custody line it must keep
 ```
 
 ## Deliberately absent
