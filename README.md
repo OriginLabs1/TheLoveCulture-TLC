@@ -1,7 +1,12 @@
-# TLC — v0.0.1 scaffold
+# TLC — v0.0.2 preview
 
 Android-first shell over a sovereign, non-custodial core.
-Doctrine: [`CONTEXT.md`](CONTEXT.md) · Contract: [`SPECS.md`](SPECS.md)
+Doctrine: [`CONTEXT.md`](CONTEXT.md) · Contract: [`SPECS.md`](SPECS.md) · Releases: [v0.0.2](https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/latest)
+
+**Status: preview.** The rules and the ledger are proven by tests; the shell is a thin, working
+demonstration of the activation flow with an in-memory ledger. On-device persistence and the
+two-steward flow are the next milestone. The store copy says the same thing — see
+[`fastlane/metadata`](fastlane/metadata/android/en-US/full_description.txt).
 
 ## What exists (and is proven by tests)
 
