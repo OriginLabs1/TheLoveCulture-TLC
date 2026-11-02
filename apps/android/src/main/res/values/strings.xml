@@ -191,7 +191,7 @@
 
     <!-- Dues -->
     <string name="dues_title">Pioneer dues</string>
-    <string name="dues_lead">Activation, Reactivation, Courtesy and Joy go directly to the Concept Pioneer's own account. TLC records the intent and the evidence; it never holds the money. This build does not release bank details yet.</string>
+    <string name="dues_lead">Activation, Reactivation, Courtesy and Joy go directly to the Concept Pioneer\'s own account. TLC records the intent and the evidence; it never holds the money. This build does not release bank details yet.</string>
     <string name="dues_no_details">Pioneer bank details are not stored in this build. When the secure fee flow ships, they will be released only to the payer, only after the due exists, and will expire.</string>
     <string name="dues_empty_title">No due recorded</string>
     <string name="dues_empty_body">A due is an intention, not a balance. Record one when you are ready to transfer directly.</string>
@@ -293,7 +293,7 @@
     <string name="settings_privacy">Privacy by construction</string>
     <string name="settings_privacy_body">No INTERNET permission. No Play Services, Firebase, analytics or advertising identifier. Nothing leaves this device unless you export or share it.</string>
     <string name="settings_version">Version %1$s (%2$d)</string>
-    <string name="settings_data_note">The state file and the record live in the app's private folder. Uninstalling removes them; export a backup first.</string>
+    <string name="settings_data_note">The state file and the record live in the app\'s private folder. Uninstalling removes them; export a backup first.</string>
     <string name="settings_export_done">Backup exported</string>
     <string name="settings_export_failed">The file could not be written</string>
     <string name="settings_import_done">Backup restored and verified</string>

@@ -29,6 +29,31 @@ while read -r p; do
   esac
 done < "$WORK/cp.txt"
 
+# 2b. Resource sanity. Kotlin compiles fine while AAPT2 rejects the XML, so catch the two
+# mistakes that have actually reached CI: an unescaped apostrophe in a string, and a malformed
+# backslash escape. AAPT2's own message ("invalid unicode escape") points at the wrong line.
+python3 - "$ROOT" <<'PY'
+import pathlib, re, sys
+
+root = pathlib.Path(sys.argv[1])
+problems = []
+for path in sorted((root / "apps/android/src/main/res").glob("values*/*.xml")):
+    text = path.read_text(encoding="utf-8")
+    for match in re.finditer(r"<string\b[^>]*>(.*?)</string>", text, re.S):
+        body = match.group(1)
+        for index, char in enumerate(body):
+            if char == "'" and (index == 0 or body[index - 1] != "\\"):
+                line = text.count("\n", 0, match.start(1) + index) + 1
+                problems.append(f"{path.relative_to(root)}:{line}: unescaped apostrophe in string")
+        for bad in re.finditer(r"\\(?![nt'\"\\@?]|u[0-9a-fA-F]{4})", body):
+            line = text.count("\n", 0, match.start(1) + bad.start()) + 1
+            problems.append(f"{path.relative_to(root)}:{line}: bad escape {bad.group(0)!r} in string")
+
+if problems:
+    print("\n".join(problems), file=sys.stderr)
+    sys.exit(1)
+PY
+
 # 3. Generate an R stub from the real string resources, so resource drift is caught too.
 {
   echo 'package culture.thelove.tlc.android'
