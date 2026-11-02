@@ -1,6 +1,6 @@
 # Privacy Notice — TLC
 
-**Version:** 0.0.2 · **Applies to:** the TLC Android app and `tlc.app`
+**Version:** 0.0.3 · **Applies to:** the TLC Android app and `tlc.app`
 **Data regime:** Nigeria Data Protection Act 2023 (NDPA), GDPR-shaped by design (INV-10)
 **Contact:** concept-pioneer@theloveculture.app
 
@@ -21,7 +21,12 @@ purposes below. There is no separate analytics company, ad network or data broke
 | Relationship | dyad membership, Receptive Mode | Route support to the right person | On your device |
 | Fee evidence | proof image/PDF, bank reference, amount, timestamp | Prove *you* paid the Concept Pioneer directly | Encrypted object storage, 90 days, then hash only |
 | Receipts | obligation id, amount, attestation, hash chain | Your permanent record of what was attested | On your device + append-only ledger |
-| Technical | crash signature, app version, OS version | Fix defects | 90 days |
+| Technical | app version, OS version | Fix defects | On your device only, in this build |
+
+**In this build (0.0.3):** the app stores one thing off the network — the recognition record you
+write, in a text file inside its private folder. There is no account, no sync and no crash reporting,
+so the account, relationship and fee-evidence rows above describe the product's intended scope, not
+data this version collects.
 
 **Not collected, ever:** card numbers, bank passwords, full bank account numbers in plaintext,
 contacts, location, advertising identifiers, clipboard contents, or the contents of your messages.
@@ -32,7 +37,7 @@ happened between two private bank accounts (INV-01).
 ## 3. The `foss` build is telemetry-free
 
 The `foss` flavour ships with **no** Google Play Services, Firebase, Crashlytics, ad SDK or
-third-party analytics. Version 0.0.2 contains no networking code at all and its APK does not request
+third-party analytics. Version 0.0.3 contains no networking code at all and its APK does not request
 the `INTERNET` permission — the release workflow checks both. When a networked feature arrives, this
 notice changes in the same release, and the app asks only for what that feature needs. The `full`
 flavour may add first-party integrations; each one is opt-in and listed in the release notes for

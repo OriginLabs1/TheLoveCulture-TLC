@@ -1,0 +1,8 @@
+TLC 0.0.3 — the record is durable.
+
+• Recognition now survives closing the app: entries are fsynced to a readable text file in the app's private folder.
+• Every launch re-verifies the whole hash chain before adding anything; a damaged or truncated record opens read-only with a plain explanation.
+• A crash mid-write is repaired by dropping only the incomplete line.
+• New journal: search, per-entry Merkle proof, copy/share a seal, export the record.
+• Verify screen shows the head hash, anchor root and exactly what failed.
+• Still no INTERNET permission, no Play Services, no Firebase, no analytics. Tokens are recognition signals only.

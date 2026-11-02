@@ -3,6 +3,7 @@ package culture.thelove.tlc.tools
 import culture.thelove.tlc.ledger.Anchor
 import culture.thelove.tlc.ledger.EntryKind
 import culture.thelove.tlc.ledger.Ledger
+import culture.thelove.tlc.ledger.LedgerCodec
 import culture.thelove.tlc.ledger.LedgerDraft
 import culture.thelove.tlc.ledger.LedgerEntry
 import culture.thelove.tlc.ledger.VerificationReport
@@ -61,7 +62,8 @@ internal fun run(args: Array<String>): Int {
 }
 
 private const val USAGE =
-    "usage: ledger-verify --demo | --file <chain.tsv> [--anchor <len>:<head>:<root>:<createdAt>]"
+    "usage: ledger-verify --demo | --file <record> [--anchor <len>:<head>:<root>:<createdAt>]\n" +
+        "  <record> is either an app export (starts with #tlc-ledger-v1) or a legacy TSV table."
 
 private fun demo(hasher: PlatformSha256): Int {
     val ledger = Ledger(hasher)
@@ -93,10 +95,28 @@ private fun verifyFile(file: java.io.File, anchor: Anchor?, hasher: PlatformSha2
         println("✗ no such file: ${file.path}")
         return 2
     }
-    val entries = runCatching { parse(file.readLines()) }.getOrElse {
-        println("✗ malformed chain: ${it.message}")
+    val text = runCatching { file.readText() }.getOrElse {
+        println("✗ cannot read ${file.path}: ${it.message}")
         return 2
     }
+
+    // A file written by the app is self-describing. The TSV branch keeps the original CLI shape
+    // working for anyone who scripted it; both are verified by the same rules.
+    val entries = if (text.startsWith(LedgerCodec.HEADER)) {
+        when (val decoded = LedgerCodec.decode(text)) {
+            is LedgerCodec.Decoded.Ok -> decoded.entries
+            is LedgerCodec.Decoded.Unreadable -> {
+                println("✗ malformed record: line ${decoded.lineNumber}: ${decoded.reason}")
+                return 2
+            }
+        }
+    } else {
+        runCatching { parse(text.lines()) }.getOrElse {
+            println("✗ malformed chain: ${it.message}")
+            return 2
+        }
+    }
+
     val report = Ledger.verify(entries, hasher, anchor)
     printReport(file.name, report)
     return if (report.ok) 0 else 1

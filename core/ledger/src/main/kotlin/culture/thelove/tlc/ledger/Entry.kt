@@ -18,6 +18,9 @@ public enum class EntryKind {
     MILESTONE_VERIFIED,
     CONSENT_GRANTED,
     CONSENT_REVOKED,
+
+    /** Someone thanked someone for real work. Amount is absent: recognition is not a payment. */
+    RECOGNITION,
 }
 
 public data class LedgerEntry(

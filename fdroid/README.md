@@ -15,14 +15,14 @@ so a user who moved between GitHub and F-Droid could not update without uninstal
 
 1. **Reproducibility.** `SOURCE_DATE_EPOCH` is pinned to the commit and two independent runners
    produce identical app content: `apksigcopier compare` reports no difference between build A,
-   build B and the published `v0.0.2` asset. Only the APK signature block differs from run to run,
+   build B and the published `v0.0.3` asset. Only the APK signature block differs from run to run,
    which is expected and is exactly what `apksigcopier` is designed to ignore — F-Droid's
    buildserver uses the same comparison for developer-signed apps.
    Run [`.github/workflows/reproducible.yml`](../.github/workflows/reproducible.yml) against any tag
    to re-check it.
-2. **Preview status.** F-Droid reviewers may consider a demonstration-only build too thin for the
-   main repository. If so, the honest routes are: wait for on-device persistence (0.1.0), or ask the
-   reviewers directly whether a preview is acceptable.
+2. **Not a demo any more.** 0.0.3 keeps a durable, verifiable record in the app's private folder, so
+   the "too thin to review" objection to a demonstration build no longer applies. The listing still
+   describes the narrow scope honestly: no account, no sync, no multi-device merge.
 3. **Description provenance.** The text in the metadata must match the app; if the app changes, the
    metadata changes in the same merge request.
 
@@ -43,6 +43,6 @@ git push -o merge_request.create -o merge_request.title="New app: TLC" origin cu
 
 ## Self-hosted alternative
 
-If F-Droid's main repository declines a preview build, the same APK can be served from a self-hosted
+If F-Droid's main repository declines the app, the same APK can be served from a self-hosted
 F-Droid repository (one `fdroid update` over the release artifacts, signed with a repo key that is
 separate from the app key). That keeps the app key untouched and the download path independent.

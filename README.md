@@ -1,21 +1,22 @@
-# TLC — v0.0.2 preview
+# TLC — v0.0.3
 
 Android-first shell over a sovereign, non-custodial core.
-Doctrine: [`CONTEXT.md`](CONTEXT.md) · Contract: [`SPECS.md`](SPECS.md) · Releases: [v0.0.2](https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/latest)
+Doctrine: [`CONTEXT.md`](CONTEXT.md) · Contract: [`SPECS.md`](SPECS.md) · Releases: [v0.0.3](https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/latest)
 
-**Status: preview.** The rules and the ledger are proven by tests; the shell is a thin, working
-demonstration of the activation flow with an in-memory ledger. On-device persistence and the
-two-steward flow are the next milestone. The store copy says the same thing — see
-[`fastlane/metadata`](fastlane/metadata/android/en-US/full_description.txt).
+**Status: durable.** The rules and the ledger are proven by tests, and the record now survives the
+process: entries are written to the app's private folder with `fsync`, re-verified on every launch,
+and refused when the chain does not check out. The shell is a working journal — search, entry proof,
+seal sharing and export. Accounts, sync, steward approvals and growth grants are the next milestone.
+The store copy says the same thing — see [`fastlane/metadata`](fastlane/metadata/android/en-US/full_description.txt).
 
 ## What exists (and is proven by tests)
 
 | Layer | Path | Status |
 |---|---|---|
 | Domain state machine (SK-01) | `core/domain` | 29 invariant tests green |
-| Hash-chained Pioneer ledger (SK-04, INV-08) | `core/ledger` | 21 tests green — tamper, reorder, truncation, replay all caught |
-| `ledger-verify` CLI (SPECS §B-3) | `tools/ledger-verify` | exit-code contract tested, `--demo` proves the invariants |
-| Android shell (Compose M3) | `apps/android` | type-checks against the real Compose classpath; APK built by CI |
+| Hash-chained Pioneer ledger (SK-04, INV-08) | `core/ledger` | 51 tests green — tamper, reorder, truncation, torn writes, failed writes, replay all caught |
+| `ledger-verify` CLI (SPECS §B-3) | `tools/ledger-verify` | reads the app's own export; exit-code contract tested |
+| Android shell (Compose M3) | `apps/android` | durable journal, entry proof, seal share, export; type-checks against the real Compose classpath |
 
 No code path in this repository moves, holds, pools or escrows money. `Effect` has
 `requiresCustody = false` on every member, and the ledger has no `BALANCE`/`TRANSFER`/`ESCROW`
@@ -25,7 +26,7 @@ entry kind — both enforced by tests, not by comment.
 
 ```bash
 make doctor        # toolchain + secret presence (never prints secrets)
-make verify        # compile + all 56 invariant tests, no Android SDK needed
+make verify        # compile + all 89 invariant tests, no Android SDK needed
 make ledger-verify # chain verification, including deliberate tampering
 make check-foss    # prove the foss channel has no Play Services / Firebase / tracking
 make shell-check   # type-check the shell without AAPT2 (any CPU)
@@ -36,6 +37,19 @@ JDK 21 is the only hard requirement for `verify`. The Android module joins the b
 `ANDROID_HOME` is set (see `settings.gradle.kts`), so the core stays testable everywhere.
 On an arm64 host `assembleFossDebug` cannot run (Google ships AAPT2 as an x86-64 binary); use
 `make shell-check` locally and let CI produce the APK.
+
+## How the record stays honest
+
+- One header line, then one pipe-delimited line per entry (`#tlc-ledger-v1`). A person can read it
+  without this app.
+- Every entry hashes its sequence, kind, time, amount (when present), subject and the hash of the
+  entry before it. Editing a past entry breaks every later hash.
+- A local seal (`length:head:root`) detects a tail removed from this device. A published seal detects
+  a tail removed and the local seal rewritten.
+- Writes are durable before they are acknowledged. A failed write is not shown as saved and the
+  session becomes read-only rather than diverging from the disk.
+- A crash mid-write is repaired by dropping only the incomplete line; an edit is reported, never
+  repaired away.
 
 ## Two flavours, one identity
 
@@ -53,8 +67,8 @@ Version identity lives in one file (`version.properties`); the git tag must equa
 
 ```bash
 ./scripts/bump-version.sh patch
-git add version.properties && git commit -m "release: v0.0.2"
-git tag v0.0.2 && git push origin main v0.0.2
+git add version.properties && git commit -m "release: v0.0.4"
+git tag v0.0.4 && git push origin main v0.0.4
 ```
 
 `.github/workflows/release.yml` then verifies the tag against `version.properties`, rejects a
@@ -72,7 +86,7 @@ Key handling, rotation and store submission: [`RELEASING.md`](RELEASING.md).
 ```
 apps/android      Compose shell — pixels, never rules
 core/domain       roles, tokens, dyad authority, fee state machine
-core/ledger       append-only hash chain, Merkle anchor, verification
+core/ledger       append-only hash chain, durable storage, Merkle anchor, verification
 tools/ledger-verify  nightly proof that nothing was rewritten
 docs/             (next) ADRs, threat model, runbooks
 ```

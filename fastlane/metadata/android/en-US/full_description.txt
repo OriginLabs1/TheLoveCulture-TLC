@@ -1,17 +1,18 @@
-TLC is a preview of an app for recognising care and contribution between people who trust each other — and for keeping a record of it that cannot be quietly rewritten.
+TLC records recognition — who showed up for whom, and what they did — in a record that cannot be quietly rewritten, and that now survives closing the app.
 
-It exists for one narrow purpose: to make good work visible, and to make the record of it tamper-evident.
+It exists for one narrow purpose: to make care and contribution visible between people who trust each other, and to keep the memory of it beyond the reach of a silent edit.
 
-WHAT THIS PREVIEW BUILD ACTUALLY DOES
+WHAT THIS BUILD ACTUALLY DOES
 
-• Walks the activation flow: get details, bring back proof, receive an attestation, reach a receipt.
-• Every step is decided by the same rules the tests cover — the screen has no second copy of them.
-• Shows a hash-chained ledger: each entry carries the hash of the one before it, so editing history breaks verification.
-• Works with the radio off. This build contains no networking code at all, and its APK does not request the INTERNET permission.
+• Keeps your record on the device. Entries are written to a readable text file in the app's private folder and flushed to disk before the app says they were kept.
+• Re-checks the whole record on every launch. Each entry carries the SHA-256 hash of the one before it, so editing a past entry breaks every later hash.
+• Names the damage. A tail lost on this device is reported as missing entries; an edited line is reported as a failed verification. A record that does not verify opens read-only instead of quietly accepting new history.
+• Repairs an interrupted write by dropping only the incomplete line, then verifying what remains.
+• Lets you search the journal, open any entry to see its Merkle proof against the current root, copy its hash, share a seal (length, head, root, time) or export the full record through the system file picker.
 
 WHAT IT DOES NOT DO YET
 
-Be clear about this: version 0.0.2 is a preview. The flow uses demonstration data, the ledger lives in memory for the length of a session, and records are not yet kept between launches. There is no account, no sync and no sharing yet. On-device persistence and the two-steward flow are the next milestone, not a promise about this build.
+There is no account, no sync and no multi-device merge. Steward approvals, dyads and growth grants are the next milestone, not a promise about this build.
 
 WHAT TLC WILL NEVER DO
 
@@ -19,6 +20,14 @@ WHAT TLC WILL NEVER DO
 • The app shows where to send a payment and records the evidence you bring back. The money moves between two private bank accounts, bank to bank, and TLC is not a party to it.
 • Recognition tokens are signals of appreciation: not currency, not transferable, not redeemable, not crypto.
 • No analytics on amounts, no advertising identifier, no third-party tracking.
+
+PRIVATE BY CONSTRUCTION
+
+This build contains no networking code and its APK does not request the INTERNET permission. Nothing leaves the device unless you export or share it. There is no Google Play Services, no Firebase, no analytics and no proprietary SDK.
+
+CHECK IT YOURSELF
+
+Export the record, then run the ledger-verify command-line tool from the source repository. It recomputes every hash and reports the first break — the same check the app performs, outside the app.
 
 WHO IT IS FOR
 

@@ -1,17 +1,109 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">TLC</string>
-    <string name="fee_flow_title">Activation</string>
-    <string name="fee_flow_caption">The app never moves money. It shows where to send it, then records the evidence you bring back.</string>
-    <string name="label_token">Token: %1$s</string>
-    <string name="label_amount">Amount: %1$s</string>
-    <string name="label_state">State: %1$s</string>
-    <string name="label_effects">Effects</string>
-    <string name="action_instruction">Get details</string>
-    <string name="action_proof">Submit proof</string>
-    <string name="action_attest">Attest</string>
-    <string name="ledger_ok">Ledger verified · %1$d entries</string>
-    <string name="ledger_failed">Ledger FAILED · %1$d problems</string>
-    <string name="ledger_head">head %1$s…</string>
-    <string name="notice_title">TLC Financial Notice</string>
+
+    <!-- Navigation -->
+    <string name="nav_journal">Journal</string>
+    <string name="nav_verify">Verify</string>
+    <string name="nav_about">About</string>
+    <string name="cd_back">Back</string>
+    <string name="loading">Opening your record…</string>
+    <string name="load_failed">The record could not be opened</string>
+
+    <!-- Journal -->
+    <string name="journal_eyebrow">YOUR RECORD</string>
+    <string name="journal_count_one">%1$d entry</string>
+    <string name="journal_count_many">%1$d entries</string>
+    <string name="journal_subtitle">Kept on this device. Each entry holds the hash of the one before it.</string>
+    <string name="journal_search_hint">Search this record</string>
+    <string name="cd_clear_search">Clear search</string>
+    <string name="journal_list_title">The chain</string>
+    <string name="journal_list_caption">Newest first. Tap an entry to see its proof.</string>
+    <string name="journal_empty_title">The first entry is yours to write</string>
+    <string name="journal_empty_body">When someone shows up for you, write it down. Recognition is not a payment: it is a signal of appreciation, kept where you can check it.</string>
+    <string name="journal_filter_empty">No entry matches that search.</string>
+    <string name="journal_footer">Head %1$s. Open Verify to recompute the whole chain.</string>
+    <string name="journal_add">Recognise</string>
+    <string name="entry_kind_recognition">Recognition</string>
+    <string name="blocked_title">The record needs attention</string>
+
+    <!-- Status -->
+    <string name="status_ok">Verified</string>
+    <string name="status_empty">Nothing yet</string>
+    <string name="status_opening">Opening</string>
+    <string name="status_damaged">Needs attention</string>
+    <string name="status_truncated">Missing entries</string>
+    <string name="status_recovered">Repaired after an interruption</string>
+
+    <!-- Capture -->
+    <string name="capture_title">New recognition</string>
+    <string name="capture_lead">Name the person, then say what they did. Plain words are best: this is a memory, not a review.</string>
+    <string name="capture_who">Who showed up?</string>
+    <string name="capture_who_hint">A name, or how you know them</string>
+    <string name="capture_what">What did they do?</string>
+    <string name="capture_what_hint">One or two sentences</string>
+    <string name="capture_where_title">Where this goes</string>
+    <string name="capture_saved_note">Only on this device, inside the private app folder. It is chained to every entry before it, and it leaves only when you export or share it.</string>
+    <string name="capture_save">Keep it</string>
+    <string name="capture_cancel">Cancel</string>
+    <string name="saved_message">Recognition kept</string>
+
+    <!-- Verify -->
+    <string name="verify_title">Verify</string>
+    <string name="verify_lead">Recompute the chain yourself. Nothing here asks to be taken on trust.</string>
+    <string name="verify_entries">Entries</string>
+    <string name="verify_status">Status</string>
+    <string name="verify_commitment_title">What this record commits to</string>
+    <string name="verify_head">Head hash</string>
+    <string name="verify_root">Anchor root</string>
+    <string name="verify_length">Length</string>
+    <string name="verify_length_value">%1$d entries</string>
+    <string name="verify_chain">Chain check</string>
+    <string name="verify_all_ok">Every link recomputes. No entry was rewritten.</string>
+    <string name="verify_empty">Nothing has been written yet, so there is no chain to check. The first entry you keep starts it.</string>
+    <string name="verify_failures">%1$d problems found. Restore this record from a backup before adding to it.</string>
+    <string name="verify_truncated_body">The seal says %1$d entries; this file has %2$d. The missing tail cannot be recovered here.</string>
+    <string name="verify_recovered_body">An interrupted write was dropped; %1$d entries are intact.</string>
+    <string name="verify_export">Export the record</string>
+    <string name="verify_share">Share a seal</string>
+    <string name="verify_outside_title">Check it outside the app</string>
+    <string name="verify_outside_body">Export the record, then run the verifier from the source repository. It recomputes every hash and reports the first break.</string>
+    <string name="verify_how_title">How the chain works</string>
+    <string name="verify_how_body">Each entry hashes its sequence number, kind, time, subject and the hash of the entry before it. Change anything in a past entry and every later hash stops matching. The Merkle root is a single fingerprint of the whole record at this moment.</string>
+    <string name="export_done">Record exported</string>
+    <string name="export_failed">The record could not be exported</string>
+    <string name="record_file_name">tlc-record-%1$s.txt</string>
+    <string name="seal_share_subject">TLC record seal</string>
+    <string name="seal_share_body">TLC record seal\n\nEntries: %1$d\nHead: %2$s\nRoot: %3$s\nSealed: %4$s\n\nThis seal commits to the record at that moment. Anyone holding it can compare it with a later copy.</string>
+
+    <!-- Entry detail -->
+    <string name="detail_title">Entry %1$d</string>
+    <string name="detail_time">Recorded</string>
+    <string name="detail_kind">Kind</string>
+    <string name="detail_prev">Links to</string>
+    <string name="detail_hash">Hash</string>
+    <string name="detail_key">Idempotency key</string>
+    <string name="detail_proof">Merkle proof</string>
+    <string name="detail_proof_ok">The proof reaches the current root.</string>
+    <string name="detail_proof_bad">The proof does not reach the current root.</string>
+    <string name="detail_proof_single">This is the only entry, so its hash is the root.</string>
+    <string name="detail_proof_steps">%1$d × SHA-256 → %2$s…</string>
+    <string name="detail_copy">Copy hash</string>
+    <string name="detail_copied">Hash copied</string>
+
+    <!-- About -->
+    <string name="about_title">About</string>
+    <string name="about_tagline">Recognition, kept honestly.</string>
+    <string name="about_subtitle">A private record of who showed up, and what they did.</string>
+    <string name="about_purpose_title">What TLC is for</string>
+    <string name="about_purpose">TLC exists to make care and contribution visible between people who trust each other, and to keep the record of it beyond the reach of a quiet edit. It is for families, small circles, community groups and cooperatives: anyone who wants a trustworthy memory of who showed up for whom, without handing that memory to a company.</string>
+    <string name="about_not_money_title">What it will never do</string>
+    <string name="about_now_title">In this build</string>
+    <string name="about_now">The record lives on this device as a text file you can read. Every entry carries a SHA-256 hash of the entry before it, so changing one entry breaks the rest. You can export the record and check it with the ledger-verify command-line tool in the source repository.</string>
+    <string name="about_next_title">Not here yet</string>
+    <string name="about_next">There is no account and no sync. Records do not leave this device unless you export or share them. Steward approvals, dyads and growth grants are the next milestone.</string>
+    <string name="about_meta_title">This copy</string>
+    <string name="about_version">Version %1$s (build %2$d)</string>
+    <string name="about_licence">GPL-3.0-or-later. No analytics, no advertising identifier, no third-party tracking.</string>
+    <string name="about_source">github.com/OriginLabs1/TheLoveCulture-TLC</string>
 </resources>

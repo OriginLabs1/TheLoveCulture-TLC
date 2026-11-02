@@ -27,6 +27,7 @@ class LedgerContractTest {
                 "MILESTONE_VERIFIED",
                 "CONSENT_GRANTED",
                 "CONSENT_REVOKED",
+                "RECOGNITION",
             ),
             EntryKind.entries.map { it.name },
         )

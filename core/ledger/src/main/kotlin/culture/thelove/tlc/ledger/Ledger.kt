@@ -20,6 +20,27 @@ public class Ledger(private val hasher: Hasher) {
 
     public fun size(): Int = items.size
 
+    /**
+     * Loads entries that the caller has already verified (e.g. [PersistentLedger.open]).
+     *
+     * Defence in depth: this re-checks the cheap structural rules itself rather than trusting the
+     * caller, so a bug in a loader cannot turn into a longer-looking history.
+     */
+    public fun restore(entries: List<LedgerEntry>) {
+        require(items.isEmpty()) { "restore() is only valid on an empty ledger." }
+        entries.forEachIndexed { index, entry ->
+            require(entry.seq == index + 1L) { "Sequence gap at index $index (found ${entry.seq})." }
+            val expectedPrev = if (index == 0) GENESIS else entries[index - 1].hash
+            require(entry.prevHash == expectedPrev) { "Broken link at index $index." }
+            require(entry.recomputeHash(hasher) == entry.hash) { "Bad hash at index $index." }
+            entry.idempotencyKey?.let { key ->
+                require(!idempotencyIndex.containsKey(key)) { "Duplicate idempotency key '$key'." }
+                idempotencyIndex[key] = entry
+            }
+            items += entry
+        }
+    }
+
     public fun headHash(): String = items.lastOrNull()?.hash ?: GENESIS
 
     public fun append(draft: LedgerDraft): AppendResult {
