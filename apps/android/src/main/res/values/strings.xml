@@ -191,8 +191,8 @@
 
     <!-- Dues -->
     <string name="dues_title">Pioneer dues</string>
-    <string name="dues_lead">Activation, Reactivation, Courtesy and Joy go directly to the Concept Pioneer's own account. TLC records the intent and the evidence; it never holds the money.</string>
-    <string name="dues_no_details">Account details are released only inside the fee flow and are never stored in this build.</string>
+    <string name="dues_lead">Activation, Reactivation, Courtesy and Joy go directly to the Concept Pioneer's own account. TLC records the intent and the evidence; it never holds the money. This build does not release bank details yet.</string>
+    <string name="dues_no_details">Pioneer bank details are not stored in this build. When the secure fee flow ships, they will be released only to the payer, only after the due exists, and will expire.</string>
     <string name="dues_empty_title">No due recorded</string>
     <string name="dues_empty_body">A due is an intention, not a balance. Record one when you are ready to transfer directly.</string>
     <string name="dues_new">Record a due</string>

@@ -36,9 +36,10 @@ public data class WorkspaceChange(
 public object Workspace {
 
     public const val PIONEER_DETAILS_NOTE: String =
-        "Pioneer account details are released only inside the fee flow and are never stored in " +
-            "this build. The reference below is yours to keep; the transfer itself happens in " +
-            "your own banking app."
+        "Pioneer bank details are not stored in this build. When the secure fee flow ships, they " +
+            "are released only to the payer, only after the due exists, and expire after " +
+            "INSTRUCTION_TTL_MILLIS. The reference below is yours to keep; the transfer itself " +
+            "happens in your own banking app."
 
     public fun onboard(
         displayName: String,
