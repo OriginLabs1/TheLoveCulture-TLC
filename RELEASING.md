@@ -39,12 +39,12 @@ throwaway signed APK from the backup.
 ## Cutting a release
 
 ```bash
-./scripts/bump-version.sh patch        # 0.0.2 -> 0.0.3, versionCode +1
-# write release-notes/v0.0.3.md        # required: the workflow fails without it
-git add version.properties release-notes/v0.0.3.md
-git commit -m "release: v0.0.3"
-git tag v0.0.3
-git push origin main v0.0.3
+./scripts/bump-version.sh patch        # 0.0.3 -> 0.0.4, versionCode +1
+# write release-notes/v0.0.4.md        # required: the workflow fails without it
+git add version.properties release-notes/v0.0.4.md
+git commit -m "release: v0.0.4"
+git tag v0.0.4
+git push origin main v0.0.4
 ```
 
 The tag must equal `v<versionName>`, and `versionCode` must be greater than the previous tag's.
@@ -79,6 +79,51 @@ configuration.
 
 ## Orion Store
 
-The same signed `tlc-<version>-foss.apk` is submitted unchanged. No re-signing: a store that
-re-signs the APK breaks update continuity with GitHub and F-Droid, so that is a blocker to resolve
-before submission, not a setting to accept.
+Orion Store (`https://www.orionstore.net/`) is GitHub-driven and serverless: it reads a repository and
+publishes releases from it, so there is no binary upload desk and no separate store account holding a
+second copy. Point Orion at `OriginLabs1/TheLoveCulture-TLC` and let it consume the same immutable
+GitHub Release and `tlc-<version>-foss.apk` that F-Droid and GitHub serve.
+
+Before submission, confirm that:
+
+1. the release is public, immutable and tagged exactly `v<versionName>`;
+2. the APK is the signed `foss` build, not a rebuilt or re-signed copy;
+3. `SHA256SUMS`, the signature block and the dependency manifest are attached to the release;
+4. the listing text matches [`fastlane/metadata`](fastlane/metadata/android/en-US/) and
+   [`PRIVACY.md`](PRIVACY.md).
+
+If Orion cannot serve the APK directly and asks for an upload, upload the same file unchanged. A
+store that re-signs the APK breaks update continuity with GitHub and F-Droid, so that is a blocker
+to resolve before submission, not a setting to accept.
+
+## Uptodown
+
+Uptodown is a manual developer-console upload: create the app once, then upload the same signed
+`tlc-<version>-foss.apk` for each release, with the version name, version code, changelog and listing
+copy. It does not build from source. Use the Android listing at
+`https://uptodown-android.uptodown.com/android` as the reference for the store's format and category
+conventions.
+
+The upload checklist is the same as Orion's, plus:
+
+1. versionCode must be strictly greater than the previous Uptodown upload;
+2. the changelog is the text in `fastlane/metadata/android/en-US/changelogs/<versionCode>.txt`;
+3. the icon, feature graphic and screenshots come from the same release commit;
+4. never upload a debug APK, an unsigned APK or an APK built from an unmerged branch.
+
+Uptodown does not replace GitHub Releases as the source of truth. If an upload is wrong, correct the
+listing and publish the next version; a published APK is not silently swapped.
+
+## One identity, four channels
+
+| Channel | How it receives the build | Re-signs? |
+|---|---|---|
+| GitHub Releases | CI builds, signs and publishes the immutable release | No |
+| F-Droid | Buildserver rebuilds from the tag and compares to the pinned APK | No (key pinned) |
+| Orion Store | Reads the GitHub repository/release | No |
+| Uptodown | Manual developer-console upload of the same APK | No |
+
+Every channel must end up with `culture.thelove.tlc` signed by the fingerprint in
+[`release-key.properties`](release-key.properties). If any channel insists on a different signature,
+stop and resolve it before publishing: two signatures for one package id is the failure mode this
+document exists to prevent.

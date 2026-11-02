@@ -1,11 +1,13 @@
 package culture.thelove.tlc.android.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -39,31 +41,82 @@ import culture.thelove.tlc.android.R
 import culture.thelove.tlc.ledger.EntryKind
 import culture.thelove.tlc.ledger.LedgerEntry
 
+// ---------------------------------------------------------------------------------------------
+// Shared visual language. Everything here is presentation only: it reads a fact and draws it.
+// The surface is warm and paper-like; panels are layered gradients with a hairline border, which
+// gives the "glass" depth without a blur that would cost frames on a modest phone.
+// ---------------------------------------------------------------------------------------------
+
 @Composable
-public fun KindLabel(kind: EntryKind, modifier: Modifier = Modifier) {
-    val (label, container, content) = when (kind) {
-        EntryKind.RECOGNITION -> Triple(
-            stringResource(R.string.entry_kind_recognition),
-            MaterialTheme.colorScheme.tertiaryContainer,
-            MaterialTheme.colorScheme.onTertiaryContainer,
-        )
-        else -> Triple(
-            kind.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() },
-            MaterialTheme.colorScheme.secondaryContainer,
-            MaterialTheme.colorScheme.onSecondaryContainer,
-        )
-    }
-    Surface(
+public fun Eyebrow(text: String, modifier: Modifier = Modifier, color: Color = MaterialTheme.colorScheme.primary) {
+    Text(
+        text = text.uppercase(),
         modifier = modifier,
-        shape = RoundedCornerShape(999.dp),
-        color = container,
-        contentColor = content,
+        style = MaterialTheme.typography.labelSmall,
+        fontWeight = FontWeight.SemiBold,
+        color = color,
+    )
+}
+
+@Composable
+public fun ScreenHeader(
+    eyebrow: String,
+    title: String,
+    body: String? = null,
+    modifier: Modifier = Modifier,
+    trailing: (@Composable () -> Unit)? = null,
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(top = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Eyebrow(eyebrow)
+            Spacer(modifier = Modifier.weight(1f))
+            trailing?.invoke()
+        }
+        Text(text = title, style = MaterialTheme.typography.headlineMedium)
+        if (body != null) {
+            Text(
+                text = body,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+@Composable
+public fun GlassPanel(
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    val scheme = MaterialTheme.colorScheme
+    val shape = MaterialTheme.shapes.extraLarge
+    val base = modifier
+        .fillMaxWidth()
+        .clip(shape)
+        .background(
+            Brush.linearGradient(
+                listOf(
+                    scheme.primaryContainer.copy(alpha = 0.72f),
+                    scheme.surface.copy(alpha = 0.98f),
+                    scheme.tertiaryContainer.copy(alpha = 0.55f),
+                ),
+            ),
+        )
+        .border(1.dp, scheme.outlineVariant, shape)
+    Column(
+        modifier = if (onClick != null) base.clickable(onClick = onClick) else base,
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Column(
+            modifier = Modifier.padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+            content = content,
         )
     }
 }
@@ -86,12 +139,57 @@ public fun SealPill(
             Icon(
                 imageVector = if (healthy) Icons.Filled.CheckCircle else Icons.Filled.Warning,
                 contentDescription = null,
-                modifier = Modifier.size(16.dp),
+                modifier = Modifier.size(15.dp),
             )
             Text(text = label, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
         }
     }
 }
+
+@Composable
+public fun Pill(
+    text: String,
+    modifier: Modifier = Modifier,
+    container: Color = MaterialTheme.colorScheme.secondaryContainer,
+    content: Color = MaterialTheme.colorScheme.onSecondaryContainer,
+) {
+    Surface(modifier = modifier, shape = RoundedCornerShape(999.dp), color = container, contentColor = content) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+        )
+    }
+}
+
+@Composable
+public fun KindLabel(kind: EntryKind, modifier: Modifier = Modifier) {
+    val (label, container, content) = when (kind) {
+        EntryKind.RECOGNITION -> Triple(
+            stringResource(R.string.entry_kind_recognition),
+            MaterialTheme.colorScheme.tertiaryContainer,
+            MaterialTheme.colorScheme.onTertiaryContainer,
+        )
+        EntryKind.GRANT_PLEDGE,
+        EntryKind.GRANT_EVIDENCE,
+        EntryKind.MILESTONE_VERIFIED,
+        -> Triple(
+            kindLabel(kind),
+            MaterialTheme.colorScheme.secondaryContainer,
+            MaterialTheme.colorScheme.onSecondaryContainer,
+        )
+        else -> Triple(
+            kindLabel(kind),
+            MaterialTheme.colorScheme.primaryContainer,
+            MaterialTheme.colorScheme.onPrimaryContainer,
+        )
+    }
+    Pill(text = label, modifier = modifier, container = container, content = content)
+}
+
+private fun kindLabel(kind: EntryKind): String =
+    kind.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() }
 
 @Composable
 public fun RecordHero(
@@ -102,60 +200,154 @@ public fun RecordHero(
     modifier: Modifier = Modifier,
 ) {
     val scheme = MaterialTheme.colorScheme
-    val shape = MaterialTheme.shapes.extraLarge
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(shape)
-            .background(
-                Brush.linearGradient(
-                    listOf(scheme.primaryContainer, scheme.surface),
-                ),
-            )
-            .border(1.dp, scheme.outlineVariant, shape)
-            .padding(22.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-        Text(
-            text = stringResource(R.string.journal_eyebrow),
-            style = MaterialTheme.typography.labelSmall,
-            color = scheme.onPrimaryContainer,
-        )
+    GlassPanel(modifier = modifier) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Eyebrow(stringResource(R.string.today_record))
+            Spacer(modifier = Modifier.weight(1f))
+            SealPill(healthy = healthy, label = sealLabel)
+        }
         Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             Text(
                 text = entryCount.toString(),
                 style = MaterialTheme.typography.displaySmall,
-                color = scheme.onPrimaryContainer,
+                color = scheme.onSurface,
             )
             Text(
                 text = if (entryCount == 1) {
-                    stringResource(R.string.journal_count_one, entryCount)
+                    stringResource(R.string.today_one_entry)
                 } else {
-                    stringResource(R.string.journal_count_many, entryCount)
+                    stringResource(R.string.today_entries, entryCount)
                 },
                 style = MaterialTheme.typography.titleMedium,
-                color = scheme.onPrimaryContainer,
+                color = scheme.onSurfaceVariant,
                 modifier = Modifier.padding(bottom = 6.dp),
             )
         }
         Text(
             text = stringResource(R.string.journal_subtitle),
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodySmall,
             color = scheme.onSurfaceVariant,
         )
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
+        Text(
+            text = headHash.take(20) + "…",
+            style = MaterialTheme.typography.labelSmall,
+            fontFamily = FontFamily.Monospace,
+            color = scheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
+}
+
+/** A large tap target with a title, a reason and a chevron. Used for the everyday verbs. */
+@Composable
+public fun ActionTile(
+    title: String,
+    body: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+) {
+    Card(
+        modifier = modifier.clickable(enabled = enabled, onClick = onClick),
+        shape = MaterialTheme.shapes.large,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            SealPill(healthy = healthy, label = sealLabel)
+            Box(
+                modifier = Modifier
+                    .size(38.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primaryContainer),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier.size(19.dp),
+                )
+            }
+            Text(text = title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
             Text(
-                text = headHash.take(12) + "…",
-                style = MaterialTheme.typography.labelMedium,
-                fontFamily = FontFamily.Monospace,
-                color = scheme.onSurfaceVariant,
+                text = body,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                minLines = 2,
             )
         }
+    }
+}
+
+@Composable
+public fun ModuleRow(
+    index: Int,
+    title: String,
+    body: String,
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(MaterialTheme.shapes.medium)
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
+            .padding(vertical = 9.dp, horizontal = 2.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(14.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .size(32.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.surfaceVariant),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = index.toString().padStart(2, '0'),
+                style = MaterialTheme.typography.labelSmall,
+                fontFamily = FontFamily.Monospace,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(text = title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+            Text(
+                text = body,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        if (onClick != null) {
+            Icon(
+                imageVector = Icons.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.outline,
+            )
+        }
+    }
+}
+
+@Composable
+public fun EmptyState(
+    title: String,
+    body: String,
+    modifier: Modifier = Modifier,
+    action: (@Composable () -> Unit)? = null,
+) {
+    GlassPanel(modifier = modifier) {
+        Text(text = title, style = MaterialTheme.typography.titleLarge)
+        Text(
+            text = body,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        action?.invoke()
     }
 }
 
@@ -251,7 +443,7 @@ public fun StatTile(
         modifier = modifier,
         shape = MaterialTheme.shapes.medium,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
     ) {
         Column(
             modifier = Modifier.padding(14.dp),
@@ -286,7 +478,7 @@ public fun SectionCard(
         modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(containerColor = container),
-        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
     ) {
         Column(
             modifier = Modifier.padding(18.dp),

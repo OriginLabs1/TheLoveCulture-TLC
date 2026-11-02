@@ -1,8 +1,8 @@
 # Privacy Notice — TLC
 
-**Version:** 0.0.3 · **Applies to:** the TLC Android app and `tlc.app`
+**Version:** 0.0.4 · **Applies to:** the TLC Android app and `tlc.app`
 **Data regime:** Nigeria Data Protection Act 2023 (NDPA), GDPR-shaped by design (INV-10)
-**Contact:** concept-pioneer@theloveculture.app
+**Contact:** tlcfounder@protonmail.com · https://sircollins.coreconcept1.net · https://t.me/CollinsRoyalMedium
 
 This notice is short because the app collects little. It is written to be read, not to be survived.
 
@@ -23,10 +23,12 @@ purposes below. There is no separate analytics company, ad network or data broke
 | Receipts | obligation id, amount, attestation, hash chain | Your permanent record of what was attested | On your device + append-only ledger |
 | Technical | app version, OS version | Fix defects | On your device only, in this build |
 
-**In this build (0.0.3):** the app stores one thing off the network — the recognition record you
-write, in a text file inside its private folder. There is no account, no sync and no crash reporting,
-so the account, relationship and fee-evidence rows above describe the product's intended scope, not
-data this version collects.
+**In this build (0.0.4):** the app stores, on the device only, the recognition record you write, the
+profile name and circle name you enter, your presentation preferences, and the grants, dues and
+proposals you create. The state file and the record live in the app's private folder. There is no
+account, no sync and no crash reporting, so the account, relationship and fee-evidence rows above
+describe the product's intended scope, not data this version collects. Backup means exporting a
+bundle through the system file picker; TLC does not upload it.
 
 **Not collected, ever:** card numbers, bank passwords, full bank account numbers in plaintext,
 contacts, location, advertising identifiers, clipboard contents, or the contents of your messages.
@@ -37,7 +39,7 @@ happened between two private bank accounts (INV-01).
 ## 3. The `foss` build is telemetry-free
 
 The `foss` flavour ships with **no** Google Play Services, Firebase, Crashlytics, ad SDK or
-third-party analytics. Version 0.0.3 contains no networking code at all and its APK does not request
+third-party analytics. Version 0.0.4 contains no networking code at all and its APK does not request
 the `INTERNET` permission — the release workflow checks both. When a networked feature arrives, this
 notice changes in the same release, and the app asks only for what that feature needs. The `full`
 flavour may add first-party integrations; each one is opt-in and listed in the release notes for
@@ -77,7 +79,7 @@ We do not sell data. We do not share it for advertising. We do not use it to tra
 Access, correction, deletion, restriction, portability, objection, and withdrawal of consent.
 **Export is always available offline** — your ledger is a file on your device (INV-05).
 
-Make a request to **concept-pioneer@theloveculture.app**. We answer within **30 days**. If you are
+Make a request to **tlcfounder@protonmail.com**. We answer within **30 days**. If you are
 not satisfied you may complain to the **Nigeria Data Protection Commission (NDPC)**.
 
 ## 8. Security

@@ -1,6 +1,8 @@
 package culture.thelove.tlc.ledger
 
+import culture.thelove.tlc.ledger.adapter.FileLogStorage
 import culture.thelove.tlc.ledger.adapter.PlatformSha256
+import java.nio.file.Files
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -250,5 +252,51 @@ class PersistentLedgerTest {
         assertEquals(ledger.headHash(), anchor.headHash)
         assertEquals(ledger.merkleRoot(), anchor.merkleRoot)
         assertNull(PersistentLedger.open(hasher, InMemoryLogStorage(initialLog = ledger.export())).blockedReason())
+    }
+
+    @Test
+    fun `a verified backup replaces the whole record and survives a reopen`() {
+        val dir = Files.createTempDirectory("tlc-restore").toFile()
+        val hasher = PlatformSha256()
+        val storage = FileLogStorage(dir)
+        val original = PersistentLedger.open(hasher, storage)
+        original.append(LedgerDraft(EntryKind.RECOGNITION, "first", occurredAt = 1, idempotencyKey = "a"))
+        original.append(LedgerDraft(EntryKind.RECOGNITION, "second", occurredAt = 2, idempotencyKey = "b"))
+        val backup = original.entries()
+
+        val replacement = Ledger(hasher)
+        replacement.append(LedgerDraft(EntryKind.RECOGNITION, "replacement", occurredAt = 3, idempotencyKey = "c"))
+
+        val reopened = PersistentLedger.open(hasher, storage)
+        val result = reopened.restore(replacement.entries())
+        assertTrue(result is PersistentLedger.RestoreResult.Restored)
+        assertEquals(1, reopened.size())
+        assertEquals("replacement", reopened.entries().single().subject)
+
+        val after = PersistentLedger.open(hasher, storage)
+        assertTrue(after.healthy)
+        assertEquals(1, after.size())
+        assertEquals(replacement.entries().single().hash, after.headHash())
+
+        // The old backup still verifies, so restoring it is not a loss.
+        assertTrue(after.restore(backup) is PersistentLedger.RestoreResult.Restored)
+        assertEquals(2, after.size())
+    }
+
+    @Test
+    fun `an invalid backup cannot overwrite a good record`() {
+        val dir = Files.createTempDirectory("tlc-restore-bad").toFile()
+        val hasher = PlatformSha256()
+        val storage = FileLogStorage(dir)
+        val ledger = PersistentLedger.open(hasher, storage)
+        ledger.append(LedgerDraft(EntryKind.RECOGNITION, "keep me", occurredAt = 1, idempotencyKey = "a"))
+        val good = ledger.entries().single()
+
+        val result = ledger.restore(listOf(good.copy(subject = "tampered")))
+        assertTrue(result is PersistentLedger.RestoreResult.Invalid)
+        assertEquals("keep me", ledger.entries().single().subject)
+
+        val after = PersistentLedger.open(hasher, storage)
+        assertEquals("keep me", after.entries().single().subject)
     }
 }

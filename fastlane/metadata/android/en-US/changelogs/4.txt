@@ -1,0 +1,12 @@
+TLC 0.0.4 — the whole shape of it.
+
+• Onboarding: three honest screens, then a local profile. Nothing is created until you tap the last button.
+• Today: your circle, the health of the record, the everyday verbs and every open loop in one place.
+• Journal: search and filters, plus a Merkle proof sheet for any entry. Filters never change the record.
+• Growth Grants: pledge, attach evidence, name the witness, record the bank reference. A stage cannot be claimed without its evidence.
+• Pioneer dues: record a due, issue the instruction, submit your proof. The app does not pretend to attest a Pioneer payment.
+• Circle: name a Co-Steward, open a two-key decision, see both signatures, and veto from either seat. These are local personas, not accounts yet.
+• Settings: theme, motion, haptics, Receptive Mode, export, verified backup and restore, seal sharing.
+• About: what TLC is now, what it is not yet, the module map, licence and source.
+
+Still no account, no sync, no multi-device merge. Still no INTERNET permission, no Play Services, no Firebase and no analytics. No wallet, no balance, no escrow, no payment rail. Recognition tokens are signals of appreciation only — not currency, not transferable, not redeemable, not crypto. The APK is signed with the project key and published unchanged to GitHub, F-Droid, Orion Store and Uptodown.

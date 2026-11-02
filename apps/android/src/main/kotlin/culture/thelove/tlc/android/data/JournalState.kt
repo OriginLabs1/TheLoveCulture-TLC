@@ -7,6 +7,7 @@ import culture.thelove.tlc.ledger.Anchor
 import culture.thelove.tlc.ledger.AppendResult
 import culture.thelove.tlc.ledger.EntryKind
 import culture.thelove.tlc.ledger.Ledger
+import culture.thelove.tlc.ledger.LedgerCodec
 import culture.thelove.tlc.ledger.LedgerDraft
 import culture.thelove.tlc.ledger.LedgerEntry
 import culture.thelove.tlc.ledger.Merkle
@@ -66,23 +67,9 @@ public class JournalState(filesDir: File) {
         loading = false
     }
 
-    public suspend fun addRecognition(who: String, what: String): SaveOutcome {
+    /** Append any fact the experience layer has already decided on. */
+    public suspend fun append(draft: LedgerDraft): SaveOutcome {
         val current = ledger ?: return SaveOutcome.Failed("The record is not open yet.")
-        val name = who.trim()
-        if (name.isBlank()) return SaveOutcome.Failed("Name the person, or how you know them.")
-        if (name.length > MAX_WHO) return SaveOutcome.Failed("That name is too long for one entry.")
-        val note = what.trim()
-        if (note.length > MAX_WHAT) return SaveOutcome.Failed("That note is too long for one entry.")
-
-        // The subject is the whole sentence a person will read later. Recognition carries no
-        // amount: it is a signal, not a payment (INV-01/INV-03).
-        val subject = if (note.isBlank()) name else "$name — $note"
-        val draft = LedgerDraft(
-            kind = EntryKind.RECOGNITION,
-            subject = subject,
-            occurredAt = System.currentTimeMillis(),
-            idempotencyKey = "recognition:${UUID.randomUUID()}",
-        )
         return when (val result = withContext(Dispatchers.IO) { current.append(draft) }) {
             is AppendResult.Appended -> {
                 publish()
@@ -93,6 +80,42 @@ public class JournalState(filesDir: File) {
                 SaveOutcome.Saved(result.existing)
             }
             is AppendResult.Invalid -> SaveOutcome.Failed(result.reason)
+        }
+    }
+
+    public suspend fun addRecognition(who: String, what: String): SaveOutcome {
+        val name = who.trim()
+        if (name.isBlank()) return SaveOutcome.Failed("Name the person, or how you know them.")
+        if (name.length > MAX_WHO) return SaveOutcome.Failed("That name is too long for one entry.")
+        val note = what.trim()
+        if (note.length > MAX_WHAT) return SaveOutcome.Failed("That note is too long for one entry.")
+
+        // The subject is the whole sentence a person will read later. Recognition carries no
+        // amount: it is a signal, not a payment (INV-01/INV-03).
+        val subject = if (note.isBlank()) name else "$name — $note"
+        return append(
+            LedgerDraft(
+                kind = EntryKind.RECOGNITION,
+                subject = subject,
+                occurredAt = System.currentTimeMillis(),
+                idempotencyKey = "recognition:${UUID.randomUUID()}",
+            ),
+        )
+    }
+
+    /** Restore a verified backup over the whole record. Returns `null` on success. */
+    public suspend fun replaceRecord(text: String): String? {
+        val current = ledger ?: return "The record is not open yet."
+        val entries = when (val decoded = LedgerCodec.decode(text)) {
+            is LedgerCodec.Decoded.Ok -> decoded.entries
+            is LedgerCodec.Decoded.Unreadable -> return "The backup record is malformed: ${decoded.reason}"
+        }
+        return when (val result = withContext(Dispatchers.IO) { current.restore(entries) }) {
+            is PersistentLedger.RestoreResult.Restored -> {
+                publish()
+                null
+            }
+            is PersistentLedger.RestoreResult.Invalid -> result.reason
         }
     }
 
@@ -118,6 +141,7 @@ public class JournalState(filesDir: File) {
         headHash = current.headHash()
         merkleRoot = current.merkleRoot()
         report = current.verification()
+        loadError = null
     }
 
     public companion object {

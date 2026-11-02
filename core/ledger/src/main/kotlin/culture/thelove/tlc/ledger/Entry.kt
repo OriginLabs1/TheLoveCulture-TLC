@@ -15,6 +15,7 @@ public enum class EntryKind {
     RECEIPT,
     WAIVER,
     GRANT_PLEDGE,
+    GRANT_EVIDENCE,
     MILESTONE_VERIFIED,
     CONSENT_GRANTED,
     CONSENT_REVOKED,

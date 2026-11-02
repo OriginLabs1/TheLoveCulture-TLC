@@ -22,12 +22,14 @@ package culture.thelove.tlc.ledger
 public class PersistentLedger private constructor(
     private val hasher: Hasher,
     private val storage: LogStorage,
-    private val ledger: Ledger,
-    public val status: Status,
+    private var ledger: Ledger,
+    private var statusValue: Status,
 ) {
 
     private var durable: Int = ledger.size()
     private var faulted: String? = null
+
+    public val status: Status get() = statusValue
 
     public sealed interface Status {
         /** Opened cleanly. `entries` may be zero. */
@@ -73,6 +75,54 @@ public class PersistentLedger private constructor(
             "The record is missing its last ${s.expected - s.found} entries. " +
                 "TLC will not write over a gap; restore a backup or export what remains."
         is Status.Damaged -> "The record failed verification (${s.reason}). TLC will not add to it."
+    }
+
+    /**
+     * Replace the whole record with a backup that the caller has already decoded.
+     *
+     * This is the only sanctioned way to shorten history, and it is still closed: the entries are
+     * re-verified here, the text written is exactly the text a verifier would read, and the seal is
+     * rewritten from the verified result. An invalid backup cannot overwrite a good record.
+     */
+    public fun restore(entries: List<LedgerEntry>): RestoreResult {
+        if (entries.isEmpty()) {
+            val text = LedgerCodec.encodeAll(emptyList())
+            return try {
+                storage.replaceLog(text)
+                storage.writeSeal("0:${Ledger.GENESIS}:${Merkle.root(emptyList(), hasher)}")
+                ledger = Ledger(hasher)
+                durable = 0
+                faulted = null
+                statusValue = Status.Ready(0)
+                RestoreResult.Restored
+            } catch (e: Exception) {
+                RestoreResult.Invalid(e.message ?: "The record could not be replaced.")
+            }
+        }
+        val report = Ledger.verify(entries, hasher)
+        if (!report.ok) return RestoreResult.Invalid("The imported record does not verify.")
+        val rebuilt = Ledger(hasher)
+        runCatching { rebuilt.restore(entries) }.onFailure {
+            return RestoreResult.Invalid(it.message ?: "The imported record is not a valid chain.")
+        }
+        val text = LedgerCodec.encodeAll(entries)
+        return try {
+            storage.replaceLog(text)
+            storage.writeSeal("${entries.size}:${rebuilt.headHash()}:${rebuilt.merkleRoot()}")
+            ledger = rebuilt
+            durable = entries.size
+            faulted = null
+            statusValue = Status.Ready(entries.size)
+            RestoreResult.Restored
+        } catch (e: Exception) {
+            RestoreResult.Invalid(e.message ?: "The record could not be replaced.")
+        }
+    }
+
+    public sealed interface RestoreResult {
+        public data object Restored : RestoreResult
+
+        public data class Invalid(public val reason: String) : RestoreResult
     }
 
     public fun append(draft: LedgerDraft): AppendResult {

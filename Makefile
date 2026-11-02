@@ -1,4 +1,4 @@
-# TLC v0.0.1 — one command per obligation (SPECS §B-3, §C-1).
+# TLC — one command per obligation (SPECS §B-3, §C-1).
 # Everything here is reproducible on a clean machine with JDK 21 only; Android targets need the SDK.
 
 SHELL := /bin/bash
@@ -58,7 +58,7 @@ release-assets: ## Show what the release pipeline will publish for the current v
 	@echo "  versionCode: $$(sed -nE 's/^versionCode=//p' version.properties)"
 	@echo "  tag:         v$(VERSION)"
 	@echo "  asset:       tlc-$(VERSION)-foss.apk (+ .dependencies.txt, .signature.txt, SHA256SUMS)"
-	@echo "  channels:    GitHub Releases · F-Droid · Orion Store (same signed APK)"
+	@echo "  channels:    GitHub Releases · F-Droid · Orion Store · Uptodown (same signed APK)"
 
 clean: ## Remove build outputs
 	$(GRADLE) --console=plain clean

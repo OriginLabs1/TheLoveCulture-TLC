@@ -13,6 +13,7 @@ tasks.register("verify") {
     dependsOn(
         ":core:domain:test",
         ":core:ledger:test",
+        ":core:experience:test",
         ":tools:ledger-verify:test",
     )
 }

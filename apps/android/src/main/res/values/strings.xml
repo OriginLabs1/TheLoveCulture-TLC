@@ -1,14 +1,108 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">TLC</string>
+    <string name="app_wordmark">TLC</string>
+    <string name="app_doctrine">The Love Culture</string>
 
     <!-- Navigation -->
+    <string name="nav_today">Today</string>
     <string name="nav_journal">Journal</string>
-    <string name="nav_verify">Verify</string>
-    <string name="nav_about">About</string>
+    <string name="nav_grants">Grants</string>
+    <string name="nav_circle">Circle</string>
+    <string name="nav_settings">Settings</string>
     <string name="cd_back">Back</string>
-    <string name="loading">Opening your record…</string>
-    <string name="load_failed">The record could not be opened</string>
+    <string name="loading">Opening your circle…</string>
+    <string name="load_failed">TLC could not open this circle</string>
+    <string name="retry">Try again</string>
+
+    <!-- Shared -->
+    <string name="cd_more">More</string>
+    <string name="cd_close">Close</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_save">Save</string>
+    <string name="action_done">Done</string>
+    <string name="action_open">Open</string>
+    <string name="action_copy">Copy</string>
+    <string name="action_share">Share</string>
+    <string name="action_continue">Continue</string>
+    <string name="action_back">Back</string>
+    <string name="copied">Copied</string>
+    <string name="not_now">Not now</string>
+    <string name="unknown_error">Something did not complete. Try again.</string>
+
+    <!-- Onboarding -->
+    <string name="onboard_skip">Skip the tour</string>
+    <string name="onboard_next">Continue</string>
+    <string name="onboard_begin">Begin</string>
+    <string name="onboard_create">Create my circle</string>
+    <string name="onboard_welcome_eyebrow">THE LOVE CULTURE</string>
+    <string name="onboard_welcome_title">Recognition, kept honestly.</string>
+    <string name="onboard_welcome_body">A private, local-first place to remember who showed up, what they did, and what was promised. Not a bank. Not a feed. Yours.</string>
+    <string name="onboard_promise_local">Kept on this device</string>
+    <string name="onboard_promise_local_body">No account, no network, no analytics. Export or share only when you choose.</string>
+    <string name="onboard_promise_chain">A record that cannot be quietly edited</string>
+    <string name="onboard_promise_chain_body">Every entry carries the hash of the one before it. Verification is one tap, not a promise.</string>
+    <string name="onboard_promise_non_custody">TLC never holds money</string>
+    <string name="onboard_promise_non_custody_body">Support moves directly between private bank accounts. TLC records the intent and the evidence.</string>
+    <string name="onboard_role_eyebrow">THE CHOICE</string>
+    <string name="onboard_role_title">How will you travel?</string>
+    <string name="onboard_role_body">A role is a responsibility, not a rank. You can change how you describe yourself later; the record keeps its history.</string>
+    <string name="role_single">Single</string>
+    <string name="role_single_body">Free. Give recognition and Joy. Receive Supportive and Recognition when Receptive Mode is on.</string>
+    <string name="role_i_partner">I-Partner</string>
+    <string name="role_i_partner_body">Free. Form a two-person circle, pledge Growth Grants and share stewardship before marriage.</string>
+    <string name="role_love_model">Love Model</string>
+    <string name="role_love_model_body">Activation and monthly Reactivation apply. Full dyad, shared record and two-key decisions.</string>
+    <string name="onboard_profile_eyebrow">THE FORM</string>
+    <string name="onboard_profile_title">Name the circle.</string>
+    <string name="onboard_profile_body">This stays on the device. It is how your own record greets you, not a public profile.</string>
+    <string name="onboard_name">Your name</string>
+    <string name="onboard_name_hint">A name, or how you know yourself</string>
+    <string name="onboard_circle">Circle name</string>
+    <string name="onboard_circle_hint">Family, friends, cooperative…</string>
+    <string name="onboard_consent">I understand that TLC records claims about direct transfers. It does not hold, move or escrow money.</string>
+    <string name="onboard_consent_required">Please confirm the notice to continue.</string>
+    <string name="onboard_ready">Your Primary Steward seat is ready. You can name a Co-Steward in Circle.</string>
+    <string name="onboard_step">Step %1$d of %2$d</string>
+
+    <!-- Today -->
+    <string name="today_eyebrow">GOOD TO SEE YOU</string>
+    <string name="today_greeting">%1$s</string>
+    <string name="today_circle">%1$s · %2$s</string>
+    <string name="today_record">Your record</string>
+    <string name="today_entries">%1$d entries</string>
+    <string name="today_one_entry">1 entry</string>
+    <string name="today_sealed">Sealed and checked on this launch</string>
+    <string name="today_quick">What would you like to do?</string>
+    <string name="today_recognise">Recognise someone</string>
+    <string name="today_recognise_body">Write down who showed up.</string>
+    <string name="today_pledge">Pledge a grant</string>
+    <string name="today_pledge_body">Record a promise, then witness it.</string>
+    <string name="today_due">Record a due</string>
+    <string name="today_due_body">Keep the fee trail honest.</string>
+    <string name="today_open_loops">Open loops</string>
+    <string name="today_open_loops_body">Nothing is waiting. The record is at rest.</string>
+    <string name="today_all_clear">All clear</string>
+    <string name="today_view_all">View all</string>
+    <string name="today_capabilities">What lives here</string>
+    <string name="today_capabilities_body">Six working modules, one record, one doctrine.</string>
+    <string name="today_notice_title">The short version</string>
+    <string name="today_notice_body">TLC facilitates direct peer-to-peer support. It never holds, pools, escrows or moves money.</string>
+    <string name="today_read_doctrine">Read the full notice</string>
+
+    <!-- Capabilities -->
+    <string name="module_journal">Journal</string>
+    <string name="module_journal_body">Recognition, chained and searchable.</string>
+    <string name="module_grants">Growth Grants</string>
+    <string name="module_grants_body">Pledge → evidence → witness → direct payment.</string>
+    <string name="module_dues">Pioneer dues</string>
+    <string name="module_dues_body">Intent, proof and attestation — no custody.</string>
+    <string name="module_circle">Stewardship</string>
+    <string name="module_circle_body">Two seats, symmetric veto, scoped decisions.</string>
+    <string name="module_verify">Verification</string>
+    <string name="module_verify_body">Recompute the chain, export, share a seal.</string>
+    <string name="module_backup">Portability</string>
+    <string name="module_backup_body">One file restores the state and the record.</string>
 
     <!-- Journal -->
     <string name="journal_eyebrow">YOUR RECORD</string>
@@ -24,6 +118,11 @@
     <string name="journal_filter_empty">No entry matches that search.</string>
     <string name="journal_footer">Head %1$s. Open Verify to recompute the whole chain.</string>
     <string name="journal_add">Recognise</string>
+    <string name="journal_filter_all">All</string>
+    <string name="journal_filter_recognition">Recognition</string>
+    <string name="journal_filter_grants">Grants</string>
+    <string name="journal_filter_dues">Dues</string>
+    <string name="journal_filter_governance">Governance</string>
     <string name="entry_kind_recognition">Recognition</string>
     <string name="blocked_title">The record needs attention</string>
 
@@ -47,6 +146,161 @@
     <string name="capture_save">Keep it</string>
     <string name="capture_cancel">Cancel</string>
     <string name="saved_message">Recognition kept</string>
+    <string name="capture_not_payment">Recognition carries no amount and no cash value. It is a signal, not a payment.</string>
+
+    <!-- Grants -->
+    <string name="grants_title">Growth Grants</string>
+    <string name="grants_lead">A pledge is a promise between two people. TLC witnesses the milestone; the money still moves directly from donor to beneficiary.</string>
+    <string name="grants_empty_title">No grant yet</string>
+    <string name="grants_empty_body">Pledge something specific: who, what, and by when. A vague promise is hard to witness.</string>
+    <string name="grants_new">Pledge a grant</string>
+    <string name="grants_new_title">New pledge</string>
+    <string name="grants_beneficiary">Beneficiary</string>
+    <string name="grants_beneficiary_hint">Who receives the direct transfer?</string>
+    <string name="grants_purpose">Purpose</string>
+    <string name="grants_purpose_hint">What milestone will you witness?</string>
+    <string name="grants_amount">Amount (₦, optional)</string>
+    <string name="grants_amount_hint">Leave blank if the amount is private</string>
+    <string name="grants_created">Pledge recorded. The money has not moved.</string>
+    <string name="grants_stage_pledged">Pledged</string>
+    <string name="grants_stage_evidence">Evidence recorded</string>
+    <string name="grants_stage_verified">Verified</string>
+    <string name="grants_stage_paid">Paid directly</string>
+    <string name="grants_stage_withdrawn">Withdrawn</string>
+    <string name="grants_attach">Attach evidence</string>
+    <string name="grants_attach_title">What evidence do you have?</string>
+    <string name="grants_attach_hint">A receipt, a photo you can describe, a witness statement</string>
+    <string name="grants_attach_done">Evidence recorded</string>
+    <string name="grants_verify">Record verification</string>
+    <string name="grants_verify_title">Who verified the milestone?</string>
+    <string name="grants_verify_hint">Name the witness</string>
+    <string name="grants_verify_done">Milestone verified</string>
+    <string name="grants_pay">Record direct payment</string>
+    <string name="grants_pay_title">Bank reference</string>
+    <string name="grants_pay_hint">The reference from your own transfer</string>
+    <string name="grants_pay_done">Direct payment recorded</string>
+    <string name="grants_withdraw">Withdraw pledge</string>
+    <string name="grants_withdraw_title">Why withdraw?</string>
+    <string name="grants_withdraw_hint">A short reason, kept with the record</string>
+    <string name="grants_withdraw_done">Pledge withdrawn cleanly</string>
+    <string name="grants_timeline">The path</string>
+    <string name="grants_detail">Grant detail</string>
+    <string name="grants_no_amount">Amount private</string>
+    <string name="grants_direct_note">Payment happens in your banking app, directly to the beneficiary. TLC is not a party to the transfer.</string>
+    <string name="grants_reference">Reference</string>
+
+    <!-- Dues -->
+    <string name="dues_title">Pioneer dues</string>
+    <string name="dues_lead">Activation, Reactivation, Courtesy and Joy go directly to the Concept Pioneer's own account. TLC records the intent and the evidence; it never holds the money.</string>
+    <string name="dues_no_details">Account details are released only inside the fee flow and are never stored in this build.</string>
+    <string name="dues_empty_title">No due recorded</string>
+    <string name="dues_empty_body">A due is an intention, not a balance. Record one when you are ready to transfer directly.</string>
+    <string name="dues_new">Record a due</string>
+    <string name="dues_new_title">New due</string>
+    <string name="dues_kind">Kind</string>
+    <string name="dues_amount">Amount (₦)</string>
+    <string name="dues_activation">Activation</string>
+    <string name="dues_reactivation">Reactivation</string>
+    <string name="dues_courtesy">Courtesy</string>
+    <string name="dues_joy">Joy</string>
+    <string name="dues_period_one_off">One-off</string>
+    <string name="dues_period_monthly">Monthly</string>
+    <string name="dues_created">Due recorded. No money has moved.</string>
+    <string name="dues_issue">Release instruction</string>
+    <string name="dues_issue_done">Instruction released for this session</string>
+    <string name="dues_record_proof">I sent it — record proof</string>
+    <string name="dues_proof_title">Proof of transfer</string>
+    <string name="dues_proof_amount">Amount sent (₦)</string>
+    <string name="dues_proof_reference">Bank reference</string>
+    <string name="dues_proof_reference_hint">From your own banking app</string>
+    <string name="dues_proof_done">Proof recorded. It awaits attestation.</string>
+    <string name="dues_reference">Your reference</string>
+    <string name="dues_copy_reference">Copy reference</string>
+    <string name="dues_awaiting">Awaiting attestation by the Concept Pioneer. A proof is a claim, never a settled fact.</string>
+    <string name="dues_no_co_steward">Name a Co-Steward in Circle before recording a Pioneer due: the obligation belongs to the dyad.</string>
+    <string name="dues_state_due">Due</string>
+    <string name="dues_state_instruction">Instruction issued</string>
+    <string name="dues_state_proof">Proof submitted</string>
+    <string name="dues_state_attested">Attested</string>
+    <string name="dues_state_exception">Exception</string>
+    <string name="dues_state_waived">Waived</string>
+    <string name="dues_state_expired">Expired</string>
+    <string name="dues_exception_body">The amount in the proof does not match the obligation. Nothing was settled; the exception is the honest state.</string>
+    <string name="dues_waived">Waived. No receivable was created.</string>
+    <string name="dues_attested">Attested. A receipt is part of the record.</string>
+    <string name="dues_expired">Expired cleanly. No debt is created.</string>
+
+    <!-- Circle -->
+    <string name="circle_title">Circle</string>
+    <string name="circle_lead">Two seats, two signatures, one shared record. Structural authority and full visibility are roles — never gender, age or rank.</string>
+    <string name="circle_primary">Primary Steward</string>
+    <string name="circle_co">Co-Steward</string>
+    <string name="circle_primary_body">Administers structure. Does not hold a second key alone.</string>
+    <string name="circle_co_body">Full visibility and a symmetric veto on irreversible actions.</string>
+    <string name="circle_vacant">Seat open</string>
+    <string name="circle_add_co">Name a Co-Steward</string>
+    <string name="circle_add_co_title">Who shares this circle?</string>
+    <string name="circle_add_co_hint">A name, or how you know them</string>
+    <string name="circle_add_co_done">Co-Steward named on this device</string>
+    <string name="circle_add_co_note">This records the name on this device. A signed cross-device invitation arrives with accounts and sync; it is not claimed here.</string>
+    <string name="circle_two_key">Two-key actions</string>
+    <string name="circle_two_key_body">Bank-detail changes, dissolution, delegation and shared export need both signatures. Either steward can veto immediately.</string>
+    <string name="circle_decisions">Decisions</string>
+    <string name="circle_no_decisions">No decision is open. Irreversible actions will appear here before they happen.</string>
+    <string name="circle_open_decision">Open a decision</string>
+    <string name="circle_decision_title">What needs two keys?</string>
+    <string name="circle_decision_summary">Note (optional)</string>
+    <string name="circle_decision_summary_hint">Why this matters, in plain language</string>
+    <string name="circle_sign_primary">Sign as %1$s</string>
+    <string name="circle_sign_co">Sign as %1$s</string>
+    <string name="circle_veto">Veto</string>
+    <string name="circle_approved">Approved by both stewards</string>
+    <string name="circle_vetoed">Vetoed</string>
+    <string name="circle_waiting">Waiting for the second signature</string>
+    <string name="circle_signature_one">1 of 2 signatures</string>
+    <string name="circle_signature_two">2 of 2 signatures</string>
+    <string name="circle_decision_opened">Decision opened</string>
+    <string name="circle_signed">Signature recorded</string>
+    <string name="circle_vetoed_done">Veto recorded</string>
+    <string name="circle_identity_note">This preview has local personas, not accounts. Real authentication and signed consent grants arrive with sync.</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_appearance">Appearance</string>
+    <string name="settings_theme">Theme</string>
+    <string name="settings_theme_system">System</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_motion">Motion</string>
+    <string name="settings_motion_body">Allow transitions and entrance animations.</string>
+    <string name="settings_haptics">Haptics</string>
+    <string name="settings_haptics_body">A short confirmation when something is kept.</string>
+    <string name="settings_receptive">Receptive Mode</string>
+    <string name="settings_receptive_body">Allow Supportive and Recognition offers when you are Single. You can turn this off at any time.</string>
+    <string name="settings_data">Data and portability</string>
+    <string name="settings_export_record">Export the record</string>
+    <string name="settings_export_record_body">The exact text the ledger-verify tool reads.</string>
+    <string name="settings_export_bundle">Export a full backup</string>
+    <string name="settings_export_bundle_body">State and record in one verified file.</string>
+    <string name="settings_import_bundle">Restore from backup</string>
+    <string name="settings_import_bundle_body">A backup is accepted only if its record re-verifies.</string>
+    <string name="settings_share_seal">Share a seal</string>
+    <string name="settings_share_seal_body">Entry count, head, root and time.</string>
+    <string name="settings_verify">Verify the record</string>
+    <string name="settings_verify_body">Recompute the chain and see exactly what failed.</string>
+    <string name="settings_about">About TLC</string>
+    <string name="settings_about_body">Nature, purpose, modules and licence.</string>
+    <string name="settings_privacy">Privacy by construction</string>
+    <string name="settings_privacy_body">No INTERNET permission. No Play Services, Firebase, analytics or advertising identifier. Nothing leaves this device unless you export or share it.</string>
+    <string name="settings_version">Version %1$s (%2$d)</string>
+    <string name="settings_data_note">The state file and the record live in the app's private folder. Uninstalling removes them; export a backup first.</string>
+    <string name="settings_export_done">Backup exported</string>
+    <string name="settings_export_failed">The file could not be written</string>
+    <string name="settings_import_done">Backup restored and verified</string>
+    <string name="settings_import_failed">That backup could not be restored</string>
+    <string name="settings_import_confirm">This replaces the state and record on this device. Continue only if you trust the file.</string>
+    <string name="settings_record_file_name">tlc-record-%1$s.txt</string>
+    <string name="settings_bundle_file_name">tlc-backup-%1$s.json</string>
 
     <!-- Verify -->
     <string name="verify_title">Verify</string>
@@ -94,16 +348,40 @@
     <!-- About -->
     <string name="about_title">About</string>
     <string name="about_tagline">Recognition, kept honestly.</string>
-    <string name="about_subtitle">A private record of who showed up, and what they did.</string>
+    <string name="about_subtitle">A sovereign, local-first shell over a non-custodial core.</string>
     <string name="about_purpose_title">What TLC is for</string>
     <string name="about_purpose">TLC exists to make care and contribution visible between people who trust each other, and to keep the record of it beyond the reach of a quiet edit. It is for families, small circles, community groups and cooperatives: anyone who wants a trustworthy memory of who showed up for whom, without handing that memory to a company.</string>
     <string name="about_not_money_title">What it will never do</string>
     <string name="about_now_title">In this build</string>
-    <string name="about_now">The record lives on this device as a text file you can read. Every entry carries a SHA-256 hash of the entry before it, so changing one entry breaks the rest. You can export the record and check it with the ledger-verify command-line tool in the source repository.</string>
+    <string name="about_now">The journal is durable and hash-chained. You can recognise someone, pledge and witness a Growth Grant, record a Pioneer due, name a Co-Steward, open a two-key decision, choose a theme and restore a verified backup. There is still no account, no sync and no multi-device merge.</string>
     <string name="about_next_title">Not here yet</string>
-    <string name="about_next">There is no account and no sync. Records do not leave this device unless you export or share them. Steward approvals, dyads and growth grants are the next milestone.</string>
+    <string name="about_next">Accounts, cross-device invitations, sync, the remote Pioneer attestation desk and multi-device merge are the next milestone. Records do not leave this device unless you export or share them.</string>
+    <string name="about_modules_title">Capabilities and modules</string>
+    <string name="about_modules_body">Journal · Growth Grants · Pioneer dues · Stewardship · Verification · Portability. One core, many shells; the Android shell owns pixels, never rules.</string>
     <string name="about_meta_title">This copy</string>
     <string name="about_version">Version %1$s (build %2$d)</string>
     <string name="about_licence">GPL-3.0-or-later. No analytics, no advertising identifier, no third-party tracking.</string>
     <string name="about_source">github.com/OriginLabs1/TheLoveCulture-TLC</string>
+    <string name="about_stores">GitHub Releases · F-Droid · Orion Store · Uptodown</string>
+    <string name="about_contact_title">Pioneer contact</string>
+    <string name="about_contact_body">Direct, human contact for TLC. Opened by the system; nothing is copied into the record.</string>
+    <string name="about_website">Website</string>
+    <string name="about_website_value">sircollins.coreconcept1.net</string>
+    <string name="about_telegram">Telegram</string>
+    <string name="about_telegram_value">t.me/CollinsRoyalMedium</string>
+    <string name="about_email">Email</string>
+    <string name="about_email_value">tlcfounder@protonmail.com</string>
+
+    <!-- Two-key action labels -->
+    <string name="action_change_bank">Change verified transfer details</string>
+    <string name="action_dissolve">Dissolve this circle</string>
+    <string name="action_grant_delegation">Delegate a scoped steward role</string>
+    <string name="action_revoke_delegation">Revoke a delegated steward role</string>
+    <string name="action_export_shared">Export the shared record</string>
+
+    <!-- Screen eyebrows -->
+    <string name="grants_eyebrow">THE WITNESSED PROMISE</string>
+    <string name="dues_eyebrow">PLATFORM DIRECT</string>
+    <string name="circle_eyebrow">TWO SEATS, ONE RECORD</string>
+    <string name="settings_eyebrow">YOURS TO TUNE</string>
 </resources>

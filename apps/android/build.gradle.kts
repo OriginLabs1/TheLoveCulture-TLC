@@ -101,6 +101,7 @@ dependencies {
     // One core, many shells: the shell owns pixels, never rules (CONTEXT §6).
     implementation(project(":core:domain"))
     implementation(project(":core:ledger"))
+    implementation(project(":core:experience"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)

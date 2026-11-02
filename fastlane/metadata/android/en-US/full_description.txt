@@ -1,18 +1,29 @@
-TLC records recognition — who showed up for whom, and what they did — in a record that cannot be quietly rewritten, and that now survives closing the app.
+TLC records recognition — who showed up for whom, and what they did — in a record that cannot be quietly rewritten, and that survives closing the app.
 
 It exists for one narrow purpose: to make care and contribution visible between people who trust each other, and to keep the memory of it beyond the reach of a silent edit.
 
-WHAT THIS BUILD ACTUALLY DOES
+THE WHOLE SHAPE, IN ONE BUILD
 
-• Keeps your record on the device. Entries are written to a readable text file in the app's private folder and flushed to disk before the app says they were kept.
-• Re-checks the whole record on every launch. Each entry carries the SHA-256 hash of the one before it, so editing a past entry breaks every later hash.
-• Names the damage. A tail lost on this device is reported as missing entries; an edited line is reported as a failed verification. A record that does not verify opens read-only instead of quietly accepting new history.
-• Repairs an interrupted write by dropping only the incomplete line, then verifying what remains.
-• Lets you search the journal, open any entry to see its Merkle proof against the current root, copy its hash, share a seal (length, head, root, time) or export the full record through the system file picker.
+• Onboarding asks for a name and a role only after it has explained the promise: local by default, hash-chained, non-custodial.
+• Today is the home surface: your circle, whether the record is intact, the everyday verbs, every open loop and the modules that make up TLC.
+• The Journal is searchable and filterable, and any entry opens to its Merkle proof against the current root. A filter is a reading aid, never a change to the record.
+• Growth Grants record a witnessed pledge: the beneficiary, the purpose, the evidence you actually have, the person who verified the milestone, and the bank reference when the transfer is done.
+• Pioneer dues record a platform obligation, the instruction, and the proof you brought back. The app stops at proof submission, because only the Pioneer can attest a Pioneer payment.
+• Circle holds a Primary Steward and a Co-Steward. Either seat can veto; a sensitive decision needs both signatures to close. This build uses local personas, not accounts — cross-device invitations and signed consent grants arrive with sync.
+• Settings carries theme, motion, haptics, Receptive Mode, record export, a verified backup bundle, restore, and seal sharing.
+• Verify recomputes the chain, shows the head hash and Merkle root, and exports the exact text the ledger-verify command-line tool reads.
+
+WHAT THE RECORD DOES
+
+• It keeps your record on the device. Entries are written to a readable text file in the app's private folder and flushed to disk before the app says they were kept.
+• It re-checks the whole record on every launch. Each entry carries the SHA-256 hash of the one before it, so editing a past entry breaks every later hash.
+• It names the damage. A tail lost on this device is reported as missing entries; an edited line is reported as a failed verification. A record that does not verify opens read-only instead of quietly accepting new history.
+• It repairs an interrupted write by dropping only the incomplete line, then verifying what remains.
+• It refuses a damaged state file or backup bundle rather than silently replacing or merging it.
 
 WHAT IT DOES NOT DO YET
 
-There is no account, no sync and no multi-device merge. Steward approvals, dyads and growth grants are the next milestone, not a promise about this build.
+There is no account, no sync and no multi-device merge. A Co-Steward is a local persona, not a remote authenticated person. The remote Pioneer attestation desk, cross-device invitations and signed consent grants are the next milestone, not a promise about this build.
 
 WHAT TLC WILL NEVER DO
 
@@ -35,7 +46,8 @@ Families, small circles, community groups and cooperatives — anyone who wants 
 
 FREE AND OPEN SOURCE
 
-GPL-3.0-or-later, no proprietary SDKs, no Google Play Services. The same signed build is published to GitHub Releases, F-Droid and Orion Store.
+GPL-3.0-or-later, no proprietary SDKs, no Google Play Services. The same signed build is published to GitHub Releases, F-Droid and Orion Store, and uploaded unchanged to Uptodown.
 
 Privacy notice: https://github.com/OriginLabs1/TheLoveCulture-TLC/blob/main/PRIVACY.md
 Source code: https://github.com/OriginLabs1/TheLoveCulture-TLC
+Pioneer: https://sircollins.coreconcept1.net · https://t.me/CollinsRoyalMedium · tlcfounder@protonmail.com
