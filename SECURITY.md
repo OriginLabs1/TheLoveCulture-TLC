@@ -6,7 +6,8 @@
 |---|---|
 | 0.0.x (pre-release) | ✅ latest patch only |
 
-Pre-release builds are for testing. Do not use them with real bank details until v1.0.
+Pre-release builds are for testing. Keep an independent copy of any bank destination you save until
+v1.0; a lost or reset keystore makes the vault unreadable by design.
 
 ## Report a vulnerability
 
@@ -62,32 +63,35 @@ not ask you to sign an NDA to report a bug.
 - **No client minting.** Attestations come from an authorised human, never from `SYSTEM` (INV-08).
 - **Tamper-evident history.** Append-only SHA-256 chain; truncation is detected against a published
   Merkle anchor.
-- **No secrets in the app.** The Pioneer account number is fetched at runtime, never compiled in.
+- **No secrets in the app.** No account number is compiled into the APK. A destination you choose to
+  save is entered by you and kept only in the encrypted vault on that device.
 - **No silence.** A breach affecting personal data is assessed and, where required, reported to the
   Nigeria Data Protection Commission within 72 hours of awareness.
 
-## Pioneer bank details
+## Bank destinations
 
-The Pioneer's bank details are not a public profile, a listing screenshot, a repository value or a
-constant in the APK. They are released only through the fee flow, to the person the due belongs to,
-after that due exists:
+A bank destination is not a public profile, a listing screenshot, a repository value or a constant
+in the APK. It is entered by the person who will use it and kept on that device:
 
-1. **Right people.** One payer and the Pioneer. A due is bound to two distinct member ids, and the
-   instruction is issued to that payer alone.
-2. **Right time.** Details are released only after the due is recorded and the instruction is issued,
-   and the instruction expires after `INSTRUCTION_TTL_MILLIS` (15 minutes). They are never cached,
-   never written to the state file or ledger, never included in an export or backup bundle, and
-   never logged.
-3. **Right reason.** The only reason is to let the payer make the transfer the due describes. There
-   is no browseable directory, no "show account" button outside an active due, and no copy path that
-   survives the flow.
-4. **Never in this build.** v0.0.4 has no networking code, so it has no secure runtime channel for
-   those details. It records the due and the proof and says plainly that the details are released
-   only inside the fee flow. Do not paste real account numbers into a preview build, a screenshot, an
-   issue or a chat.
+1. **Encrypted at rest.** The full account number lives only in a separate vault file, encrypted with
+   AES-256-GCM under a key generated inside the Android Keystore and never exported. The state file,
+   the record, a backup bundle, the contact log, a notification and an export see only the bank name,
+   the last four digits and a fingerprint.
+2. **Revealed on purpose.** The app shows the masked destination until an explicit reveal. A reveal
+   is written to the record, hides again when its timer ends, and is never copied into the state or a
+   backup.
+3. **Right reason.** The only reason to reveal is to make a transfer the person has chosen to make.
+   There is no browseable directory and no copy path that survives the reveal window.
+4. **No network.** v0.0.5 has no networking code, so a destination cannot leave the device through
+   the app. It can leave only if the person exports or shares something deliberately, and the vault
+   itself is never part of an export.
+5. **Loss is honest.** Uninstalling the app or resetting the device destroys the Keystore key, so the
+   saved numbers become unreadable. The reference (bank name, last four, fingerprint) remains; the
+   person can enter the destination again deliberately.
 
-If a release ever compiles an account number, prints it to a log, stores it in the ledger, or shows
-it before a due exists, treat that as a security defect and report it under this policy.
+If a release compiles an account number, prints one to a log, stores a full number in the ledger or
+state, includes one in a backup or export, or shows one before an explicit reveal, treat that as a
+security defect and report it under this policy.
 
 ## Safe harbour
 
