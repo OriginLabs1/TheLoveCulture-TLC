@@ -1,6 +1,6 @@
 # TLC v0.0.5 — Trust & Contact
 
-**Status:** proposal updated after the founder's review. Not a commitment, not a tag.
+**Status:** shipped as v0.0.5 on 2026-11-04.
 **Working title:** *Trust & Contact* · **Release headline:** *Names, numbers, and a way to reach the Pioneer.*
 **Baseline:** v0.0.4 (`10bfa88`), 112 tests, local-only, no `INTERNET` permission.
 **Companion docs:** [`CONTEXT.md`](../CONTEXT.md) · [`SPECS.md`](../SPECS.md) · [`docs/SEF.md`](SEF.md) · [`PRIVACY.md`](../PRIVACY.md) · [`SECURITY.md`](../SECURITY.md)

@@ -29,8 +29,12 @@ Verify a download:
 gh release download v0.0.5 --repo OriginLabs1/TheLoveCulture-TLC
 sha256sum -c SHA256SUMS
 apksigner verify --print-certs tlc-0.0.5-foss.apk
-gh attestation verify tlc-0.0.5-foss.apk --repo OriginLabs1/TheLoveCulture-TLC
 ```
+
+v0.0.5 was published from the locally built and verified signed APK. The GitHub Actions release
+workflow (with its build-provenance attestation) remains the canonical path for future releases;
+when it publishes a release, `gh attestation verify tlc-<version>-foss.apk --repo
+OriginLabs1/TheLoveCulture-TLC` becomes available for that tag.
 
 ## Ready, waiting on an owner account
 
