@@ -1,6 +1,7 @@
 package culture.thelove.tlc.android.ui
 
 import android.content.Intent
+import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -12,6 +13,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,8 +33,11 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -66,6 +71,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
@@ -73,46 +80,62 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import culture.thelove.tlc.android.R
 import culture.thelove.tlc.android.data.AppState
 import culture.thelove.tlc.android.data.JournalState
 import culture.thelove.tlc.android.data.SaveOutcome
 import culture.thelove.tlc.android.ui.screens.AboutScreen
+import culture.thelove.tlc.android.ui.screens.BankVaultScreen
 import culture.thelove.tlc.android.ui.screens.CaptureScreen
 import culture.thelove.tlc.android.ui.screens.CircleScreen
+import culture.thelove.tlc.android.ui.screens.ContactScreen
 import culture.thelove.tlc.android.ui.screens.DuesScreen
 import culture.thelove.tlc.android.ui.screens.GrantsScreen
 import culture.thelove.tlc.android.ui.screens.JournalScreen
 import culture.thelove.tlc.android.ui.screens.OnboardingScreen
+import culture.thelove.tlc.android.ui.screens.PeopleScreen
 import culture.thelove.tlc.android.ui.screens.SettingsScreen
+import culture.thelove.tlc.android.ui.screens.SupportScreen
 import culture.thelove.tlc.android.ui.screens.TodayScreen
 import culture.thelove.tlc.android.ui.screens.VerifyScreen
 import culture.thelove.tlc.android.ui.theme.TlcTheme
+import culture.thelove.tlc.domain.BankAccount
+import culture.thelove.tlc.domain.ContactChannel
+import culture.thelove.tlc.domain.ContactIntent
+import culture.thelove.tlc.domain.ContactPurpose
+import culture.thelove.tlc.domain.Handle
 import culture.thelove.tlc.experience.GrantEvent
 import culture.thelove.tlc.experience.ThemeMode
 import culture.thelove.tlc.ledger.LedgerEntry
 import culture.thelove.tlc.ledger.Merkle
 import culture.thelove.tlc.ledger.PersistentLedger
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 
 public enum class Dest {
     TODAY,
-    JOURNAL,
-    GRANTS,
-    CIRCLE,
+    RECORD,
+    PEOPLE,
     SETTINGS,
-    CAPTURE,
+    CREATE,
+    SUPPORT,
+    CONTACT,
     DUES,
+    BANK,
+    CIRCLE,
+    GRANTS,
+    CAPTURE,
     VERIFY,
     ABOUT,
     ;
 
     public val isTab: Boolean
-        get() = this == TODAY || this == JOURNAL || this == GRANTS || this == CIRCLE || this == SETTINGS
+        get() = this == TODAY || this == RECORD || this == PEOPLE || this == SETTINGS
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -135,11 +158,19 @@ public fun TlcApp(filesDir: File, modifier: Modifier = Modifier) {
     var capturing by remember { mutableStateOf(false) }
     var confirmReset by remember { mutableStateOf(false) }
     var confirmImport by remember { mutableStateOf(false) }
+    var showCreate by rememberSaveable { mutableStateOf(false) }
+    var revealed by remember { mutableStateOf<BankAccount?>(null) }
+    var supportFor by rememberSaveable { mutableStateOf<String?>(null) }
     val systemDark = isSystemInDarkTheme()
 
     LaunchedEffect(Unit) { state.load() }
 
     val snapshot = state.snapshot
+    LaunchedEffect(revealed) {
+        val account = revealed ?: return@LaunchedEffect
+        delay(((state.snapshot?.preferences?.revealSeconds ?: 60) * 1000L))
+        if (revealed === account) revealed = null
+    }
     val darkTheme = when (snapshot?.preferences?.theme ?: ThemeMode.SYSTEM) {
         ThemeMode.SYSTEM -> systemDark
         ThemeMode.LIGHT -> false
@@ -159,7 +190,7 @@ public fun TlcApp(filesDir: File, modifier: Modifier = Modifier) {
         scope.launch { snackbar.showSnackbar(message) }
     }
 
-    fun run(success: Int?, block: suspend () -> String?) {
+    fun act(success: Int?, block: suspend () -> String?) {
         if (actionBusy) return
         actionBusy = true
         scope.launch {
@@ -175,6 +206,50 @@ public fun TlcApp(filesDir: File, modifier: Modifier = Modifier) {
                 }
             } finally {
                 actionBusy = false
+            }
+        }
+    }
+
+    fun openContact(
+        channel: ContactChannel,
+        purpose: ContactPurpose,
+        category: String?,
+        guidance: String?,
+    ) {
+        val profile = state.snapshot?.profile ?: return
+        val contactIntent = ContactIntent(purpose, category, guidance)
+        val signature = buildString {
+            append("\n\n— ")
+            append(profile.displayName)
+            profile.handle?.let {
+                append(" (")
+                append(it.value)
+                append(")")
+            }
+        }
+        val message = contactIntent.opening(profile.role) + signature
+        val uri = when (channel) {
+            ContactChannel.TELEGRAM -> Uri.parse("https://t.me/CollinsRoyalMedium")
+            ContactChannel.EMAIL -> Uri.parse(
+                "mailto:tlcfounder@protonmail.com" +
+                    "?subject=${Uri.encode(purpose.label)}" +
+                    "&body=${Uri.encode(message)}",
+            )
+            ContactChannel.WEBSITE -> Uri.parse("https://sircollins.coreconcept1.net")
+            ContactChannel.PHONE -> return
+        }
+        act(null) { state.logContact(channel, purpose, category) }
+        runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, uri)) }
+            .onFailure { notify(context.getString(R.string.contact_no_app)) }
+    }
+
+    fun revealAccount(refId: String) {
+        scope.launch {
+            val account = state.revealBankAccount(refId)
+            if (account == null) {
+                snackbar.showSnackbar(context.getString(R.string.vault_reveal_failed))
+            } else {
+                revealed = account
             }
         }
     }
@@ -280,7 +355,7 @@ public fun TlcApp(filesDir: File, modifier: Modifier = Modifier) {
                         if (snapshot?.preferences?.haptics != false) {
                             haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                         }
-                        go(Dest.JOURNAL)
+                        go(Dest.RECORD)
                         snackbar.showSnackbar(context.getString(R.string.saved_message))
                     }
                     is SaveOutcome.Failed -> snackbar.showSnackbar(outcome.reason)
@@ -313,12 +388,12 @@ public fun TlcApp(filesDir: File, modifier: Modifier = Modifier) {
                     OnboardingScreen(
                         submitting = onboardingBusy,
                         error = onboardingError,
-                        onFinish = { name, circle, role ->
+                        onFinish = { name, circle, role, handle ->
                             if (onboardingBusy) return@OnboardingScreen
                             scope.launch {
                                 onboardingBusy = true
                                 onboardingError = null
-                                val error = state.onboard(name, circle, role)
+                                val error = state.onboard(name, circle, role, handle)
                                 onboardingBusy = false
                                 if (error != null) {
                                     onboardingError = error
@@ -381,22 +456,16 @@ public fun TlcApp(filesDir: File, modifier: Modifier = Modifier) {
                                         onClick = { go(Dest.TODAY) },
                                     )
                                     TlcNavItem(
-                                        selected = dest == Dest.JOURNAL,
-                                        label = stringResource(R.string.nav_journal),
+                                        selected = dest == Dest.RECORD,
+                                        label = stringResource(R.string.nav_record),
                                         icon = { Icon(Icons.Filled.List, contentDescription = null) },
-                                        onClick = { go(Dest.JOURNAL) },
+                                        onClick = { go(Dest.RECORD) },
                                     )
                                     TlcNavItem(
-                                        selected = dest == Dest.GRANTS,
-                                        label = stringResource(R.string.nav_grants),
-                                        icon = { Icon(Icons.Filled.Favorite, contentDescription = null) },
-                                        onClick = { go(Dest.GRANTS) },
-                                    )
-                                    TlcNavItem(
-                                        selected = dest == Dest.CIRCLE,
-                                        label = stringResource(R.string.nav_circle),
+                                        selected = dest == Dest.PEOPLE,
+                                        label = stringResource(R.string.nav_people),
                                         icon = { Icon(Icons.Filled.Person, contentDescription = null) },
-                                        onClick = { go(Dest.CIRCLE) },
+                                        onClick = { go(Dest.PEOPLE) },
                                     )
                                     TlcNavItem(
                                         selected = dest == Dest.SETTINGS,
@@ -408,11 +477,11 @@ public fun TlcApp(filesDir: File, modifier: Modifier = Modifier) {
                             }
                         },
                         floatingActionButton = {
-                            if (dest == Dest.JOURNAL) {
+                            if (dest.isTab) {
                                 ExtendedFloatingActionButton(
-                                    onClick = { go(Dest.CAPTURE) },
+                                    onClick = { showCreate = true },
                                     icon = { Icon(Icons.Filled.Add, contentDescription = null) },
-                                    text = { Text(stringResource(R.string.journal_add)) },
+                                    text = { Text(stringResource(R.string.create_title)) },
                                     containerColor = MaterialTheme.colorScheme.primary,
                                     contentColor = MaterialTheme.colorScheme.onPrimary,
                                 )
@@ -441,19 +510,20 @@ public fun TlcApp(filesDir: File, modifier: Modifier = Modifier) {
                                         headHash = state.headHash,
                                         healthy = state.healthy,
                                         sealLabel = sealLabel(state.status, state.entries.size, state.healthy),
-                                        onRecognise = { go(Dest.CAPTURE) },
-                                        onPledge = { go(Dest.GRANTS) },
-                                        onRecordDue = { go(Dest.DUES) },
-                                        onJournal = { go(Dest.JOURNAL) },
-                                        onCircle = { go(Dest.CIRCLE) },
+                                        onRecord = { go(Dest.CAPTURE) },
+                                        onSupport = { supportFor = null; go(Dest.SUPPORT) },
+                                        onContact = { go(Dest.CONTACT) },
+                                        onPioneerToken = { go(Dest.DUES) },
+                                        onPeople = { go(Dest.PEOPLE) },
                                         onGrants = { go(Dest.GRANTS) },
+                                        onCircle = { go(Dest.CIRCLE) },
                                         onDues = { go(Dest.DUES) },
                                         onVerify = { go(Dest.VERIFY) },
                                         onCheckpoint = { go(Dest.SETTINGS) },
                                         onAbout = { go(Dest.ABOUT) },
                                     )
 
-                                    Dest.JOURNAL -> JournalScreen(
+                                    Dest.RECORD -> JournalScreen(
                                         entries = state.entries,
                                         headHash = state.headHash,
                                         healthy = state.healthy,
@@ -462,12 +532,80 @@ public fun TlcApp(filesDir: File, modifier: Modifier = Modifier) {
                                         onEntry = { selected = it },
                                     )
 
+                                    Dest.PEOPLE -> PeopleScreen(
+                                        snapshot = sealed,
+                                        busy = state.busy || actionBusy,
+                                        onAddPerson = { handle, name, role, bankRefId ->
+                                            act(R.string.people_added) {
+                                                state.addPerson(handle, name, role, bankRefId)
+                                            }
+                                        },
+                                        onAttachBank = { personId, bankRefId ->
+                                            act(null) { state.attachBank(personId, bankRefId) }
+                                        },
+                                        onRemovePerson = { personId ->
+                                            act(R.string.people_removed) { state.removePerson(personId) }
+                                        },
+                                        onSupport = { handle ->
+                                            supportFor = handle.value
+                                            go(Dest.SUPPORT)
+                                        },
+                                        onContact = { go(Dest.CONTACT) },
+                                        onBankVault = { go(Dest.BANK) },
+                                    )
+
+                                    Dest.SUPPORT -> SupportScreen(
+                                        people = sealed.people,
+                                        supports = sealed.supports,
+                                        busy = state.busy || actionBusy,
+                                        initialHandle = supportFor?.let { Handle.parse(it) },
+                                        onSend = { handle, kind, amountKobo ->
+                                            act(R.string.support_sent) {
+                                                state.sendSupport(handle, kind, amountKobo)
+                                            }
+                                        },
+                                        onClaim = { id, reference ->
+                                            act(R.string.support_claimed) { state.claimSupport(id, reference) }
+                                        },
+                                        onAcknowledge = { id ->
+                                            act(R.string.support_acknowledged) { state.acknowledgeSupport(id) }
+                                        },
+                                    )
+
+                                    Dest.CONTACT -> ContactScreen(
+                                        role = sealed.profile.role,
+                                        displayName = sealed.profile.displayName,
+                                        handle = sealed.profile.handle,
+                                        contactLog = sealed.contactLog,
+                                        busy = state.busy || actionBusy,
+                                        onOpen = { channel, purpose, category, guidance ->
+                                            openContact(channel, purpose, category, guidance)
+                                        },
+                                        onClearLog = { act(null) { state.clearContactLog() } },
+                                    )
+
+                                    Dest.BANK -> BankVaultScreen(
+                                        refs = sealed.bankAccounts,
+                                        revealed = revealed,
+                                        busy = state.busy || actionBusy,
+                                        onAdd = { bankCode, number, holder ->
+                                            act(R.string.vault_saved) {
+                                                state.saveBankAccount(bankCode, number, holder)
+                                            }
+                                        },
+                                        onRemove = { refId ->
+                                            act(R.string.vault_removed) { state.removeBankAccount(refId) }
+                                        },
+                                        onReveal = { refId -> revealAccount(refId) },
+                                        onHide = { revealed = null },
+                                    )
+
                                     Dest.GRANTS -> GrantsScreen(
                                         grants = sealed.grants,
                                         busy = state.busy || actionBusy,
                                         blockedReason = state.blockedReason,
                                         onCreate = { beneficiary, purpose, amountKobo ->
-                                            run(R.string.grants_created) {
+                                            act(R.string.grants_created) {
                                                 state.addGrant(beneficiary, purpose, amountKobo)
                                             }
                                         },
@@ -478,7 +616,7 @@ public fun TlcApp(filesDir: File, modifier: Modifier = Modifier) {
                                                 is GrantEvent.RecordPayment -> R.string.grants_pay_done
                                                 is GrantEvent.Withdraw -> R.string.grants_withdraw_done
                                             }
-                                            run(message) { state.advanceGrant(id, event) }
+                                            act(message) { state.advanceGrant(id, event) }
                                         },
                                     )
 
@@ -487,16 +625,16 @@ public fun TlcApp(filesDir: File, modifier: Modifier = Modifier) {
                                         busy = state.busy || actionBusy,
                                         blockedReason = state.blockedReason,
                                         onAddCoSteward = { name ->
-                                            run(R.string.circle_add_co_done) { state.addCoSteward(name) }
+                                            act(R.string.circle_add_co_done) { state.addCoSteward(name) }
                                         },
                                         onPropose = { action, summary ->
-                                            run(R.string.circle_decision_opened) { state.propose(action, summary) }
+                                            act(R.string.circle_decision_opened) { state.propose(action, summary) }
                                         },
                                         onApprove = { id, actor ->
-                                            run(R.string.circle_signed) { state.approve(id, actor) }
+                                            act(R.string.circle_signed) { state.approve(id, actor) }
                                         },
                                         onVeto = { id, actor ->
-                                            run(R.string.circle_vetoed_done) { state.veto(id, actor) }
+                                            act(R.string.circle_vetoed_done) { state.veto(id, actor) }
                                         },
                                     )
 
@@ -505,12 +643,18 @@ public fun TlcApp(filesDir: File, modifier: Modifier = Modifier) {
                                         versionName = culture.thelove.tlc.android.BuildConfig.VERSION_NAME,
                                         versionCode = culture.thelove.tlc.android.BuildConfig.VERSION_CODE,
                                         busy = state.busy || actionBusy,
+                                        handle = sealed.profile.handle,
                                         onPreferences = { next ->
                                             scope.launch {
                                                 val error = state.updatePreferences(next)
                                                 if (error != null) snackbar.showSnackbar(error)
                                             }
                                         },
+                                        onPeople = { go(Dest.PEOPLE) },
+                                        onBankVault = { go(Dest.BANK) },
+                                        onContact = { go(Dest.CONTACT) },
+                                        onCircle = { go(Dest.CIRCLE) },
+                                        onGrants = { go(Dest.GRANTS) },
                                         onExportRecord = {
                                             exportRecord.launch(
                                                 context.getString(
@@ -546,15 +690,15 @@ public fun TlcApp(filesDir: File, modifier: Modifier = Modifier) {
                                         busy = state.busy || actionBusy,
                                         blockedReason = state.blockedReason,
                                         onRecordDue = { kind, amountKobo, period ->
-                                            run(R.string.dues_created) {
+                                            act(R.string.dues_created) {
                                                 state.addDue(kind, amountKobo, period)
                                             }
                                         },
                                         onIssue = { id ->
-                                            run(R.string.dues_issue_done) { state.issueInstruction(id) }
+                                            act(R.string.dues_issue_done) { state.issueInstruction(id) }
                                         },
                                         onProof = { id, amountKobo, reference ->
-                                            run(R.string.dues_proof_done) {
+                                            act(R.string.dues_proof_done) {
                                                 state.recordProof(id, amountKobo, reference)
                                             }
                                         },
@@ -578,6 +722,8 @@ public fun TlcApp(filesDir: File, modifier: Modifier = Modifier) {
                                     )
 
                                     Dest.ABOUT -> AboutScreen()
+
+                                    Dest.CREATE -> Unit
                                 }
                             }
                         }
@@ -638,6 +784,75 @@ public fun TlcApp(filesDir: File, modifier: Modifier = Modifier) {
                 )
             }
 
+            if (showCreate) {
+                ModalBottomSheet(
+                    onDismissRequest = { showCreate = false },
+                    sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+                    containerColor = MaterialTheme.colorScheme.surface,
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 22.dp, end = 22.dp, bottom = 32.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        Eyebrow(stringResource(R.string.create_eyebrow))
+                        Text(
+                            text = stringResource(R.string.create_title),
+                            style = MaterialTheme.typography.headlineSmall,
+                        )
+                        Text(
+                            text = stringResource(R.string.create_body),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(bottom = 8.dp),
+                        )
+                        CreateRow(
+                            icon = Icons.Filled.CheckCircle,
+                            title = stringResource(R.string.create_recognise),
+                            body = stringResource(R.string.create_recognise_body),
+                            onClick = { showCreate = false; go(Dest.CAPTURE) },
+                        )
+                        CreateRow(
+                            icon = Icons.Filled.Send,
+                            title = stringResource(R.string.create_support),
+                            body = stringResource(R.string.create_support_body),
+                            onClick = { showCreate = false; supportFor = null; go(Dest.SUPPORT) },
+                        )
+                        CreateRow(
+                            icon = Icons.Filled.DateRange,
+                            title = stringResource(R.string.create_token),
+                            body = stringResource(R.string.create_token_body),
+                            onClick = { showCreate = false; go(Dest.DUES) },
+                        )
+                        CreateRow(
+                            icon = Icons.Filled.Favorite,
+                            title = stringResource(R.string.create_grant),
+                            body = stringResource(R.string.create_grant_body),
+                            onClick = { showCreate = false; go(Dest.GRANTS) },
+                        )
+                        CreateRow(
+                            icon = Icons.Filled.Person,
+                            title = stringResource(R.string.create_person),
+                            body = stringResource(R.string.create_person_body),
+                            onClick = { showCreate = false; go(Dest.PEOPLE) },
+                        )
+                        CreateRow(
+                            icon = Icons.Filled.Lock,
+                            title = stringResource(R.string.create_bank),
+                            body = stringResource(R.string.create_bank_body),
+                            onClick = { showCreate = false; go(Dest.BANK) },
+                        )
+                        CreateRow(
+                            icon = Icons.Filled.Info,
+                            title = stringResource(R.string.create_desk),
+                            body = stringResource(R.string.create_desk_body),
+                            onClick = { showCreate = false; go(Dest.CONTACT) },
+                        )
+                    }
+                }
+            }
+
             val detail = selected
             if (detail != null) {
                 EntryDetailSheet(
@@ -655,12 +870,17 @@ public fun TlcApp(filesDir: File, modifier: Modifier = Modifier) {
 private fun Dest.title(): String = stringResource(
     when (this) {
         Dest.TODAY -> R.string.app_doctrine
-        Dest.JOURNAL -> R.string.nav_journal
+        Dest.RECORD -> R.string.nav_record
+        Dest.PEOPLE -> R.string.nav_people
+        Dest.SETTINGS -> R.string.nav_settings
+        Dest.CREATE -> R.string.create_title
+        Dest.SUPPORT -> R.string.support_title
+        Dest.CONTACT -> R.string.contact_title
+        Dest.BANK -> R.string.vault_title
         Dest.GRANTS -> R.string.nav_grants
         Dest.CIRCLE -> R.string.nav_circle
-        Dest.SETTINGS -> R.string.nav_settings
-        Dest.CAPTURE -> R.string.capture_title
         Dest.DUES -> R.string.dues_title
+        Dest.CAPTURE -> R.string.capture_title
         Dest.VERIFY -> R.string.verify_title
         Dest.ABOUT -> R.string.about_title
     },
@@ -689,6 +909,43 @@ private fun RowScope.TlcNavItem(
         icon = icon,
         label = { Text(label) },
     )
+}
+
+@Composable
+private fun CreateRow(
+    icon: ImageVector,
+    title: String,
+    body: String,
+    onClick: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(MaterialTheme.shapes.medium)
+            .clickable(onClick = onClick)
+            .padding(vertical = 11.dp, horizontal = 2.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(14.dp),
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+        )
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(text = title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+            Text(
+                text = body,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Icon(
+            imageVector = Icons.Filled.KeyboardArrowRight,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.outline,
+        )
+    }
 }
 
 @Composable

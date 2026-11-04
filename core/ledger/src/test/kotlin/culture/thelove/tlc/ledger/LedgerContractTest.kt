@@ -29,6 +29,13 @@ class LedgerContractTest {
                 "CONSENT_GRANTED",
                 "CONSENT_REVOKED",
                 "RECOGNITION",
+                "HANDLE_CLAIMED",
+                "PERSON_ADDED",
+                "BANK_DETAILS_SAVED",
+                "BANK_DETAILS_REVEALED",
+                "SUPPORT_INTENT",
+                "SUPPORT_ACKNOWLEDGED",
+                "CONTACT_RECORDED",
             ),
             EntryKind.entries.map { it.name },
         )

@@ -22,6 +22,27 @@ public enum class EntryKind {
 
     /** Someone thanked someone for real work. Amount is absent: recognition is not a payment. */
     RECOGNITION,
+
+    /** A handle was claimed on this device. Handles are addresses, not authority. */
+    HANDLE_CLAIMED,
+
+    /** A person was added to the circle so they can be reached and supported. */
+    PERSON_ADDED,
+
+    /** Transfer details were saved into the encrypted vault. The number is never in the entry. */
+    BANK_DETAILS_SAVED,
+
+    /** Transfer details were shown on purpose. A reveal is an event worth remembering. */
+    BANK_DETAILS_REVEALED,
+
+    /** A Support offer was recorded. It is an intention, never a balance or a settlement. */
+    SUPPORT_INTENT,
+
+    /** The recipient acknowledged Support. Recognition of a gift, not proof of a payment rail. */
+    SUPPORT_ACKNOWLEDGED,
+
+    /** Contact happened through a channel. The message body is deliberately absent. */
+    CONTACT_RECORDED,
 }
 
 public data class LedgerEntry(

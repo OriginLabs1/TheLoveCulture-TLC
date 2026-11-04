@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
@@ -13,7 +14,8 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Send
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -21,6 +23,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import culture.thelove.tlc.android.R
 import culture.thelove.tlc.android.ui.ActionTile
@@ -31,14 +34,15 @@ import culture.thelove.tlc.android.ui.Pill
 import culture.thelove.tlc.android.ui.RecordHero
 import culture.thelove.tlc.android.ui.SealPill
 import culture.thelove.tlc.android.ui.SectionCard
+import culture.thelove.tlc.android.ui.TlcMark
 import culture.thelove.tlc.domain.ObligationState
 import culture.thelove.tlc.domain.Role
 import culture.thelove.tlc.experience.AppSnapshot
 import culture.thelove.tlc.experience.GrantStage
 
 /**
- * The home surface: who you are, that the record is intact, the three everyday verbs, and every
- * loop that is still open. Nothing is decorative for its own sake; each block leads somewhere.
+ * The home surface: who you are, that the record is intact, the four everyday verbs, and every
+ * loop that is still open. The first thing a new person should see is a way to reach someone.
  */
 @Composable
 public fun TodayScreen(
@@ -47,12 +51,13 @@ public fun TodayScreen(
     headHash: String,
     healthy: Boolean,
     sealLabel: String,
-    onRecognise: () -> Unit,
-    onPledge: () -> Unit,
-    onRecordDue: () -> Unit,
-    onJournal: () -> Unit,
-    onCircle: () -> Unit,
+    onRecord: () -> Unit,
+    onSupport: () -> Unit,
+    onContact: () -> Unit,
+    onPioneerToken: () -> Unit,
+    onPeople: () -> Unit,
     onGrants: () -> Unit,
+    onCircle: () -> Unit,
     onDues: () -> Unit,
     onVerify: () -> Unit,
     onCheckpoint: () -> Unit,
@@ -66,7 +71,8 @@ public fun TodayScreen(
             it.state == ObligationState.INSTRUCTION_ISSUED ||
             it.state == ObligationState.PROOF_SUBMITTED
     }
-    val openTotal = openProposals + openGrants + openDues
+    val openSupports = snapshot.supports.count { it.state != culture.thelove.tlc.experience.SupportState.ACKNOWLEDGED }
+    val openTotal = openProposals + openGrants + openDues + openSupports
 
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -79,28 +85,42 @@ public fun TodayScreen(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item(key = "hello") {
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Eyebrow(stringResource(R.string.today_eyebrow))
-                Text(
-                    text = stringResource(R.string.today_greeting, snapshot.profile.displayName),
-                    style = MaterialTheme.typography.displaySmall,
-                )
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Pill(
-                        text = stringResource(
-                            R.string.today_circle,
-                            snapshot.profile.circleName,
-                            roleLabel(snapshot.profile.role),
-                        ),
+            Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    Eyebrow(stringResource(R.string.today_eyebrow))
+                    Text(
+                        text = stringResource(R.string.today_greeting, snapshot.profile.displayName),
+                        style = MaterialTheme.typography.displaySmall,
                     )
-                    if (snapshot.hasDyad) {
-                        Pill(
-                            text = stringResource(R.string.circle_signature_two),
-                            container = MaterialTheme.colorScheme.tertiaryContainer,
-                            content = MaterialTheme.colorScheme.onTertiaryContainer,
+                    snapshot.profile.handle?.let { handle ->
+                        Text(
+                            text = handle.value,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontFamily = FontFamily.Monospace,
+                            color = MaterialTheme.colorScheme.secondary,
                         )
                     }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Pill(
+                            text = stringResource(
+                                R.string.today_circle,
+                                snapshot.profile.circleName,
+                                roleLabel(snapshot.profile.role),
+                            ),
+                        )
+                        if (snapshot.hasDyad) {
+                            Pill(
+                                text = stringResource(R.string.circle_signature_two),
+                                container = MaterialTheme.colorScheme.tertiaryContainer,
+                                content = MaterialTheme.colorScheme.onTertiaryContainer,
+                            )
+                        }
+                    }
                 }
+                TlcMark(modifier = Modifier.size(52.dp))
             }
         }
 
@@ -134,28 +154,37 @@ public fun TodayScreen(
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     ActionTile(
-                        title = stringResource(R.string.today_recognise),
-                        body = stringResource(R.string.today_recognise_body),
-                        icon = Icons.Filled.Person,
-                        onClick = onRecognise,
+                        title = stringResource(R.string.today_support),
+                        body = stringResource(R.string.today_support_body),
+                        icon = Icons.Filled.Send,
+                        onClick = onSupport,
                         modifier = Modifier.weight(1f),
                     )
                     ActionTile(
-                        title = stringResource(R.string.today_pledge),
-                        body = stringResource(R.string.today_pledge_body),
-                        icon = Icons.Filled.Favorite,
-                        onClick = onPledge,
+                        title = stringResource(R.string.today_desk),
+                        body = stringResource(R.string.today_desk_body),
+                        icon = Icons.Filled.Person,
+                        onClick = onContact,
                         modifier = Modifier.weight(1f),
                     )
                 }
-                ActionTile(
-                    title = stringResource(R.string.today_due),
-                    body = stringResource(R.string.today_due_body),
-                    icon = Icons.Filled.DateRange,
-                    onClick = onRecordDue,
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = snapshot.hasDyad,
-                )
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    ActionTile(
+                        title = stringResource(R.string.today_recognise),
+                        body = stringResource(R.string.today_recognise_body),
+                        icon = Icons.Filled.CheckCircle,
+                        onClick = onRecord,
+                        modifier = Modifier.weight(1f),
+                    )
+                    ActionTile(
+                        title = stringResource(R.string.today_token),
+                        body = stringResource(R.string.today_token_body),
+                        icon = Icons.Filled.DateRange,
+                        onClick = onPioneerToken,
+                        modifier = Modifier.weight(1f),
+                        enabled = snapshot.hasDyad,
+                    )
+                }
             }
         }
 
@@ -179,6 +208,11 @@ public fun TodayScreen(
                     }
                 } else {
                     OpenLoopRow(
+                        title = stringResource(R.string.module_support),
+                        count = openSupports,
+                        onClick = onSupport,
+                    )
+                    OpenLoopRow(
                         title = stringResource(R.string.module_grants),
                         count = openGrants,
                         onClick = onGrants,
@@ -197,45 +231,51 @@ public fun TodayScreen(
             }
         }
 
-        item(key = "modules") {
-            SectionCard(title = stringResource(R.string.today_capabilities)) {
+        item(key = "trust") {
+            SectionCard(title = stringResource(R.string.today_trust_title)) {
                 Text(
-                    text = stringResource(R.string.today_capabilities_body),
+                    text = stringResource(R.string.today_trust_body),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 ModuleRow(
                     index = 1,
-                    title = stringResource(R.string.module_journal),
-                    body = stringResource(R.string.module_journal_body),
-                    onClick = onJournal,
+                    title = stringResource(R.string.module_people),
+                    body = stringResource(R.string.module_people_body),
+                    onClick = onPeople,
                 )
                 ModuleRow(
                     index = 2,
+                    title = stringResource(R.string.module_journal),
+                    body = stringResource(R.string.module_journal_body),
+                    onClick = onRecord,
+                )
+                ModuleRow(
+                    index = 3,
                     title = stringResource(R.string.module_grants),
                     body = stringResource(R.string.module_grants_body),
                     onClick = onGrants,
                 )
                 ModuleRow(
-                    index = 3,
+                    index = 4,
                     title = stringResource(R.string.module_dues),
                     body = stringResource(R.string.module_dues_body),
                     onClick = onDues,
                 )
                 ModuleRow(
-                    index = 4,
+                    index = 5,
                     title = stringResource(R.string.module_circle),
                     body = stringResource(R.string.module_circle_body),
                     onClick = onCircle,
                 )
                 ModuleRow(
-                    index = 5,
+                    index = 6,
                     title = stringResource(R.string.module_verify),
                     body = stringResource(R.string.module_verify_body),
                     onClick = onVerify,
                 )
                 ModuleRow(
-                    index = 6,
+                    index = 7,
                     title = stringResource(R.string.module_backup),
                     body = stringResource(R.string.module_backup_body),
                     onClick = onCheckpoint,
@@ -246,7 +286,7 @@ public fun TodayScreen(
         item(key = "notice") {
             GlassPanel {
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    androidx.compose.material3.Icon(
+                    Icon(
                         imageVector = Icons.Filled.Lock,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.primary,
@@ -275,7 +315,7 @@ public fun TodayScreen(
                 modifier = Modifier.fillMaxWidth(),
                 shape = MaterialTheme.shapes.large,
             ) {
-                androidx.compose.material3.Icon(
+                Icon(
                     imageVector = Icons.Filled.CheckCircle,
                     contentDescription = null,
                     modifier = Modifier.padding(end = 8.dp),

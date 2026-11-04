@@ -1,4 +1,4 @@
-# Distribution — v0.0.4
+# Distribution — v0.0.5
 
 One tag, one build, one signature. The source of truth is the GitHub Release; every other channel
 must carry the same signed APK, never a re-signed copy.
@@ -7,7 +7,7 @@ must carry the same signed APK, never a re-signed copy.
 
 | Channel | Status | Where |
 |---|---|---|
-| GitHub Releases | **Published** | <https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/tag/v0.0.4> |
+| GitHub Releases | **Published** | <https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/tag/v0.0.5> |
 | GitHub Pages install page | **Live** | <https://originlabs1.github.io/TheLoveCulture-TLC/> |
 | Obtainium | **Available** | add `https://github.com/OriginLabs1/TheLoveCulture-TLC` as a source |
 
@@ -15,10 +15,10 @@ Release facts:
 
 | | |
 |---|---|
-| APK | `tlc-0.0.4-foss.apk` (1,298,731 bytes) |
-| APK SHA-256 | `9d73ad59b4c40ce7b2e42036376ea8038eb2287decc33c567cc25fee11d0e79d` |
-| versionName / versionCode | `0.0.4` / `4` |
-| Commit | `81f23fab7b71065c6a34383bc76095e2d90aea5d` |
+| APK | `tlc-0.0.5-foss.apk` (1,378,187 bytes) |
+| APK SHA-256 | `16defb6903751c93a0058da69eef451bd6dafdcfd40c344dd81a0da5993eeb2d` |
+| versionName / versionCode | `0.0.5` / `5` |
+| Commit | tag `v0.0.5` |
 | Signature | APK Signature Scheme v2, RSA 4096 |
 | Certificate SHA-256 | `e04cb8aa2cf5fdeec043d917a74a5ba634121f2a0b98df92869a42bb4acb732c` |
 | Permissions | no `INTERNET` permission |
@@ -26,10 +26,10 @@ Release facts:
 Verify a download:
 
 ```sh
-gh release download v0.0.4 --repo OriginLabs1/TheLoveCulture-TLC
+gh release download v0.0.5 --repo OriginLabs1/TheLoveCulture-TLC
 sha256sum -c SHA256SUMS
-apksigner verify --print-certs tlc-0.0.4-foss.apk
-gh attestation verify tlc-0.0.4-foss.apk --repo OriginLabs1/TheLoveCulture-TLC
+apksigner verify --print-certs tlc-0.0.5-foss.apk
+gh attestation verify tlc-0.0.5-foss.apk --repo OriginLabs1/TheLoveCulture-TLC
 ```
 
 ## Ready, waiting on an owner account
@@ -40,10 +40,10 @@ copy are ready; only the account action is missing.
 ### F-Droid
 
 1. Fork <https://gitlab.com/fdroid/fdroiddata> with the project owner's GitLab account.
-2. Copy [`fdroid/metadata/culture.thelove.tlc.yml`](fdroid/metadata/culture.thelove.tlc.yml) to
+2. Copy [`fdroid/metadata/culture.thelove.tlc.yml`](../fdroid/metadata/culture.thelove.tlc.yml) to
    `metadata/culture.thelove.tlc.yml` unchanged.
 3. Open a merge request. The metadata pins:
-   - `commit: 81f23fab...` (the exact commit this release was built from),
+   - `commit: v0.0.5` (the exact tag this release was built from),
    - `Binaries:` to the GitHub APK,
    - `AllowedAPKSigningKeys:` to the project certificate above.
 4. F-Droid's buildserver rebuilds from source and compares the result. If it differs, the build
@@ -69,10 +69,10 @@ pull request to <https://github.com/RookieEnough/Orion-Data>:
 | `category` | `Social` |
 | `platform` | `Android` |
 | `author` | `Collins Christopher` |
-| `version` / `latestVersion` | `0.0.4` / `Latest` |
-| `description` | the short description in [`fastlane/metadata`](fastlane/metadata/android/en-US/short_description.txt) |
+| `version` / `latestVersion` | `0.0.5` / `Latest` |
+| `description` | the short description in [`fastlane/metadata`](../fastlane/metadata/android/en-US/short_description.txt) |
 
-Orion should resolve `tlc-0.0.4-foss.apk` from the GitHub Release above. The listing needs a direct
+Orion should resolve `tlc-0.0.5-foss.apk` from the GitHub Release above. The listing needs a direct
 icon URL and direct screenshot URLs; this repository does not yet carry raster screenshots, so the
 owner must supply or approve them before the Orion entry can be complete.
 
@@ -81,8 +81,8 @@ owner must supply or approve them before the Orion entry can be complete.
 Uptodown is a manual developer-console upload:
 
 1. Create the app once under `culture.thelove.tlc`.
-2. Upload the same `tlc-0.0.4-foss.apk`; versionCode `4`.
-3. Use [`changelogs/4.txt`](fastlane/metadata/android/en-US/changelogs/4.txt) as the changelog and the
+2. Upload the same `tlc-0.0.5-foss.apk`; versionCode `5`.
+3. Use [`changelogs/5.txt`](../fastlane/metadata/android/en-US/changelogs/5.txt) as the changelog and the
    `fastlane/metadata` files as the listing copy.
 4. Supply the icon, feature graphic and screenshots from the release commit (still outstanding).
 5. Never upload a debug build, an unsigned build or a re-signed build.
@@ -90,8 +90,8 @@ Uptodown is a manual developer-console upload:
 ## Guardrails
 
 - **No bank details.** Nothing in the release, its assets, its metadata or this repository contains
-  the Pioneer's bank account. Details are released only inside the fee flow: to the payer, after the
-  due exists, for the reason the due describes, and they expire. See [`SECURITY.md`](SECURITY.md).
+  a bank account number. The full number lives only inside the payer's encrypted vault; only the
+  bank name, the last four digits and a fingerprint enter the state. See [`SECURITY.md`](../SECURITY.md).
 - **No re-signing.** One package id, one certificate. A store that insists on its own key is a
   blocker, not a setting.
 - **No silent swaps.** Published assets are immutable. A wrong release is withdrawn in the listing,

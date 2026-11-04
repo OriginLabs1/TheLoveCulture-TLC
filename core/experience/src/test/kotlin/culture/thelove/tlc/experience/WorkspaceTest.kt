@@ -26,7 +26,11 @@ class WorkspaceTest {
         assertEquals("My circle", result.change.snapshot.profile.circleName)
         assertEquals(StewardRole.PRIMARY, result.change.snapshot.primary.role)
         assertTrue(result.change.snapshot.preferences.onboarded)
-        assertEquals(EntryKind.CONSENT_GRANTED, result.change.facts.single().kind)
+        assertEquals(
+            listOf(EntryKind.CONSENT_GRANTED, EntryKind.HANDLE_CLAIMED),
+            result.change.facts.map { it.kind },
+        )
+        assertEquals("@ada", result.change.snapshot.profile.handle.toString())
     }
 
     @Test

@@ -53,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import culture.thelove.tlc.android.R
 import culture.thelove.tlc.android.ui.Eyebrow
 import culture.thelove.tlc.android.ui.GlassPanel
+import culture.thelove.tlc.domain.Handle
 import culture.thelove.tlc.domain.Role
 
 /**
@@ -63,17 +64,21 @@ import culture.thelove.tlc.domain.Role
 public fun OnboardingScreen(
     submitting: Boolean,
     error: String?,
-    onFinish: (displayName: String, circleName: String, role: Role) -> Unit,
+    onFinish: (displayName: String, circleName: String, role: Role, handle: Handle?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var step by rememberSaveable { mutableIntStateOf(0) }
     var name by rememberSaveable { mutableStateOf("") }
     var circle by rememberSaveable { mutableStateOf("") }
+    var handleText by rememberSaveable { mutableStateOf("") }
+    var handleEdited by rememberSaveable { mutableStateOf(false) }
     var roleName by rememberSaveable { mutableStateOf(Role.SINGLE.name) }
     var consented by rememberSaveable { mutableStateOf(false) }
     val role = Role.valueOf(roleName)
     val last = step == 2
-    val canFinish = name.isNotBlank() && consented && !submitting
+    val handle = Handle.parse(handleText)
+    val handleReserved = handle != null && Handle.isReserved(handle.value)
+    val canFinish = name.isNotBlank() && handle != null && !handleReserved && consented && !submitting
 
     Column(
         modifier = modifier
@@ -128,9 +133,25 @@ public fun OnboardingScreen(
             else -> ProfileStep(
                 name = name,
                 circle = circle,
+                handleText = handleText,
+                handleReserved = handleReserved,
+                handleValid = handle != null,
                 consented = consented,
-                onName = { if (it.length <= 80) name = it },
+                onName = { value ->
+                    if (value.length <= 80) {
+                        name = value
+                        if (!handleEdited) {
+                            handleText = Handle.suggest(value.ifBlank { "member" }, "000000").value
+                        }
+                    }
+                },
                 onCircle = { if (it.length <= 80) circle = it },
+                onHandle = { value ->
+                    if (value.length <= 24) {
+                        handleText = value.lowercase().removePrefix("@")
+                        handleEdited = true
+                    }
+                },
                 onConsent = { consented = it },
             )
         }
@@ -159,7 +180,7 @@ public fun OnboardingScreen(
             Button(
                 onClick = {
                     if (last) {
-                        onFinish(name.trim(), circle.trim(), role)
+                        onFinish(name.trim(), circle.trim(), role, Handle.parse(handleText))
                     } else {
                         step += 1
                     }
@@ -351,9 +372,13 @@ private fun RoleCard(
 private fun ProfileStep(
     name: String,
     circle: String,
+    handleText: String,
+    handleReserved: Boolean,
+    handleValid: Boolean,
     consented: Boolean,
     onName: (String) -> Unit,
     onCircle: (String) -> Unit,
+    onHandle: (String) -> Unit,
     onConsent: (Boolean) -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
@@ -380,6 +405,27 @@ private fun ProfileStep(
                 capitalization = KeyboardCapitalization.Words,
                 imeAction = ImeAction.Next,
             ),
+        )
+
+        OutlinedTextField(
+            value = handleText,
+            onValueChange = onHandle,
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text(stringResource(R.string.onboard_handle)) },
+            prefix = { Text("@") },
+            singleLine = true,
+            isError = handleText.isNotBlank() && (!handleValid || handleReserved),
+            supportingText = {
+                Text(
+                    when {
+                        handleReserved -> stringResource(R.string.people_handle_reserved)
+                        handleText.isBlank() || !handleValid -> stringResource(R.string.people_handle_hint)
+                        else -> stringResource(R.string.onboard_handle_ok, handleText)
+                    },
+                )
+            },
+            shape = MaterialTheme.shapes.large,
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
         )
 
         OutlinedTextField(

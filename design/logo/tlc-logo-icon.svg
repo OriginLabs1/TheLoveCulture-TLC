@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="The Love Culture app icon">
+  <rect width="512" height="512" rx="112" fill="#0B1B33"/>
+  <g transform="translate(46 46) scale(0.82)">
+
+  
+  
+
+  <defs>
+    <clipPath id="heartLeft">
+      <rect x="0" y="0" width="256" height="512"/>
+    </clipPath>
+    <clipPath id="heartRight">
+      <rect x="256" y="0" width="256" height="512"/>
+    </clipPath>
+    <path id="star" d="M0 -14 C2.4 -4 4 -2.4 14 0 C4 2.4 2.4 4 0 14 C-2.4 4 -4 2.4 -14 0 C-4 -2.4 -2.4 -4 0 -14 Z"/>
+    <path id="heart" d="M256 392 C256 392 170 334 170 266 C170 232 194 212 220 212 C238 212 250 222 256 234 C262 222 274 212 292 212 C318 212 342 232 342 266 C342 334 256 392 256 392 Z"/>
+  </defs>
+
+  <!-- outer silver ring -->
+  <circle cx="256" cy="256" r="238" fill="none" stroke="#C9D6E6" stroke-width="8"/>
+  <circle cx="256" cy="256" r="222" fill="none" stroke="#1B3A8C" stroke-width="3" opacity="0.28"/>
+
+  <!-- celestial stars around the emblem -->
+  <g fill="#1466C7">
+    <use href="#star" transform="translate(256 30) scale(0.7)"/>
+    <use href="#star" transform="translate(182 54) scale(0.5)"/>
+    <use href="#star" transform="translate(330 54) scale(0.5)"/>
+    <use href="#star" transform="translate(104 172) scale(0.45)"/>
+    <use href="#star" transform="translate(408 172) scale(0.45)"/>
+    <use href="#star" transform="translate(256 482) scale(0.55)"/>
+  </g>
+  <g fill="#C9D6E6">
+    <circle cx="144" cy="100" r="4"/>
+    <circle cx="368" cy="100" r="4"/>
+    <circle cx="84" cy="270" r="4"/>
+    <circle cx="428" cy="270" r="4"/>
+  </g>
+
+  <!-- botanical leaves flanking the heart -->
+  <g fill="#C9D6E6">
+    <path d="M190 364 C158 352 148 326 160 298 C188 304 202 332 190 364 Z"/>
+    <path d="M322 364 C354 352 364 326 352 298 C324 304 310 332 322 364 Z"/>
+    <path d="M206 400 C184 392 176 374 184 354 C204 358 214 378 206 400 Z"/>
+    <path d="M306 400 C328 392 336 374 328 354 C308 358 298 378 306 400 Z"/>
+  </g>
+
+  <!-- split-tone heart -->
+  <g>
+    <use href="#heart" fill="#1B3A8C" clip-path="url(#heartLeft)"/>
+    <use href="#heart" fill="#1466C7" clip-path="url(#heartRight)"/>
+  </g>
+
+  <!-- botanical sprout inside the heart -->
+  <g>
+    <path d="M256 356 C256 330 256 308 256 286" fill="none" stroke="#F4F7FB" stroke-width="8" stroke-linecap="round"/>
+    <path d="M256 326 C236 326 222 312 218 292 C240 292 254 306 256 326 Z" fill="#F4F7FB"/>
+    <path d="M256 304 C276 304 290 290 294 270 C272 270 258 284 256 304 Z" fill="#C9D6E6"/>
+    <use href="#star" transform="translate(256 272) scale(0.45)" fill="#F4F7FB"/>
+  </g>
+
+  <!-- crowned circular figure -->
+  <g>
+    <circle cx="256" cy="196" r="30" fill="#F4F7FB" stroke="#1B3A8C" stroke-width="6"/>
+    <path d="M242 190 C246 186 252 186 256 190" fill="none" stroke="#1B3A8C" stroke-width="4" stroke-linecap="round"/>
+    <path d="M256 190 C260 186 266 186 270 190" fill="none" stroke="#1B3A8C" stroke-width="4" stroke-linecap="round"/>
+    <path d="M248 206 C252 210 260 210 264 206" fill="none" stroke="#1466C7" stroke-width="4" stroke-linecap="round"/>
+  </g>
+
+  <!-- crown -->
+  <g>
+    <path d="M206 168 L206 132 L228 150 L256 120 L284 150 L306 132 L306 168 Z"
+          fill="#1466C7" stroke="#1B3A8C" stroke-width="6" stroke-linejoin="round"/>
+    <path d="M206 168 L306 168" stroke="#1B3A8C" stroke-width="12" stroke-linecap="round"/>
+    <circle cx="206" cy="132" r="7" fill="#C9D6E6" stroke="#1B3A8C" stroke-width="4"/>
+    <circle cx="256" cy="120" r="8" fill="#C9D6E6" stroke="#1B3A8C" stroke-width="4"/>
+    <circle cx="306" cy="132" r="7" fill="#C9D6E6" stroke="#1B3A8C" stroke-width="4"/>
+  </g>
+
+  </g>
+</svg>

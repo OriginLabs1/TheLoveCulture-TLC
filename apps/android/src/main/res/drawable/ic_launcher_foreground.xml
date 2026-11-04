@@ -1,11 +1,117 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- TLC mark: a heart drawn as one continuous gesture, inside the 66dp adaptive safe zone. -->
+<!-- TLC emblem: a crowned heart with a sprout, inside the adaptive-icon safe zone.
+     Drawn as a vector so the same master serves the launcher, the store listing and the app. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
-    android:viewportWidth="108"
-    android:viewportHeight="108">
-    <path
-        android:fillColor="#7A2E3A"
-        android:pathData="M54,79 C54,79 27,62.5 27,45.5 C27,36.2 34.2,30 42.3,30 C47.6,30 52,33.2 54,37.4 C56,33.2 60.4,30 65.7,30 C73.8,30 81,36.2 81,45.5 C81,62.5 54,79 54,79 Z" />
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+
+    <group
+        android:translateX="82"
+        android:translateY="82"
+        android:scaleX="0.68"
+        android:scaleY="0.68">
+
+        <!-- silver ring -->
+        <path
+            android:fillColor="#00000000"
+            android:pathData="M256,18 a238,238 0 1,0 0.1,0 Z"
+            android:strokeColor="#C9D6E6"
+            android:strokeWidth="10" />
+        <path
+            android:fillColor="#00000000"
+            android:pathData="M256,34 a222,222 0 1,0 0.1,0 Z"
+            android:strokeColor="#1466C7"
+            android:strokeAlpha="0.35"
+            android:strokeWidth="4" />
+
+        <!-- celestial stars -->
+        <path
+            android:fillColor="#1466C7"
+            android:pathData="M256,16 C258.4,26 260,27.6 270,30 C260,32.4 258.4,34 256,44 C253.6,34 252,32.4 242,30 C252,27.6 253.6,26 256,16 Z" />
+        <path
+            android:fillColor="#1466C7"
+            android:pathData="M182,47 C183.2,52 184,52.8 189,54 C184,55.2 183.2,56 182,61 C180.8,56 180,55.2 175,54 C180,52.8 180.8,52 182,47 Z" />
+        <path
+            android:fillColor="#1466C7"
+            android:pathData="M330,47 C331.2,52 332,52.8 337,54 C332,55.2 331.2,56 330,61 C328.8,56 328,55.2 323,54 C328,52.8 328.8,52 330,47 Z" />
+        <path
+            android:fillColor="#C9D6E6"
+            android:pathData="M104,172 m-5,0 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0" />
+        <path
+            android:fillColor="#C9D6E6"
+            android:pathData="M408,172 m-5,0 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0" />
+        <path
+            android:fillColor="#1466C7"
+            android:pathData="M256,470 C257.6,476 258.8,477.2 265,479 C258.8,480.8 257.6,482 256,488 C254.4,482 253.2,480.8 247,479 C253.2,477.2 254.4,476 256,470 Z" />
+
+        <!-- botanical leaves -->
+        <path
+            android:fillColor="#C9D6E6"
+            android:pathData="M190,364 C158,352 148,326 160,298 C188,304 202,332 190,364 Z" />
+        <path
+            android:fillColor="#C9D6E6"
+            android:pathData="M322,364 C354,352 364,326 352,298 C324,304 310,332 322,364 Z" />
+        <path
+            android:fillColor="#C9D6E6"
+            android:pathData="M206,400 C184,392 176,374 184,354 C204,358 214,378 206,400 Z" />
+        <path
+            android:fillColor="#C9D6E6"
+            android:pathData="M306,400 C328,392 336,374 328,354 C308,358 298,378 306,400 Z" />
+
+        <!-- split-tone heart -->
+        <group>
+            <clip-path android:pathData="M0,0 L256,0 L256,512 L0,512 Z" />
+            <path
+                android:fillColor="#1B3A8C"
+                android:pathData="M256,392 C256,392 170,334 170,266 C170,232 194,212 220,212 C238,212 250,222 256,234 C262,222 274,212 292,212 C318,212 342,232 342,266 C342,334 256,392 256,392 Z" />
+        </group>
+        <group>
+            <clip-path android:pathData="M256,0 L512,0 L512,512 L256,512 Z" />
+            <path
+                android:fillColor="#1466C7"
+                android:pathData="M256,392 C256,392 170,334 170,266 C170,232 194,212 220,212 C238,212 250,222 256,234 C262,222 274,212 292,212 C318,212 342,232 342,266 C342,334 256,392 256,392 Z" />
+        </group>
+
+        <!-- sprout -->
+        <path
+            android:fillColor="#00000000"
+            android:pathData="M256,356 C256,330 256,308 256,286"
+            android:strokeColor="#F4F7FB"
+            android:strokeLineCap="round"
+            android:strokeWidth="8" />
+        <path
+            android:fillColor="#F4F7FB"
+            android:pathData="M256,326 C236,326 222,312 218,292 C240,292 254,306 256,326 Z" />
+        <path
+            android:fillColor="#C9D6E6"
+            android:pathData="M256,304 C276,304 290,290 294,270 C272,270 258,284 256,304 Z" />
+        <path
+            android:fillColor="#F4F7FB"
+            android:pathData="M256,266 C257.1,270.6 258,271.5 262.5,272.5 C258,273.6 257.1,274.5 256,279 C254.9,274.5 254,273.6 249.5,272.5 C254,271.5 254.9,270.6 256,266 Z" />
+
+        <!-- crown -->
+        <path
+            android:fillColor="#1466C7"
+            android:pathData="M206,168 L206,132 L228,150 L256,120 L284,150 L306,132 L306,168 Z"
+            android:strokeColor="#1B3A8C"
+            android:strokeLineJoin="round"
+            android:strokeWidth="6" />
+        <path
+            android:fillColor="#00000000"
+            android:pathData="M206,168 L306,168"
+            android:strokeColor="#1B3A8C"
+            android:strokeLineCap="round"
+            android:strokeWidth="12" />
+        <path
+            android:fillColor="#C9D6E6"
+            android:pathData="M206,132 m-7,0 a7,7 0 1,0 14,0 a7,7 0 1,0 -14,0" />
+        <path
+            android:fillColor="#C9D6E6"
+            android:pathData="M256,120 m-8,0 a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0" />
+        <path
+            android:fillColor="#C9D6E6"
+            android:pathData="M306,132 m-7,0 a7,7 0 1,0 14,0 a7,7 0 1,0 -14,0" />
+    </group>
 </vector>

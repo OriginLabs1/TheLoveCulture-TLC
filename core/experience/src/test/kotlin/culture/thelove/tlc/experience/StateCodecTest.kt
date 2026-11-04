@@ -79,7 +79,7 @@ class StateCodecTest {
 
     @Test
     fun `unknown format is refused rather than guessed`() {
-        val text = StateCodec.encode(snapshot()).replace("tlc-state-v1", "tlc-state-v999")
+        val text = StateCodec.encode(snapshot()).replace(StateCodec.FORMAT, "tlc-state-v999")
         val decoded = StateCodec.decode(text)
         assertIs<StateResult.Invalid>(decoded)
         assertTrue(decoded.reason.contains("Unsupported state format"))

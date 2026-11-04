@@ -30,6 +30,7 @@ import culture.thelove.tlc.android.R
 import culture.thelove.tlc.android.ui.Eyebrow
 import culture.thelove.tlc.android.ui.ScreenHeader
 import culture.thelove.tlc.android.ui.SectionCard
+import culture.thelove.tlc.domain.Handle
 import culture.thelove.tlc.experience.Preferences
 import culture.thelove.tlc.experience.ThemeMode
 
@@ -39,7 +40,13 @@ public fun SettingsScreen(
     versionName: String,
     versionCode: Int,
     busy: Boolean,
+    handle: Handle?,
     onPreferences: (Preferences) -> Unit,
+    onPeople: () -> Unit,
+    onBankVault: () -> Unit,
+    onContact: () -> Unit,
+    onCircle: () -> Unit,
+    onGrants: () -> Unit,
     onExportRecord: () -> Unit,
     onExportBundle: () -> Unit,
     onImportBundle: () -> Unit,
@@ -117,6 +124,49 @@ public fun SettingsScreen(
                     checked = preferences.receptiveMode,
                     enabled = !busy,
                     onChecked = { onPreferences(preferences.copy(receptiveMode = it)) },
+                )
+            }
+        }
+
+        item(key = "trust") {
+            SectionCard(title = stringResource(R.string.settings_trust)) {
+                handle?.let {
+                    Text(
+                        text = it.value,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontFamily = FontFamily.Monospace,
+                        color = MaterialTheme.colorScheme.secondary,
+                    )
+                }
+                SettingAction(
+                    title = stringResource(R.string.settings_people),
+                    body = stringResource(R.string.settings_people_body),
+                    enabled = !busy,
+                    onClick = onPeople,
+                )
+                SettingAction(
+                    title = stringResource(R.string.settings_vault),
+                    body = stringResource(R.string.settings_vault_body),
+                    enabled = !busy,
+                    onClick = onBankVault,
+                )
+                SettingAction(
+                    title = stringResource(R.string.settings_desk),
+                    body = stringResource(R.string.settings_desk_body),
+                    enabled = !busy,
+                    onClick = onContact,
+                )
+                SettingAction(
+                    title = stringResource(R.string.settings_circle),
+                    body = stringResource(R.string.settings_circle_body),
+                    enabled = !busy,
+                    onClick = onCircle,
+                )
+                SettingAction(
+                    title = stringResource(R.string.settings_grants),
+                    body = stringResource(R.string.settings_grants_body),
+                    enabled = !busy,
+                    onClick = onGrants,
                 )
             }
         }

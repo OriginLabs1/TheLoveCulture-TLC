@@ -1,7 +1,12 @@
 package culture.thelove.tlc.experience
 
+import culture.thelove.tlc.domain.BankAccount
+import culture.thelove.tlc.domain.BankAccountRef
+import culture.thelove.tlc.domain.ContactChannel
+import culture.thelove.tlc.domain.ContactPurpose
 import culture.thelove.tlc.domain.FeeEvent
 import culture.thelove.tlc.domain.FeePeriod
+import culture.thelove.tlc.domain.Handle
 import culture.thelove.tlc.domain.Money
 import culture.thelove.tlc.domain.PartyId
 import culture.thelove.tlc.domain.Role
@@ -47,18 +52,26 @@ public object Workspace {
         role: Role,
         recordId: String,
         now: Long,
-    ): WorkspaceResult = guarded {
+        handle: Handle? = null,
+    ): WorkspaceResult {
+        val cleanName = displayName.trim()
+        val claimed = handle ?: Handle.suggest(cleanName, recordId)
+        if (Handle.isReserved(claimed.value)) {
+            return WorkspaceResult.Rejected("That handle belongs to TLC and cannot be claimed.")
+        }
+        return guarded {
         val profile = Profile(
-            displayName = displayName.trim(),
+            displayName = cleanName,
             circleName = circleName.trim().ifBlank { "My circle" },
             role = role,
             recordId = recordId,
             createdAt = now,
+            handle = claimed,
         )
         val snapshot = AppSnapshot(
             profile = profile,
             preferences = Preferences(onboarded = true),
-            stewards = listOf(Steward(profile.recordId, profile.displayName, StewardRole.PRIMARY)),
+            stewards = listOf(Steward(profile.recordId, profile.displayName, StewardRole.PRIMARY, claimed)),
         )
         WorkspaceChange(
             snapshot = snapshot,
@@ -69,9 +82,49 @@ public object Workspace {
                     at = now,
                     key = "onboard:${profile.recordId}",
                 ),
+                fact(
+                    kind = EntryKind.HANDLE_CLAIMED,
+                    subject = "Known here as ${claimed.value}",
+                    at = now,
+                    key = "handle:${profile.recordId}:${claimed.value}",
+                ),
             ),
             notice = "Your circle is ready. The record is yours; nothing leaves this device.",
         )
+        }
+    }
+
+    /** Claim a new address. Reserved addresses stay with TLC, and no two people share one. */
+    public fun claimHandle(snapshot: AppSnapshot, handle: Handle, now: Long): WorkspaceResult {
+        if (Handle.isReserved(handle.value)) {
+            return WorkspaceResult.Rejected("That handle belongs to TLC and cannot be claimed.")
+        }
+        if (handle == snapshot.profile.handle) {
+            return WorkspaceResult.Ok(WorkspaceChange(snapshot, notice = "That is already your handle."))
+        }
+        val takenByPerson = snapshot.people.any { it.handle == handle }
+        val takenBySteward = snapshot.stewards.any { it.handle == handle }
+        if (takenByPerson || takenBySteward) {
+            return WorkspaceResult.Rejected("That handle is already used in this circle.")
+        }
+        return guarded {
+            val profile = snapshot.profile.copy(handle = handle)
+            val stewards = snapshot.stewards.map { steward ->
+                if (steward.role == StewardRole.PRIMARY) steward.copy(handle = handle) else steward
+            }
+            WorkspaceChange(
+                snapshot = snapshot.copy(profile = profile, stewards = stewards),
+                facts = listOf(
+                    fact(
+                        kind = EntryKind.HANDLE_CLAIMED,
+                        subject = "Now known as ${handle.value}",
+                        at = now,
+                        key = "handle:${snapshot.profile.recordId}:${handle.value}:${now}",
+                    ),
+                ),
+                notice = "Your handle is ${handle.value}.",
+            )
+        }
     }
 
     public fun updatePreferences(snapshot: AppSnapshot, preferences: Preferences): WorkspaceResult =
@@ -379,6 +432,313 @@ public object Workspace {
         }
     }
 
+    // -----------------------------------------------------------------------------------------
+    // Trust & Contact (v0.0.5). Addresses, people, the encrypted bank vault, Support and the
+    // local slice of the Contact & Consent Framework. Every operation is still a pure rule.
+    // -----------------------------------------------------------------------------------------
+
+    public fun addPerson(
+        snapshot: AppSnapshot,
+        id: String,
+        handle: Handle,
+        displayName: String,
+        role: Role,
+        now: Long,
+        bankRefId: String? = null,
+    ): WorkspaceResult {
+        if (Handle.isReserved(handle.value)) {
+            return WorkspaceResult.Rejected("That handle belongs to TLC and cannot be given to a person.")
+        }
+        if (handle == snapshot.profile.handle || snapshot.stewards.any { it.handle == handle }) {
+            return WorkspaceResult.Rejected("That handle is already used in this circle.")
+        }
+        if (snapshot.people.any { it.handle == handle }) {
+            return WorkspaceResult.Rejected("Someone in this circle already answers to ${handle.value}.")
+        }
+        if (snapshot.people.any { it.id == id }) {
+            return WorkspaceResult.Rejected("That person already exists.")
+        }
+        if (bankRefId != null && snapshot.bankAccounts.none { it.id == bankRefId }) {
+            return WorkspaceResult.Rejected("Those transfer details are not in the vault.")
+        }
+        return guarded {
+            val person = Person(
+                id = id,
+                handle = handle,
+                displayName = displayName.trim(),
+                role = role,
+                bankRefId = bankRefId,
+                receptive = snapshot.preferences.receptiveMode,
+                createdAt = now,
+            )
+            WorkspaceChange(
+                snapshot = snapshot.copy(people = listOf(person) + snapshot.people),
+                facts = listOf(
+                    fact(
+                        kind = EntryKind.PERSON_ADDED,
+                        subject = "Added ${person.displayName} (${person.handle.value}) as ${person.badge}",
+                        at = now,
+                        key = "person:${person.id}:added",
+                    ),
+                ),
+                notice = "${person.displayName} is now in your circle.",
+            )
+        }
+    }
+
+    public fun attachBank(snapshot: AppSnapshot, personId: String, bankRefId: String?): WorkspaceResult {
+        val person = snapshot.people.firstOrNull { it.id == personId }
+            ?: return WorkspaceResult.Rejected("That person is no longer here.")
+        if (bankRefId != null && snapshot.bankAccounts.none { it.id == bankRefId }) {
+            return WorkspaceResult.Rejected("Those transfer details are not in the vault.")
+        }
+        val updated = person.copy(bankRefId = bankRefId)
+        return WorkspaceResult.Ok(
+            WorkspaceChange(
+                snapshot = snapshot.copy(people = snapshot.people.replacePerson(updated)),
+                notice = if (bankRefId == null) {
+                    "Transfer details detached from ${person.displayName}."
+                } else {
+                    "Transfer details will be suggested for ${person.displayName}."
+                },
+            ),
+        )
+    }
+
+    public fun removePerson(snapshot: AppSnapshot, personId: String): WorkspaceResult {
+        if (snapshot.people.none { it.id == personId }) {
+            return WorkspaceResult.Rejected("That person is no longer here.")
+        }
+        return WorkspaceResult.Ok(
+            WorkspaceChange(
+                snapshot = snapshot.copy(people = snapshot.people.filterNot { it.id == personId }),
+                notice = "Person removed from this circle. The record keeps its history.",
+            ),
+        )
+    }
+
+    /**
+     * Save transfer details. [account] holds the full number, but only its [BankAccountRef] — bank,
+     * last four digits, holder and a non-reversible fingerprint — enters app state or the record.
+     */
+    public fun saveBankAccount(
+        snapshot: AppSnapshot,
+        id: String,
+        account: BankAccount,
+        now: Long,
+    ): WorkspaceResult {
+        val ref = account.ref(id, now)
+        if (snapshot.bankAccounts.any { it.id == id }) {
+            return WorkspaceResult.Rejected("That vault entry already exists.")
+        }
+        if (snapshot.bankAccounts.any { it.fingerprint == ref.fingerprint }) {
+            return WorkspaceResult.Rejected("Those transfer details are already saved.")
+        }
+        return guarded {
+            WorkspaceChange(
+                snapshot = snapshot.copy(bankAccounts = listOf(ref) + snapshot.bankAccounts),
+                facts = listOf(
+                    fact(
+                        kind = EntryKind.BANK_DETAILS_SAVED,
+                        subject = "Transfer details saved: ${ref.bankName} ····${ref.last4} · ${ref.holderName}",
+                        at = now,
+                        key = "bank:${ref.id}:saved",
+                    ),
+                ),
+                notice = "Saved. The full number stays in the encrypted vault.",
+            )
+        }
+    }
+
+    public fun removeBankAccount(snapshot: AppSnapshot, refId: String): WorkspaceResult {
+        if (snapshot.bankAccounts.none { it.id == refId }) {
+            return WorkspaceResult.Rejected("Those transfer details are no longer here.")
+        }
+        val people = snapshot.people.map { person ->
+            if (person.bankRefId == refId) person.copy(bankRefId = null) else person
+        }
+        return WorkspaceResult.Ok(
+            WorkspaceChange(
+                snapshot = snapshot.copy(
+                    bankAccounts = snapshot.bankAccounts.filterNot { it.id == refId },
+                    people = people,
+                ),
+                notice = "Transfer details removed from this device.",
+            ),
+        )
+    }
+
+    /** Record that details were shown on purpose. The number itself never enters the entry. */
+    public fun markBankRevealed(snapshot: AppSnapshot, refId: String, now: Long): WorkspaceResult {
+        val ref = snapshot.bankAccounts.firstOrNull { it.id == refId }
+            ?: return WorkspaceResult.Rejected("Those transfer details are no longer here.")
+        return WorkspaceResult.Ok(
+            WorkspaceChange(
+                snapshot = snapshot,
+                facts = listOf(
+                    fact(
+                        kind = EntryKind.BANK_DETAILS_REVEALED,
+                        subject = "Transfer details shown: ${ref.bankName} ····${ref.last4}",
+                        at = now,
+                        key = "bank:${ref.id}:revealed:$now",
+                    ),
+                ),
+            ),
+        )
+    }
+
+    public fun sendSupport(
+        snapshot: AppSnapshot,
+        id: String,
+        toHandle: Handle,
+        kind: TokenKind,
+        amountKobo: Long?,
+        now: Long,
+    ): WorkspaceResult {
+        if (kind !in TokenKind.community) {
+            return WorkspaceResult.Rejected("Only Support, Recognition and Growth Grants can be offered as Support.")
+        }
+        if (snapshot.supports.any { it.id == id }) {
+            return WorkspaceResult.Rejected("That Support offer already exists.")
+        }
+        if (kind == TokenKind.RECOGNITION && amountKobo != null) {
+            return WorkspaceResult.Rejected("Recognition carries no amount.")
+        }
+        if (kind != TokenKind.RECOGNITION && (amountKobo == null || amountKobo <= 0)) {
+            return WorkspaceResult.Rejected("Name an amount greater than zero.")
+        }
+        if (kind == TokenKind.GROWTH_GRANT) {
+            return WorkspaceResult.Rejected(
+                "Growth Grants are pledged from the Growth Grant screen so the milestone is witnessed.",
+            )
+        }
+        val reference = "TLC-${id.filter { it.isLetterOrDigit() }.takeLast(8).uppercase()}"
+        return guarded {
+            val support = SupportIntent(
+                id = id,
+                toHandle = toHandle,
+                kind = kind,
+                amountKobo = amountKobo,
+                state = SupportState.INTENT,
+                createdAt = now,
+                reference = reference,
+            )
+            val money = amountKobo?.let { " · ${Money(it).render()}" }.orEmpty()
+            WorkspaceChange(
+                snapshot = snapshot.copy(supports = listOf(support) + snapshot.supports),
+                facts = listOf(
+                    fact(
+                        kind = EntryKind.SUPPORT_INTENT,
+                        subject = "${kindLabel(kind)} offered to ${toHandle.value}$money",
+                        amountKobo = amountKobo,
+                        at = now,
+                        key = "support:${support.id}:intent",
+                    ),
+                ),
+                notice = "Support recorded as an intention. Nothing has moved and TLC holds nothing.",
+            )
+        }
+    }
+
+    public fun claimSupport(
+        snapshot: AppSnapshot,
+        id: String,
+        reference: String,
+        now: Long,
+    ): WorkspaceResult {
+        val support = snapshot.supports.firstOrNull { it.id == id }
+            ?: return WorkspaceResult.Rejected("That Support offer is no longer here.")
+        if (support.state != SupportState.INTENT) {
+            return WorkspaceResult.Rejected("That Support offer has already been claimed.")
+        }
+        val clean = reference.trim()
+        if (clean.isBlank()) return WorkspaceResult.Rejected("Add the bank reference from your own app.")
+        return guarded {
+            val next = support.copy(state = SupportState.CLAIMED, reference = clean)
+            WorkspaceChange(
+                snapshot = snapshot.copy(supports = snapshot.supports.replaceSupport(next)),
+                facts = listOf(
+                    fact(
+                        kind = EntryKind.SUPPORT_INTENT,
+                        subject = "${kindLabel(next.kind)} sent to ${next.toHandle.value} · $clean",
+                        amountKobo = next.amountKobo,
+                        at = now,
+                        key = "support:${next.id}:claim:$clean",
+                    ),
+                ),
+                notice = "Claim recorded. It stays a claim until the recipient acknowledges it.",
+            )
+        }
+    }
+
+    public fun acknowledgeSupport(snapshot: AppSnapshot, id: String, now: Long): WorkspaceResult {
+        val support = snapshot.supports.firstOrNull { it.id == id }
+            ?: return WorkspaceResult.Rejected("That Support offer is no longer here.")
+        if (support.state == SupportState.ACKNOWLEDGED) {
+            return WorkspaceResult.Ok(WorkspaceChange(snapshot, notice = "Already acknowledged."))
+        }
+        return guarded {
+            val next = support.copy(state = SupportState.ACKNOWLEDGED, acknowledgedAt = now)
+            WorkspaceChange(
+                snapshot = snapshot.copy(supports = snapshot.supports.replaceSupport(next)),
+                facts = listOf(
+                    fact(
+                        kind = EntryKind.SUPPORT_ACKNOWLEDGED,
+                        subject = "${kindLabel(next.kind)} acknowledged by ${next.toHandle.value}",
+                        amountKobo = next.amountKobo,
+                        at = now,
+                        key = "support:${next.id}:acknowledged",
+                    ),
+                ),
+                notice = "Acknowledged. The record now shows both sides of the gift.",
+            )
+        }
+    }
+
+    public fun logContact(
+        snapshot: AppSnapshot,
+        id: String,
+        channel: ContactChannel,
+        purpose: ContactPurpose,
+        category: String?,
+        now: Long,
+        tokenRef: String? = null,
+    ): WorkspaceResult {
+        if (snapshot.contactLog.any { it.id == id }) {
+            return WorkspaceResult.Rejected("That contact event already exists.")
+        }
+        return guarded {
+            val event = ContactEvent(
+                id = id,
+                channel = channel,
+                purpose = purpose,
+                category = category?.trim()?.ifBlank { null },
+                at = now,
+                tokenRef = tokenRef,
+            )
+            WorkspaceChange(
+                snapshot = snapshot.copy(contactLog = listOf(event) + snapshot.contactLog),
+                facts = listOf(
+                    fact(
+                        kind = EntryKind.CONTACT_RECORDED,
+                        subject = "Contact opened by ${channel.name.lowercase()} · ${purpose.label}",
+                        at = now,
+                        key = "contact:${event.id}",
+                    ),
+                ),
+                notice = "Contact noted on this device. The message itself is not stored.",
+            )
+        }
+    }
+
+    public fun clearContactLog(snapshot: AppSnapshot): WorkspaceResult =
+        WorkspaceResult.Ok(
+            WorkspaceChange(
+                snapshot = snapshot.copy(contactLog = emptyList()),
+                notice = "Contact history cleared on this device.",
+            ),
+        )
+
     public fun defaultSummary(action: SensitiveAction): String = when (action) {
         SensitiveAction.CHANGE_BANK_DETAILS -> "Change the verified transfer details"
         SensitiveAction.DISSOLVE_DYAD -> "Dissolve this circle"
@@ -399,6 +759,12 @@ public object Workspace {
         map { if (it.id == item.id) item else it }
 
     private fun List<DueRecord>.replace(item: DueRecord): List<DueRecord> =
+        map { if (it.id == item.id) item else it }
+
+    private fun List<Person>.replacePerson(item: Person): List<Person> =
+        map { if (it.id == item.id) item else it }
+
+    private fun List<SupportIntent>.replaceSupport(item: SupportIntent): List<SupportIntent> =
         map { if (it.id == item.id) item else it }
 
     private fun fact(

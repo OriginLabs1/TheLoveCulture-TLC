@@ -6,6 +6,8 @@
 
     <!-- Navigation -->
     <string name="nav_today">Today</string>
+    <string name="nav_record">Record</string>
+    <string name="nav_people">People</string>
     <string name="nav_journal">Journal</string>
     <string name="nav_grants">Grants</string>
     <string name="nav_circle">Circle</string>
@@ -78,24 +80,24 @@
     <string name="today_recognise_body">Write down who showed up.</string>
     <string name="today_pledge">Pledge a grant</string>
     <string name="today_pledge_body">Record a promise, then witness it.</string>
-    <string name="today_due">Record a due</string>
-    <string name="today_due_body">Keep the fee trail honest.</string>
+    <string name="today_due">Record a Token</string>
+    <string name="today_due_body">Activation, Reactivation, Courtesy, Joy.</string>
     <string name="today_open_loops">Open loops</string>
     <string name="today_open_loops_body">Nothing is waiting. The record is at rest.</string>
     <string name="today_all_clear">All clear</string>
     <string name="today_view_all">View all</string>
     <string name="today_capabilities">What lives here</string>
-    <string name="today_capabilities_body">Six working modules, one record, one doctrine.</string>
+    <string name="today_capabilities_body">Everyday verbs, one record, one doctrine.</string>
     <string name="today_notice_title">The short version</string>
     <string name="today_notice_body">TLC facilitates direct peer-to-peer support. It never holds, pools, escrows or moves money.</string>
     <string name="today_read_doctrine">Read the full notice</string>
 
     <!-- Capabilities -->
-    <string name="module_journal">Journal</string>
+    <string name="module_journal">Record</string>
     <string name="module_journal_body">Recognition, chained and searchable.</string>
     <string name="module_grants">Growth Grants</string>
     <string name="module_grants_body">Pledge → evidence → witness → direct payment.</string>
-    <string name="module_dues">Pioneer dues</string>
+    <string name="module_dues">Pioneer\'s Token</string>
     <string name="module_dues_body">Intent, proof and attestation — no custody.</string>
     <string name="module_circle">Stewardship</string>
     <string name="module_circle_body">Two seats, symmetric veto, scoped decisions.</string>
@@ -121,7 +123,7 @@
     <string name="journal_filter_all">All</string>
     <string name="journal_filter_recognition">Recognition</string>
     <string name="journal_filter_grants">Grants</string>
-    <string name="journal_filter_dues">Dues</string>
+    <string name="journal_filter_dues">Tokens</string>
     <string name="journal_filter_governance">Governance</string>
     <string name="entry_kind_recognition">Recognition</string>
     <string name="blocked_title">The record needs attention</string>
@@ -189,14 +191,14 @@
     <string name="grants_direct_note">Payment happens in your banking app, directly to the beneficiary. TLC is not a party to the transfer.</string>
     <string name="grants_reference">Reference</string>
 
-    <!-- Dues -->
-    <string name="dues_title">Pioneer dues</string>
-    <string name="dues_lead">Activation, Reactivation, Courtesy and Joy go directly to the Concept Pioneer\'s own account. TLC records the intent and the evidence; it never holds the money. This build does not release bank details yet.</string>
-    <string name="dues_no_details">Pioneer bank details are not stored in this build. When the secure fee flow ships, they will be released only to the payer, only after the due exists, and will expire.</string>
-    <string name="dues_empty_title">No due recorded</string>
-    <string name="dues_empty_body">A due is an intention, not a balance. Record one when you are ready to transfer directly.</string>
-    <string name="dues_new">Record a due</string>
-    <string name="dues_new_title">New due</string>
+    <!-- Pioneer\'s Token -->
+    <string name="dues_title">Pioneer\'s Token</string>
+    <string name="dues_lead">Activation, Reactivation, Courtesy and Joy go directly to the Concept Pioneer\'s own account. TLC records the intent and the evidence; it never holds the money. The encrypted vault keeps the destination and reveals it only for the moment of payment.</string>
+    <string name="dues_no_details">The Pioneer\'s destination is kept in the encrypted bank vault. It is revealed only to the payer, only after the Token exists, and it hides again on its own.</string>
+    <string name="dues_empty_title">No Token recorded</string>
+    <string name="dues_empty_body">A Token is an offering, not a balance. Record one when you are ready to transfer directly.</string>
+    <string name="dues_new">Record a Token</string>
+    <string name="dues_new_title">New Token</string>
     <string name="dues_kind">Kind</string>
     <string name="dues_amount">Amount (₦)</string>
     <string name="dues_activation">Activation</string>
@@ -205,7 +207,7 @@
     <string name="dues_joy">Joy</string>
     <string name="dues_period_one_off">One-off</string>
     <string name="dues_period_monthly">Monthly</string>
-    <string name="dues_created">Due recorded. No money has moved.</string>
+    <string name="dues_created">Token recorded. No money has moved.</string>
     <string name="dues_issue">Release instruction</string>
     <string name="dues_issue_done">Instruction released for this session</string>
     <string name="dues_record_proof">I sent it — record proof</string>
@@ -217,8 +219,8 @@
     <string name="dues_reference">Your reference</string>
     <string name="dues_copy_reference">Copy reference</string>
     <string name="dues_awaiting">Awaiting attestation by the Concept Pioneer. A proof is a claim, never a settled fact.</string>
-    <string name="dues_no_co_steward">Name a Co-Steward in Circle before recording a Pioneer due: the obligation belongs to the dyad.</string>
-    <string name="dues_state_due">Due</string>
+    <string name="dues_no_co_steward">Name a Co-Steward in Circle before recording a Pioneer\'s Token: the obligation belongs to the dyad.</string>
+    <string name="dues_state_due">Recorded</string>
     <string name="dues_state_instruction">Instruction issued</string>
     <string name="dues_state_proof">Proof submitted</string>
     <string name="dues_state_attested">Attested</string>
@@ -353,11 +355,11 @@
     <string name="about_purpose">TLC exists to make care and contribution visible between people who trust each other, and to keep the record of it beyond the reach of a quiet edit. It is for families, small circles, community groups and cooperatives: anyone who wants a trustworthy memory of who showed up for whom, without handing that memory to a company.</string>
     <string name="about_not_money_title">What it will never do</string>
     <string name="about_now_title">In this build</string>
-    <string name="about_now">The journal is durable and hash-chained. You can recognise someone, pledge and witness a Growth Grant, record a Pioneer due, name a Co-Steward, open a two-key decision, choose a theme and restore a verified backup. There is still no account, no sync and no multi-device merge.</string>
+    <string name="about_now">The journal is durable and hash-chained. You can recognise someone, pledge and witness a Growth Grant, record a Pioneer\'s Token, name a Co-Steward, open a two-key decision, save encrypted bank destinations, send Support, keep a purpose-first contact log and restore a verified backup. There is still no account, no sync and no multi-device merge.</string>
     <string name="about_next_title">Not here yet</string>
-    <string name="about_next">Accounts, cross-device invitations, sync, the remote Pioneer attestation desk and multi-device merge are the next milestone. Records do not leave this device unless you export or share them.</string>
+    <string name="about_next">Accounts, cross-device invitations, sync, the remote Pioneer attestation desk, the SEF economy and the social layer are the next milestone. Records do not leave this device unless you export or share them.</string>
     <string name="about_modules_title">Capabilities and modules</string>
-    <string name="about_modules_body">Journal · Growth Grants · Pioneer dues · Stewardship · Verification · Portability. One core, many shells; the Android shell owns pixels, never rules.</string>
+    <string name="about_modules_body">Record · Growth Grants · Pioneer\'s Token · People · Bank vault · Support · Pioneer Desk · Stewardship · Verification · Portability. One core, many shells; the Android shell owns pixels, never rules.</string>
     <string name="about_meta_title">This copy</string>
     <string name="about_version">Version %1$s (build %2$d)</string>
     <string name="about_licence">GPL-3.0-or-later. No analytics, no advertising identifier, no third-party tracking.</string>
@@ -384,4 +386,170 @@
     <string name="dues_eyebrow">PLATFORM DIRECT</string>
     <string name="circle_eyebrow">TWO SEATS, ONE RECORD</string>
     <string name="settings_eyebrow">YOURS TO TUNE</string>
+
+    <!-- v0.0.5 · Today additions -->
+    <string name="today_support">Send Support</string>
+    <string name="today_support_body">Offer a token, directly.</string>
+    <string name="today_desk">Pioneer Desk</string>
+    <string name="today_desk_body">Write with purpose.</string>
+    <string name="today_token">Pioneer\'s Token</string>
+    <string name="today_token_body">Activation, Reactivation, Joy.</string>
+    <string name="today_trust_title">Trust &amp; contact</string>
+    <string name="today_trust_body">Handles, people, an encrypted vault, Support and a way to reach the Pioneer. Everything here stays on this device.</string>
+    <string name="module_people">People</string>
+    <string name="module_people_body">Handles and one saved destination each.</string>
+    <string name="module_support">Support</string>
+
+    <!-- v0.0.5 · Create sheet -->
+    <string name="create_eyebrow">CREATE</string>
+    <string name="create_title">Create</string>
+    <string name="create_body">Every everyday verb in one place. Nothing here moves money.</string>
+    <string name="create_recognise">Recognise someone</string>
+    <string name="create_recognise_body">Keep what they did in the record.</string>
+    <string name="create_support">Send Support</string>
+    <string name="create_support_body">Offer a community token directly.</string>
+    <string name="create_token">Record a Pioneer\'s Token</string>
+    <string name="create_token_body">Activation, Reactivation, Courtesy or Joy.</string>
+    <string name="create_grant">Pledge a Growth Grant</string>
+    <string name="create_grant_body">Promise, evidence, witness, direct payment.</string>
+    <string name="create_person">Add a person</string>
+    <string name="create_person_body">Give them a handle and a destination.</string>
+    <string name="create_bank">Save bank details</string>
+    <string name="create_bank_body">Encrypted here; revealed only on purpose.</string>
+    <string name="create_desk">Message the Pioneer</string>
+    <string name="create_desk_body">Purpose first, then a channel.</string>
+
+    <!-- v0.0.5 · Onboarding handle -->
+    <string name="onboard_handle">Your handle</string>
+    <string name="onboard_handle_ok">@%1$s is yours on this device.</string>
+
+    <!-- v0.0.5 · People -->
+    <string name="people_eyebrow">THE ADDRESS BOOK</string>
+    <string name="people_title">People</string>
+    <string name="people_body">A small, deliberate list. Handles are how you address someone; the vault is how you pay them.</string>
+    <string name="people_pioneer_title">The Pioneer</string>
+    <string name="people_pioneer_body">The official role is @pioneer. Sir Collins answers to @sircollins. Both are reserved, and both reach the same desk.</string>
+    <string name="people_open_desk">Open the desk</string>
+    <string name="people_support">Send Support</string>
+    <string name="people_add">Add a person</string>
+    <string name="people_vault">Bank vault</string>
+    <string name="people_empty_title">No one here yet</string>
+    <string name="people_empty_body">Add the people you actually support. A handle keeps the record readable; a saved destination keeps the payment direct.</string>
+    <string name="people_no_bank">No destination saved</string>
+    <string name="people_attach">Destination</string>
+    <string name="people_remove">Remove</string>
+    <string name="people_attach_eyebrow">THE DESTINATION</string>
+    <string name="people_attach_title">Where does %1$s get paid?</string>
+    <string name="people_attach_body">Only the bank name, the last four digits and a fingerprint enter the state. The full number stays inside the encrypted vault.</string>
+    <string name="people_attach_hint">Choose a saved destination</string>
+    <string name="people_attach_none">Clear the destination</string>
+    <string name="people_add_eyebrow">A NEW ADDRESS</string>
+    <string name="people_add_title">Add a person</string>
+    <string name="people_name">Their name</string>
+    <string name="people_handle">Their handle</string>
+    <string name="people_handle_hint">2–24 lowercase letters, digits, dots or underscores.</string>
+    <string name="people_handle_ok">@%1$s is available on this device.</string>
+    <string name="people_handle_reserved">That handle belongs to TLC. @pioneer and @sircollins are reserved.</string>
+    <string name="people_handle_invalid">Use 2–24 lowercase letters, digits, dots or underscores.</string>
+    <string name="people_role">How they travel</string>
+    <string name="people_added">Person added</string>
+    <string name="people_removed">Person removed</string>
+    <string name="people_privacy_title">What is kept</string>
+    <string name="people_privacy_body">A name, a handle, a role and a reference. Never a full account number, never a message.</string>
+
+    <!-- v0.0.5 · Bank vault -->
+    <string name="vault_eyebrow">THE ENCRYPTED VAULT</string>
+    <string name="vault_title">Bank vault</string>
+    <string name="vault_body">Save a destination once. TLC keeps the full number encrypted, shows only the last four, and reveals the rest only when you ask.</string>
+    <string name="vault_lock_title">Sealed with the Android Keystore</string>
+    <string name="vault_lock_body">AES-256-GCM, keyed by hardware where available. The vault file is separate from the state and the record.</string>
+    <string name="vault_add">Add a destination</string>
+    <string name="vault_add_eyebrow">SAVE ONCE</string>
+    <string name="vault_add_title">New destination</string>
+    <string name="vault_add_body">The NUBAN check digit is validated locally before anything is saved. No name enquiry, no network call.</string>
+    <string name="vault_choose_bank">Choose a bank</string>
+    <string name="vault_account_number">Account number</string>
+    <string name="vault_account_hint">Ten digits</string>
+    <string name="vault_account_ok">Check digit valid</string>
+    <string name="vault_account_invalid">That does not match this bank\'s NUBAN check digit.</string>
+    <string name="vault_holder">Account holder</string>
+    <string name="vault_save">Save to the vault</string>
+    <string name="vault_saved">Destination saved</string>
+    <string name="vault_removed">Destination removed</string>
+    <string name="vault_empty_title">The vault is empty</string>
+    <string name="vault_empty_body">Add the destination you actually use. You can attach it to a person and reveal it only when you are ready to pay.</string>
+    <string name="vault_masked">Masked</string>
+    <string name="vault_remove">Remove</string>
+    <string name="vault_reveal">Reveal</string>
+    <string name="vault_hide">Hide now</string>
+    <string name="vault_revealed_title">Revealed for this moment</string>
+    <string name="vault_reveal_note">This reveal is written to the record. It hides again on its own, and it is never copied into the state or a backup.</string>
+    <string name="vault_reveal_failed">That destination could not be opened.</string>
+
+    <!-- v0.0.5 · Support -->
+    <string name="support_eyebrow">A DIRECT GIFT</string>
+    <string name="support_title">Send Support</string>
+    <string name="support_body">Support is a gift between two private accounts. TLC records the offer and the reference; it never holds the money.</string>
+    <string name="support_new">New support</string>
+    <string name="support_people">People you know</string>
+    <string name="support_to">To</string>
+    <string name="support_to_hint">Their handle</string>
+    <string name="support_kind">Token</string>
+    <string name="support_kind_supportive">Supportive</string>
+    <string name="support_kind_recognition">Recognition</string>
+    <string name="support_amount">Amount (₦, optional)</string>
+    <string name="support_rail_note">Payment happens in your banking app. A claim is a statement, not a settlement.</string>
+    <string name="support_send">Record the offer</string>
+    <string name="support_history">HISTORY</string>
+    <string name="support_empty_title">Nothing offered yet</string>
+    <string name="support_empty_body">When you send Support, record it here so both sides can point at the same fact.</string>
+    <string name="support_line">%1$s to %2$s</string>
+    <string name="support_no_amount">No amount stated</string>
+    <string name="support_reference">Bank reference</string>
+    <string name="support_claim">I sent it — add a reference</string>
+    <string name="support_claim_save">Record the claim</string>
+    <string name="support_acknowledge">Acknowledge receipt</string>
+    <string name="support_acknowledged_note">Acknowledged. The record is closed honestly; no balance was created.</string>
+    <string name="support_sent">Support offer recorded</string>
+    <string name="support_claimed">Claim recorded</string>
+    <string name="support_acknowledged">Receipt acknowledged</string>
+
+    <!-- v0.0.5 · Pioneer Desk -->
+    <string name="contact_eyebrow">THE PIONEER DESK</string>
+    <string name="contact_title">Contact</string>
+    <string name="contact_body">Purpose first. Choose why you are writing, see the opening before it leaves the app, then pick a channel.</string>
+    <string name="contact_legal_title">Wording under legal review</string>
+    <string name="contact_legal_body">The Contact &amp; Consent Framework is doctrine in this build. The public wording that describes it is still with the lawyer, so it may change before v0.0.6.</string>
+    <string name="contact_purpose">Purpose</string>
+    <string name="contact_purpose_body">A category comes before a body, so the Pioneer can route the request without reading everything.</string>
+    <string name="contact_category">Category (optional)</string>
+    <string name="contact_category_hint">Activation, mentorship, a specific question…</string>
+    <string name="contact_guidance">What you hope for (optional)</string>
+    <string name="contact_guidance_hint">One or two sentences</string>
+    <string name="contact_preview">The opening</string>
+    <string name="contact_reset">Clear</string>
+    <string name="contact_channels">Choose a channel</string>
+    <string name="contact_channels_body">Telegram opens first. WhatsApp is deferred because the founder\'s Telegram already uses that number. Phone is not confirmed yet.</string>
+    <string name="contact_telegram">Open Telegram</string>
+    <string name="contact_email">Write an email</string>
+    <string name="contact_website">Open the website</string>
+    <string name="contact_phone_deferred">Phone is not published in this build.</string>
+    <string name="contact_log">CONTACT LOG</string>
+    <string name="contact_log_empty_title">No contact yet</string>
+    <string name="contact_log_empty_body">Only the fact of contact is kept: purpose, channel and time. Never the message.</string>
+    <string name="contact_clear">Clear the log</string>
+    <string name="contact_no_app">No app can open that channel.</string>
+
+    <!-- v0.0.5 · Settings additions -->
+    <string name="settings_trust">Trust &amp; contact</string>
+    <string name="settings_people">People</string>
+    <string name="settings_people_body">Handles, roles and saved destinations.</string>
+    <string name="settings_vault">Bank vault</string>
+    <string name="settings_vault_body">Encrypted destinations, revealed only on purpose.</string>
+    <string name="settings_desk">Pioneer Desk</string>
+    <string name="settings_desk_body">Purpose-first contact with the Pioneer.</string>
+    <string name="settings_circle">Circle and stewardship</string>
+    <string name="settings_circle_body">Two seats, two signatures.</string>
+    <string name="settings_grants">Growth Grants</string>
+    <string name="settings_grants_body">Pledges, evidence and direct payment.</string>
 </resources>

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="Theme.TLC" parent="android:Theme.Material.Light.NoActionBar">
-        <item name="android:statusBarColor">#FBF6F0</item>
-        <item name="android:navigationBarColor">#FBF6F0</item>
-        <item name="android:windowBackground">#FBF6F0</item>
+        <item name="android:statusBarColor">#F6F8FC</item>
+        <item name="android:navigationBarColor">#F6F8FC</item>
+        <item name="android:windowBackground">#F6F8FC</item>
         <item name="android:windowLightStatusBar">true</item>
     </style>
 </resources>

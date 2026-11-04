@@ -4,21 +4,21 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>TLC — recognition, kept honestly</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%237a2e3a'/%3E%3Cpath d='M32 49C32 49 12 37 12 24c0-8 7-13 13-13 4 0 6 2 7 4 1-2 3-4 7-4 6 0 13 5 13 13 0 13-20 25-20 25z' fill='%23faf6f1'/%3E%3C/svg%3E">
-<meta name="description" content="TLC is a local-first, non-custodial record of recognition and contribution. Download the signed v0.0.4 APK.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230B1B33'/%3E%3Cpath d='M32 49C32 49 12 37 12 24c0-8 7-13 13-13 4 0 6 2 7 4 1-2 3-4 7-4 6 0 13 5 13 13 0 13-20 25-20 25z' fill='%231466C7'/%3E%3C/svg%3E">
+<meta name="description" content="TLC is a local-first, non-custodial record of recognition and contribution. Download the signed v0.0.5 APK.">
 <style>
-  :root { color-scheme: light dark; --bg:#faf6f1; --ink:#2b1f22; --muted:#6b5a5f; --line:#e3d6d0; --accent:#7a2e3a; --card:#fffdfb; }
-  @media (prefers-color-scheme: dark) { :root { --bg:#171214; --ink:#f3e9e6; --muted:#b9a6a9; --line:#3a2c30; --accent:#e0a0aa; --card:#211a1d; } }
+  :root { color-scheme: light dark; --bg:#F6F8FC; --ink:#0B1B33; --muted:#4B5B73; --line:#D9E2EE; --accent:#1B3A8C; --accent2:#1466C7; --card:#FFFFFF; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#0B1B33; --ink:#EDF2F9; --muted:#A9B8CE; --line:#22375A; --accent:#6FA8FF; --accent2:#8FBFFF; --card:#10233F; } }
   * { box-sizing: border-box; }
   body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif; }
   main { max-width: 46rem; margin: 0 auto; padding: 4rem 1.25rem 5rem; }
-  .mark { width:56px; height:56px; border-radius: 50%; background: var(--accent); display:grid; place-items:center; color:var(--bg); font-size:28px; }
+  .mark { width:56px; height:56px; border-radius: 50%; background: var(--accent); display:grid; place-items:center; color:#F4F7FB; font-size:28px; }
   h1 { font-size: clamp(2rem, 7vw, 3.2rem); line-height:1.1; letter-spacing:-.03em; margin:1.5rem 0 .75rem; }
   h2 { font-size:1.15rem; margin:2.5rem 0 .75rem; }
   p { margin: .75rem 0; }
   .lede { font-size:1.15rem; color:var(--muted); max-width: 36rem; }
   .actions { display:flex; flex-wrap:wrap; gap:.75rem; margin:2rem 0 1rem; }
-  .button { display:inline-block; background:var(--accent); color:var(--bg); text-decoration:none; font-weight:650; padding:.85rem 1.2rem; border-radius:.6rem; }
+  .button { display:inline-block; background:var(--accent); color:#F4F7FB; text-decoration:none; font-weight:650; padding:.85rem 1.2rem; border-radius:.6rem; }
   .button.secondary { background:transparent; color:var(--accent); border:1px solid var(--accent); }
   .meta { color:var(--muted); font-size:.9rem; }
   .card { background:var(--card); border:1px solid var(--line); border-radius:.9rem; padding:1.1rem 1.25rem; margin:1.5rem 0; }
@@ -39,27 +39,29 @@
   account, a sync server or a company holding the memory.</p>
 
   <div class="actions">
-    <a class="button" href="https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.4/tlc-0.0.4-foss.apk">Download v0.0.4 APK</a>
-    <a class="button secondary" href="https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/tag/v0.0.4">Release notes</a>
+    <a class="button" href="https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.5/tlc-0.0.5-foss.apk">Download v0.0.5 APK</a>
+    <a class="button secondary" href="https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/tag/v0.0.5">Release notes</a>
   </div>
-  <p class="meta">Android 7.0+ · 1.3 MB · GPL-3.0-or-later · no <code>INTERNET</code> permission</p>
+  <p class="meta">Android 7.0+ · 1.4 MB · GPL-3.0-or-later · no <code>INTERNET</code> permission</p>
 
   <div class="card">
     <strong>Verify before you install.</strong>
     <pre><code>sha256sum -c SHA256SUMS
-apksigner verify --print-certs tlc-0.0.4-foss.apk</code></pre>
-    <p class="meta">APK SHA-256: <code>9d73ad59b4c40ce7b2e42036376ea8038eb2287decc33c567cc25fee11d0e79d</code><br>
+apksigner verify --print-certs tlc-0.0.5-foss.apk</code></pre>
+    <p class="meta">APK SHA-256: <code>16defb6903751c93a0058da69eef451bd6dafdcfd40c344dd81a0da5993eeb2d</code><br>
     Certificate SHA-256: <code>e04cb8aa2cf5fdeec043d917a74a5ba634121f2a0b98df92869a42bb4acb732c</code></p>
-    <p class="meta"><a href="https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.4/SHA256SUMS">SHA256SUMS</a> ·
-    <a href="https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.4/tlc-0.0.4-foss.signature.txt">signature block</a> ·
-    <a href="https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.4/tlc-0.0.4-foss.dependencies.txt">dependency manifest</a></p>
+    <p class="meta"><a href="https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.5/SHA256SUMS">SHA256SUMS</a> ·
+    <a href="https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.5/tlc-0.0.5-foss.signature.txt">signature block</a> ·
+    <a href="https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.5/tlc-0.0.5-foss.dependencies.txt">dependency manifest</a></p>
   </div>
 
   <h2>What this build does</h2>
   <ul>
-    <li>Onboarding and a local profile, then Today, Journal, Grants, Dues, Circle, Settings and About.</li>
+    <li>Onboarding, a local profile and a <code>@handle</code>, then Today, Record, People, Settings and a Create sheet.</li>
     <li>An append-only, hash-chained record that is re-verified on every launch and opens read-only if it does not check out.</li>
-    <li>Growth Grants with evidence and witness stages; Pioneer dues that stop at proof submission.</li>
+    <li>Names for people and roles: <code>@pioneer</code> is the official role and <code>@sircollins</code> is the person behind it.</li>
+    <li>An encrypted bank vault: save a destination once, see only the last four digits, and reveal the full number only on purpose.</li>
+    <li>Send Support, Pioneer's Token, a purpose-first Pioneer Desk, Growth Grants with evidence and witness stages.</li>
     <li>Verified backup and restore, Merkle proofs per entry, and an export the <code>ledger-verify</code> tool reads.</li>
   </ul>
 
@@ -67,18 +69,17 @@ apksigner verify --print-certs tlc-0.0.4-foss.apk</code></pre>
   <p>TLC never holds, pools, escrows or moves money. There is no wallet, no balance, no payment rail
   and no card data. A transfer happens bank to bank between two private accounts; TLC records the
   intent, the instruction and the evidence.</p>
-  <p>Pioneer bank details are not in this build and are never compiled in. When the fee flow ships,
-  they are released only to the payer, only after the due exists, for the reason the due describes,
-  and they expire.</p>
+  <p>A full bank account number is never compiled in and never enters the record. It lives only in the
+  payer's encrypted vault, protected by the Android Keystore; the app shows the bank name, the last
+  four digits and a fingerprint, and reveals the rest only on an explicit action.</p>
 
-  <h2>Direction for v0.0.5: the SEF Token</h2>
+  <h2>Direction for v0.0.6: accounts, sync and the social layer</h2>
   <p>The unit of TLC's Standard Economic Framework is the <strong>Token</strong>: a record of a
-  meaningful resource, item, gift or monetary value. Tokens may be curated, transferred or
-  distributed in monetary form for convenience. The non-custody line does not change — a Token is a
-  record of value, not a balance, and settlement stays bank to bank. This is recorded in
-  <a href="https://github.com/OriginLabs1/TheLoveCulture-TLC/blob/main/docs/SEF.md">docs/SEF.md</a>
-  and is <strong>not in v0.0.4</strong>; this build still describes tokens as recognition signals
-  because the valuation and transfer rules do not exist yet.</p>
+  meaningful resource, item, gift or monetary value. The non-custody line does not change — a Token
+  is a record of value, not a balance, and settlement stays bank to bank. This is recorded in
+  <a href="https://github.com/OriginLabs1/TheLoveCulture-TLC/blob/main/docs/SEF.md">docs/SEF.md</a>.
+  Accounts, cross-device sync, the remote attestation desk and the social layer are the next
+  milestone, not a promise about this build.</p>
 
   <h2>Other ways to install</h2>
   <p>Add <a href="https://github.com/OriginLabs1/TheLoveCulture-TLC">OriginLabs1/TheLoveCulture-TLC</a>

@@ -1,29 +1,29 @@
-# TLC — v0.0.4
+# TLC — v0.0.5
 
 Android-first shell over a sovereign, non-custodial core.
-Doctrine: [`CONTEXT.md`](CONTEXT.md) · Contract: [`SPECS.md`](SPECS.md) · Releases: [v0.0.4](https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/latest)
+Doctrine: [`CONTEXT.md`](CONTEXT.md) · Contract: [`SPECS.md`](SPECS.md) · Releases: [v0.0.5](https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/latest)
 
-**Status: whole shape.** The rules and the ledger are proven by tests, the record survives the
-process, and the shell now exposes the full product surface: onboarding and profile, Today, a
-searchable Journal with per-entry proofs, Growth Grants with evidence and witness stages, Pioneer
-dues that stop at proof submission, a two-seat Circle with two-key decisions, preferences, verified
-backup and restore, and an About screen that separates what exists from what does not. Accounts,
-sync and cross-device invitations are the next milestone. The store copy says the same thing — see
-[`fastlane/metadata`](fastlane/metadata/android/en-US/full_description.txt). The Token direction for
-v0.0.5 is recorded in [`docs/SEF.md`](docs/SEF.md); v0.0.4 still describes tokens as recognition
-signals because the valuation and transfer rules do not exist yet.
+**Status: trust and contact.** The record is proven, and v0.0.5 makes it usable between people.
+Names, numbers and a way to reach the Pioneer: `@handles` for people and reserved roles, a local
+address book, an encrypted bank vault that saves a destination once and reveals it only on purpose,
+Send Support, the renamed **Pioneer's Token**, and a purpose-first **Pioneer Desk**. The visual
+language is new — royal blue, azure and silver, no pink — with four tabs (Today, Record, People,
+Settings) and a Create sheet. Everything is still local-only: no account, no sync, no `INTERNET`
+permission, no custody. Accounts, sync, the SEF economy and the social layer are the next milestone.
+The store copy says the same thing — see
+[`fastlane/metadata`](fastlane/metadata/android/en-US/full_description.txt).
 
-## Install v0.0.4
+## Install v0.0.5
 
-**[Download `tlc-0.0.4-foss.apk`](https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.4/tlc-0.0.4-foss.apk)**
+**[Download `tlc-0.0.5-foss.apk`](https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.5/tlc-0.0.5-foss.apk)**
 · [install page](https://originlabs1.github.io/TheLoveCulture-TLC/) ·
-[release page](https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/tag/v0.0.4) ·
-[SHA256SUMS](https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.4/SHA256SUMS) ·
-[signature](https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.4/tlc-0.0.4-foss.signature.txt)
+[release page](https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/tag/v0.0.5) ·
+[SHA256SUMS](https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.5/SHA256SUMS) ·
+[signature](https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.5/tlc-0.0.5-foss.signature.txt)
 
 ```sh
-sha256sum -c SHA256SUMS     # 9d73ad59b4c40ce7b2e42036376ea8038eb2287decc33c567cc25fee11d0e79d
-apksigner verify --print-certs tlc-0.0.4-foss.apk
+sha256sum -c SHA256SUMS
+apksigner verify --print-certs tlc-0.0.5-foss.apk
 # certificate SHA-256: e04cb8aa2cf5fdeec043d917a74a5ba634121f2a0b98df92869a42bb4acb732c
 ```
 
@@ -36,11 +36,11 @@ these releases. F-Droid, Orion Store and Uptodown receive the same signed file; 
 
 | Layer | Path | Status |
 |---|---|---|
-| Domain state machine (SK-01) | `core/domain` | 29 invariant tests green |
+| Domain state machine (SK-01) | `core/domain` | 34 invariant tests green — roles, tokens, handles, NUBAN, dyad authority, fee state machine |
 | Hash-chained Pioneer ledger (SK-04, INV-08) | `core/ledger` | 53 tests green — tamper, reorder, truncation, torn writes, failed writes, replay and restore all caught |
-| Experience layer | `core/experience` | 21 tests green — onboarding, preferences, dyad, proposals, grants, dues, state and bundle codecs |
-| `ledger-verify` CLI (SPECS §B-3) | `tools/ledger-verify` | reads the app's own export; exit-code contract tested |
-| Android shell (Compose M3) | `apps/android` | onboarding, Today, Journal, Grants, Dues, Circle, Settings, Verify and About; type-checks against the real Compose classpath |
+| Experience layer | `core/experience` | 31 tests green — onboarding, preferences, dyad, proposals, grants, tokens, Support, people, contact log, state and bundle codecs |
+| `ledger-verify` CLI (SPECS §B-3) | `tools/ledger-verify` | 9 tests — reads the app's own export; exit-code contract tested |
+| Android shell (Compose M3) | `apps/android` | onboarding, Today, Record, People, Bank vault, Support, Pioneer Desk, Grants, Token, Circle, Settings, Verify and About; type-checks against the real Compose classpath |
 
 No code path in this repository moves, holds, pools or escrows money. `Effect` has
 `requiresCustody = false` on every member, and the ledger has no `BALANCE`/`TRANSFER`/`ESCROW`
@@ -50,17 +50,18 @@ entry kind — both enforced by tests, not by comment.
 
 ```bash
 make doctor        # toolchain + secret presence (never prints secrets)
-make verify        # compile + all 112 invariant tests, no Android SDK needed
+make verify        # compile + all 127 invariant tests, no Android SDK needed
 make ledger-verify # chain verification, including deliberate tampering
 make check-foss    # prove the foss channel has no Play Services / Firebase / tracking
 make shell-check   # type-check the shell without AAPT2 (any CPU)
-make android-build # foss debug APK (x86_64 host: AAPT2 ships x86-64 only)
+make android-build # foss debug APK
 ```
 
 JDK 21 is the only hard requirement for `verify`. The Android module joins the build only when
 `ANDROID_HOME` is set (see `settings.gradle.kts`), so the core stays testable everywhere.
-On an arm64 host `assembleFossDebug` cannot run (Google ships AAPT2 as an x86-64 binary); use
-`make shell-check` locally and let CI produce the APK.
+Google ships AAPT2 as an x86-64 binary, so on an arm64 host the Android build runs it through
+`qemu-user-static` with an amd64 libc; [`RELEASING.md`](RELEASING.md) records the local workaround.
+CI produces the release APK on x86-64.
 
 ## How the record stays honest
 
@@ -91,8 +92,8 @@ Version identity lives in one file (`version.properties`); the git tag must equa
 
 ```bash
 ./scripts/bump-version.sh patch
-git add version.properties && git commit -m "release: v0.0.4"
-git tag v0.0.4 && git push origin main v0.0.4
+git add version.properties && git commit -m "release: v0.0.5"
+git tag v0.0.5 && git push origin main v0.0.5
 ```
 
 `.github/workflows/release.yml` then verifies the tag against `version.properties`, rejects a
@@ -109,11 +110,12 @@ Key handling, rotation and store submission: [`RELEASING.md`](RELEASING.md).
 
 ```
 apps/android      Compose shell — pixels, never rules
-core/domain       roles, tokens, dyad authority, fee state machine
-core/experience   use cases, durable state, grant and due lifecycles, backup bundles
+core/domain       roles, tokens, handles, NUBAN, dyad authority, fee state machine
+core/experience   use cases, durable state, people, Support, contact log, grant and token lifecycles, backup bundles
 core/ledger       append-only hash chain, durable storage, Merkle anchor, verification
 tools/ledger-verify  nightly proof that nothing was rewritten
-docs/SEF.md       the Token direction for v0.0.5, and the non-custody line it must keep
+docs/SEF.md       the Token direction, and the non-custody line it must keep
+design/logo       vector logo masters and the store-icon source
 ```
 
 ## Deliberately absent

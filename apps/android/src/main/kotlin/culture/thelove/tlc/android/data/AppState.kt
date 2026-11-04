@@ -3,8 +3,14 @@ package culture.thelove.tlc.android.data
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import culture.thelove.tlc.domain.BankAccount
+import culture.thelove.tlc.domain.BankAccountRef
+import culture.thelove.tlc.domain.BankDirectory
+import culture.thelove.tlc.domain.ContactChannel
+import culture.thelove.tlc.domain.ContactPurpose
 import culture.thelove.tlc.domain.FeeEvent
 import culture.thelove.tlc.domain.FeePeriod
+import culture.thelove.tlc.domain.Handle
 import culture.thelove.tlc.domain.Role
 import culture.thelove.tlc.domain.SensitiveAction
 import culture.thelove.tlc.domain.TokenKind
@@ -40,6 +46,7 @@ public class AppState(filesDir: File) {
     public val journal: JournalState = JournalState(filesDir)
     private val stateFile = StateFile(filesDir)
     private val hasher = PlatformSha256()
+    private val vault = BankVault(filesDir)
 
     public var loading: Boolean by mutableStateOf(true)
         private set
@@ -48,6 +55,13 @@ public class AppState(filesDir: File) {
         private set
 
     public var snapshot: AppSnapshot? by mutableStateOf(null)
+        private set
+
+    /** Full accounts, decrypted in memory only. The screens must reveal them deliberately. */
+    public var vaultAccounts: List<BankAccount> by mutableStateOf(emptyList())
+        private set
+
+    public var vaultError: String? by mutableStateOf(null)
         private set
 
     public var busy: Boolean by mutableStateOf(false)
@@ -74,18 +88,31 @@ public class AppState(filesDir: File) {
             loadError = it.message ?: "The state could not be read."
         }
         if (journal.loadError != null) loadError = journal.loadError
+        vaultAccounts = withContext(Dispatchers.IO) { vault.load() }
+        vaultError = vault.lastError
         loading = false
     }
 
-    public suspend fun onboard(displayName: String, circleName: String, role: Role): String? {
+    public suspend fun onboard(
+        displayName: String,
+        circleName: String,
+        role: Role,
+        handle: Handle? = null,
+    ): String? {
         val result = Workspace.onboard(
             displayName = displayName,
             circleName = circleName,
             role = role,
             recordId = UUID.randomUUID().toString().replace("-", ""),
             now = System.currentTimeMillis(),
+            handle = handle,
         )
         return commit(result)
+    }
+
+    public suspend fun claimHandle(handle: Handle): String? {
+        val current = snapshot ?: return "The circle is not open yet."
+        return commit(Workspace.claimHandle(current, handle, System.currentTimeMillis()))
     }
 
     public suspend fun updatePreferences(preferences: Preferences): String? {
@@ -96,6 +123,159 @@ public class AppState(filesDir: File) {
     public suspend fun addCoSteward(name: String): String? {
         val current = snapshot ?: return "The circle is not open yet."
         return commit(Workspace.addCoSteward(current, "pair-${UUID.randomUUID().toString().take(8)}", name))
+    }
+
+    // -----------------------------------------------------------------------------------------
+    // Trust & Contact
+    // -----------------------------------------------------------------------------------------
+
+    public suspend fun addPerson(
+        handle: Handle,
+        displayName: String,
+        role: Role,
+        bankRefId: String? = null,
+    ): String? {
+        val current = snapshot ?: return "The circle is not open yet."
+        return commit(
+            Workspace.addPerson(
+                snapshot = current,
+                id = "person-${UUID.randomUUID().toString().take(8)}",
+                handle = handle,
+                displayName = displayName,
+                role = role,
+                now = System.currentTimeMillis(),
+                bankRefId = bankRefId,
+            ),
+        )
+    }
+
+    public suspend fun attachBank(personId: String, bankRefId: String?): String? {
+        val current = snapshot ?: return "The circle is not open yet."
+        return commit(Workspace.attachBank(current, personId, bankRefId))
+    }
+
+    public suspend fun removePerson(personId: String): String? {
+        val current = snapshot ?: return "The circle is not open yet."
+        return commit(Workspace.removePerson(current, personId))
+    }
+
+    /**
+     * Encrypt the full account first, then record only its reference. If the record refuses the
+     * reference, the vault is put back exactly as it was.
+     */
+    public suspend fun saveBankAccount(
+        bankCode: String,
+        accountNumber: String,
+        holderName: String,
+    ): String? {
+        val current = snapshot ?: return "The circle is not open yet."
+        val bank = BankDirectory.byCode(bankCode) ?: return "Choose a bank from the list."
+        val account = try {
+            BankAccount(bank, accountNumber.filter { it.isDigit() }, holderName)
+        } catch (e: IllegalArgumentException) {
+            return e.message ?: "Those transfer details are not valid."
+        }
+        val previous = vaultAccounts
+        val next = previous + account
+        val written = withContext(Dispatchers.IO) { runCatching { vault.save(next) } }
+        if (written.isFailure) {
+            return written.exceptionOrNull()?.message ?: "The encrypted vault could not be written."
+        }
+        vaultAccounts = next
+        val error = commit(
+            Workspace.saveBankAccount(
+                snapshot = current,
+                id = "bank-${UUID.randomUUID().toString().take(8)}",
+                account = account,
+                now = System.currentTimeMillis(),
+            ),
+        )
+        if (error != null) {
+            withContext(Dispatchers.IO) { runCatching { vault.save(previous) } }
+            vaultAccounts = previous
+        }
+        return error
+    }
+
+    public suspend fun removeBankAccount(refId: String): String? {
+        val current = snapshot ?: return "The circle is not open yet."
+        val ref = current.bankAccounts.firstOrNull { it.id == refId }
+            ?: return "Those transfer details are no longer here."
+        val previous = vaultAccounts
+        val next = previous.filterNot { it.fingerprint() == ref.fingerprint }
+        val written = withContext(Dispatchers.IO) { runCatching { vault.save(next) } }
+        if (written.isFailure) {
+            return written.exceptionOrNull()?.message ?: "The encrypted vault could not be written."
+        }
+        vaultAccounts = next
+        val error = commit(Workspace.removeBankAccount(current, refId))
+        if (error != null) {
+            withContext(Dispatchers.IO) { runCatching { vault.save(previous) } }
+            vaultAccounts = previous
+        }
+        return error
+    }
+
+    /** Returns the full account only for the moment of a deliberate reveal. */
+    public suspend fun revealBankAccount(refId: String): BankAccount? {
+        val current = snapshot ?: return null
+        val ref = current.bankAccounts.firstOrNull { it.id == refId } ?: return null
+        val account = vaultAccounts.firstOrNull { it.fingerprint() == ref.fingerprint } ?: return null
+        commit(Workspace.markBankRevealed(current, refId, System.currentTimeMillis()))
+        return account
+    }
+
+    public suspend fun sendSupport(
+        toHandle: Handle,
+        kind: TokenKind,
+        amountKobo: Long?,
+    ): String? {
+        val current = snapshot ?: return "The circle is not open yet."
+        return commit(
+            Workspace.sendSupport(
+                snapshot = current,
+                id = "support-${UUID.randomUUID().toString().take(8)}",
+                toHandle = toHandle,
+                kind = kind,
+                amountKobo = amountKobo,
+                now = System.currentTimeMillis(),
+            ),
+        )
+    }
+
+    public suspend fun claimSupport(id: String, reference: String): String? {
+        val current = snapshot ?: return "The circle is not open yet."
+        return commit(Workspace.claimSupport(current, id, reference, System.currentTimeMillis()))
+    }
+
+    public suspend fun acknowledgeSupport(id: String): String? {
+        val current = snapshot ?: return "The circle is not open yet."
+        return commit(Workspace.acknowledgeSupport(current, id, System.currentTimeMillis()))
+    }
+
+    public suspend fun logContact(
+        channel: ContactChannel,
+        purpose: ContactPurpose,
+        category: String?,
+        tokenRef: String? = null,
+    ): String? {
+        val current = snapshot ?: return "The circle is not open yet."
+        return commit(
+            Workspace.logContact(
+                snapshot = current,
+                id = "contact-${UUID.randomUUID().toString().take(8)}",
+                channel = channel,
+                purpose = purpose,
+                category = category,
+                now = System.currentTimeMillis(),
+                tokenRef = tokenRef,
+            ),
+        )
+    }
+
+    public suspend fun clearContactLog(): String? {
+        val current = snapshot ?: return "The circle is not open yet."
+        return commit(Workspace.clearContactLog(current))
     }
 
     public suspend fun propose(action: SensitiveAction, summary: String?): String? {

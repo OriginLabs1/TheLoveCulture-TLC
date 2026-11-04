@@ -1,0 +1,13 @@
+TLC 0.0.5 — Trust & Contact.
+
+• A quieter, more premium surface: no pink, a royal-blue and silver palette, and a new crowned-heart emblem.
+• Four tabs — Today, Record, People, Settings — plus a Create sheet for every everyday verb.
+• Handles: every profile gets a @handle. @pioneer is the official role; @sircollins is the person. Both reserved.
+• People: add the people you support, give them a handle and a role, and attach one saved destination.
+• Bank vault: save a destination once, encrypted with the Android Keystore. Only the last four digits are shown, and the full number is revealed only on purpose.
+• Send Support: offer Supportive or Recognition support directly. TLC records the offer and the claim; it never moves money.
+• Pioneer's Token: the rename, with Activation, Reactivation, Courtesy and Joy. The destination stays in the vault.
+• Pioneer Desk: purpose first, a preview of the opening, then Telegram, email or the website. The contact log keeps the fact, never the message.
+• Wording under legal review: the Contact & Consent Framework is doctrine in this build; the final public copy waits for the lawyer.
+
+Still no account, no sync, no multi-device merge. Still no INTERNET permission, no Play Services, no Firebase and no analytics. No wallet, no balance, no escrow, no payment rail. The full account number never enters the record, a backup or a log. The APK is signed with the project key and published unchanged to GitHub, F-Droid, Orion Store and Uptodown.

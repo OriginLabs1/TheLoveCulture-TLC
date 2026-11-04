@@ -35,11 +35,17 @@ Description: |
   seal (length, head, root, time) shared, and the whole record exported through the system file picker
   in the exact format the ledger-verify command-line tool reads.
 
-  The shell now covers the whole product shape: onboarding and a local profile, Today, Journal,
-  Growth Grants with evidence and witness stages, Pioneer dues that stop at proof submission, a
+  The shell now covers the whole product shape: onboarding and a local profile, Today, Record,
+  Growth Grants with evidence and witness stages, Pioneer's Token that stops at proof submission, a
   two-seat Circle with two-key decisions, preferences, verified backup and restore, and an About
   screen. These are local personas and local records, not accounts or sync. A damaged state file or
   backup bundle is refused rather than silently replaced or merged.
+
+  v0.0.5 adds trust and contact: @handles for people and reserved roles, a local address book, an
+  encrypted bank vault that saves a destination once and reveals the full number only on purpose,
+  Send Support, and a purpose-first Pioneer Desk. The vault uses AES-256-GCM with a key held by the
+  Android Keystore. Only the bank name, the last four digits and a fingerprint enter the state; the
+  full account number never enters the record, a backup or a log.
 
   TLC never holds, moves, pools or escrows money. There is no wallet, no balance, no payment rail
   and no card data. The app shows where to send a payment and records the evidence you bring back;
@@ -80,14 +86,22 @@ Builds:
     output: apps/android/build/outputs/apk/foss/release/*.apk
     scanignore:
       - gradle/wrapper/gradle-wrapper.jar
+  - versionName: 0.0.5
+    versionCode: 5
+    commit: v0.0.5
+    gradle:
+      - assembleFossRelease
+    output: apps/android/build/outputs/apk/foss/release/*.apk
+    scanignore:
+      - gradle/wrapper/gradle-wrapper.jar
 
 # The same signed binary that GitHub Releases serves. F-Droid's buildserver builds from source and
 # verifies that its output matches this APK byte for byte; if it does not, the build fails rather
 # than silently shipping a differently-signed copy.
-Binaries: https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.4/tlc-0.0.4-foss.apk
+Binaries: https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.5/tlc-0.0.5-foss.apk
 AllowedAPKSigningKeys: e04cb8aa2cf5fdeec043d917a74a5ba634121f2a0b98df92869a42bb4acb732c
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 0.0.4
-CurrentVersionCode: 4
+CurrentVersion: 0.0.5
+CurrentVersionCode: 5

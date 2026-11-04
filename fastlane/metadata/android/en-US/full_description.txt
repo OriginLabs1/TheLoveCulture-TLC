@@ -2,15 +2,31 @@ TLC records recognition — who showed up for whom, and what they did — in a r
 
 It exists for one narrow purpose: to make care and contribution visible between people who trust each other, and to keep the memory of it beyond the reach of a silent edit.
 
+TRUST AND CONTACT
+
+• Handles give every person an address. Your profile gets a @handle at onboarding, validated locally. @pioneer is the official role and @sircollins is the person behind it; both are reserved, and both reach the same desk.
+• People is a small, deliberate address book. Add the people you actually support, give them a handle and a role, and attach one saved destination.
+• The Bank vault saves a destination once. The ten-digit account number is validated locally against its NUBAN check digit, encrypted with AES-256-GCM and a key held by the Android Keystore, and never written to the state, the record, a backup or a log. The app shows only the bank name, the last four digits and a fingerprint. Revealing the full number is an explicit action; it hides again on its own and the reveal is written to the record.
+• Send Support is the direct peer flow: Supportive or Recognition support to a person you know, with an optional amount and a reference. TLC records the offer, the claim and the acknowledgement. A claim is a statement, not a settlement.
+• Pioneer's Token replaces "Pioneer dues". Activation, Reactivation, Courtesy and Joy go directly to the Concept Pioneer's own account. TLC records the intent and the evidence; it never holds the money. The destination stays in the vault and is revealed only to the payer, only after the token exists.
+• The Pioneer Desk is purpose-first contact. Choose why you are writing, see the opening before it leaves the app, then pick a channel: Telegram, email or the website. WhatsApp is deferred because the founder's Telegram already uses that number. The local contact log keeps only the fact of contact — purpose, channel and time — never the message.
+• The Contact & Consent Framework is doctrine in this build. The public wording that describes it is under legal review and may change before v0.0.6.
+
+A NEW SURFACE
+
+• No pink. Royal blue, azure, silver-grey and cool white surfaces, with midnight navy for the icon tile.
+• A new emblem: a crowned heart with a sprout, drawn as a vector so one master serves the launcher, the themed icon and the store listing.
+• Four tabs — Today, Record, People, Settings — plus a Create sheet for every everyday verb.
+• A dark theme that is midnight ink, not black; motion that respects the system setting; haptics that can be turned off.
+
 THE WHOLE SHAPE, IN ONE BUILD
 
-• Onboarding asks for a name and a role only after it has explained the promise: local by default, hash-chained, non-custodial.
+• Onboarding asks for a name, a role and a handle only after it has explained the promise: local by default, hash-chained, non-custodial.
 • Today is the home surface: your circle, whether the record is intact, the everyday verbs, every open loop and the modules that make up TLC.
-• The Journal is searchable and filterable, and any entry opens to its Merkle proof against the current root. A filter is a reading aid, never a change to the record.
+• The Record is searchable and filterable, and any entry opens to its Merkle proof against the current root. A filter is a reading aid, never a change to the record.
 • Growth Grants record a witnessed pledge: the beneficiary, the purpose, the evidence you actually have, the person who verified the milestone, and the bank reference when the transfer is done.
-• Pioneer dues record a platform obligation, the instruction, and the proof you brought back. The app stops at proof submission, because only the Pioneer can attest a Pioneer payment.
 • Circle holds a Primary Steward and a Co-Steward. Either seat can veto; a sensitive decision needs both signatures to close. This build uses local personas, not accounts — cross-device invitations and signed consent grants arrive with sync.
-• Settings carries theme, motion, haptics, Receptive Mode, record export, a verified backup bundle, restore, and seal sharing.
+• Settings carries theme, motion, haptics, Receptive Mode, the trust and contact surfaces, record export, a verified backup bundle, restore, and seal sharing.
 • Verify recomputes the chain, shows the head hash and Merkle root, and exports the exact text the ledger-verify command-line tool reads.
 
 WHAT THE RECORD DOES
@@ -23,7 +39,7 @@ WHAT THE RECORD DOES
 
 WHAT IT DOES NOT DO YET
 
-There is no account, no sync and no multi-device merge. A Co-Steward is a local persona, not a remote authenticated person. The remote Pioneer attestation desk, cross-device invitations and signed consent grants are the next milestone, not a promise about this build.
+There is no account, no sync and no multi-device merge. A Co-Steward is a local persona, not a remote authenticated person. The remote Pioneer attestation desk, cross-device invitations, the SEF economy and the social layer are the next milestone, not a promise about this build.
 
 WHAT TLC WILL NEVER DO
 
@@ -34,7 +50,7 @@ WHAT TLC WILL NEVER DO
 
 PRIVATE BY CONSTRUCTION
 
-This build contains no networking code and its APK does not request the INTERNET permission. Nothing leaves the device unless you export or share it. There is no Google Play Services, no Firebase, no analytics and no proprietary SDK.
+This build contains no networking code and its APK does not request the INTERNET permission. Nothing leaves the device unless you export or share it. The full bank account number stays inside the encrypted vault and is never copied into the record, a backup, a log or a notification. There is no Google Play Services, no Firebase, no analytics and no proprietary SDK.
 
 CHECK IT YOURSELF
 
