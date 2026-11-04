@@ -37,6 +37,10 @@
 
         <path
             android:fillColor="#FFFFFF"
+            android:pathData="M256,166 a30,30 0 1,0 0.1,0 Z" />
+
+        <path
+            android:fillColor="#FFFFFF"
             android:pathData="M206,168 L206,132 L228,150 L256,120 L284,150 L306,132 L306,168 Z"
             android:strokeColor="#FFFFFF"
             android:strokeLineJoin="round"
