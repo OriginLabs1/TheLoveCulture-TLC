@@ -91,6 +91,31 @@
             android:fillColor="#F4F7FB"
             android:pathData="M256,266 C257.1,270.6 258,271.5 262.5,272.5 C258,273.6 257.1,274.5 256,279 C254.9,274.5 254,273.6 249.5,272.5 C254,271.5 254.9,270.6 256,266 Z" />
 
+        <!-- crowned figure: bridges the crown and the heart -->
+        <path
+            android:fillColor="#F4F7FB"
+            android:pathData="M256,166 a30,30 0 1,0 0.1,0 Z"
+            android:strokeColor="#1B3A8C"
+            android:strokeWidth="6" />
+        <path
+            android:fillColor="#00000000"
+            android:pathData="M242,190 C246,186 252,186 256,190"
+            android:strokeColor="#1B3A8C"
+            android:strokeLineCap="round"
+            android:strokeWidth="4" />
+        <path
+            android:fillColor="#00000000"
+            android:pathData="M256,190 C260,186 266,186 270,190"
+            android:strokeColor="#1B3A8C"
+            android:strokeLineCap="round"
+            android:strokeWidth="4" />
+        <path
+            android:fillColor="#00000000"
+            android:pathData="M248,206 C252,210 260,210 264,206"
+            android:strokeColor="#1466C7"
+            android:strokeLineCap="round"
+            android:strokeWidth="4" />
+
         <!-- crown -->
         <path
             android:fillColor="#1466C7"

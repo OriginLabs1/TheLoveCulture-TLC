@@ -13,7 +13,8 @@ folder holds the brand assets built from that description.
 | `preview.html` | review aid | opens the emblem on light/dark surfaces and the icon at 256px and 48px |
 | `tlc-logo.png` | pending | export from the SVG, not a trace |
 | `tlc-logo-mark.png` | pending | export from the SVG, not a trace |
-| `tlc-logo-mono.svg` | pending | single-colour version for Android 13+ themed icons |
+| `../../apps/android/src/main/res/drawable/ic_launcher_foreground.xml` | shipped | adaptive-icon foreground; mirrors the master, including the crowned figure |
+| `../../apps/android/src/main/res/drawable/ic_launcher_monochrome.xml` | shipped | single-colour silhouette for Android 13+ themed icons |
 
 The SVG is the source of truth. Do not trace a PNG or screenshot.
 
@@ -31,10 +32,13 @@ The geometry is deliberately bold so it survives 24–48px.
 ## Still needed
 
 1. **Founder review** of the crown contours, the heart split and the internal sprout.
-2. A **monochrome/themed icon** that reads in one colour (Android 13+).
-3. **Adaptive-icon layers** (66dp safe zone inside a 108dp canvas).
-4. **Android 12 splash mark**, About mark and store listing icon.
-5. Optimised **PNG/WebP exports** at 48/72/96/144/192/512px.
+2. **Android 12 splash mark**, About mark and store listing icon.
+3. Optimised **PNG/WebP exports** at 48/72/96/144/192/512px, exported from the SVG.
+
+The monochrome/themed icon and the adaptive-icon foreground are in the Android module and are
+generated from the same geometry as the master. The in-app `TlcMark` is a deliberately reduced
+glyph for 44–52dp use; it keeps the ring, crown, heart and sprout and drops the stars, laurel and
+face detail that would disappear at that size.
 
 ## Production direction
 
