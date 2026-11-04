@@ -1,0 +1,12 @@
+# Gitleaks configuration.
+#
+# The TLC signing certificate fingerprint is public on purpose: it is the value users, F-Droid
+# and Orion Store check against the published APK. Gitleaks' generic-api-key rule mistakes the
+# `AllowedAPKSigningKeys:` line in the F-Droid metadata for a secret, so allow that exact value
+# and nothing else. Real secrets stay covered by the default rules.
+
+[allowlist]
+description = "Public signing certificate fingerprint (not a secret)"
+regexes = [
+  '''(?i)AllowedAPKSigningKeys:\s*e04cb8aa2cf5fdeec043d917a74a5ba634121f2a0b98df92869a42bb4acb732c''',
+]
