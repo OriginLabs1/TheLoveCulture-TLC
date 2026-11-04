@@ -1,8 +1,10 @@
 # The Standard Economic Framework (SEF) — Token Direction
 
-**Status:** direction for v0.0.5. It is not shipped in v0.0.4. The v0.0.4 build still describes
-tokens as recognition signals; this document records the founder's correction so the next release
-can implement it coherently rather than shipping two contradictory doctrines.
+**Status:** direction recorded before v0.0.5 and implemented across v0.0.5 and v0.0.6. v0.0.5 shipped
+Pioneer's Token and Send Support; v0.0.6 added the shared Tokens surface with circulation counters,
+receipts and an honest timeline. This document records the founder's correction so the product does
+not carry two contradictory doctrines. The non-custody line has not moved: a Token is a record of
+value, not a balance.
 
 ## The unit
 

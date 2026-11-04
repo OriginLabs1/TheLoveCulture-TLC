@@ -118,6 +118,7 @@ class TrustContactTest {
         val claimed = Workspace.claimSupport(sent.change.snapshot, "support-1", "GTB-123", 21)
         assertIs<WorkspaceResult.Ok>(claimed)
         assertEquals(SupportState.CLAIMED, claimed.change.snapshot.supports.single().state)
+        assertEquals(21L, claimed.change.snapshot.supports.single().claimedAt)
 
         val acknowledged = Workspace.acknowledgeSupport(claimed.change.snapshot, "support-1", 22)
         assertIs<WorkspaceResult.Ok>(acknowledged)
@@ -137,6 +138,85 @@ class TrustContactTest {
         assertIs<WorkspaceResult.Rejected>(
             Workspace.sendSupport(snapshot, "s3", Handle.of("tunde"), TokenKind.ACTIVATION, 100, 1),
         )
+    }
+
+    @Test
+    fun `a profile name and photo are saved as a fact, not an image`() {
+        val updated = Workspace.updateProfile(
+            snapshot = onboarded(),
+            displayName = "  Ada New  ",
+            circleName = "  New Circle  ",
+            photoRef = "avatar-abc123.jpg",
+            now = 40,
+        )
+        assertIs<WorkspaceResult.Ok>(updated)
+        assertEquals("Ada New", updated.change.snapshot.profile.displayName)
+        assertEquals("New Circle", updated.change.snapshot.profile.circleName)
+        assertEquals("avatar-abc123.jpg", updated.change.snapshot.profile.photoRef)
+        assertEquals("Ada New", updated.change.snapshot.primary.name)
+        assertEquals(EntryKind.PROFILE_UPDATED, updated.change.facts.single().kind)
+    }
+
+    @Test
+    fun `a receipt belongs to one token and can be replaced, revoked and removed`() {
+        val withSupport = (
+            Workspace.sendSupport(
+                snapshot = onboarded(),
+                id = "support-1",
+                toHandle = Handle.of("tunde"),
+                kind = TokenKind.SUPPORTIVE,
+                amountKobo = 500_000,
+                now = 20,
+            ) as WorkspaceResult.Ok
+            ).change.snapshot
+
+        fun receipt(id: String, name: String): TokenReceipt = TokenReceipt(
+            id = id,
+            subjectKind = ReceiptSubject.SUPPORT,
+            subjectId = "support-1",
+            fileName = name,
+            hash = "a".repeat(64),
+            audience = ReceiptAudience.THIS_TRANSFER,
+            addedAt = 50,
+        )
+
+        val attached = Workspace.attachReceipt(withSupport, receipt("receipt-1", "receipt-one.jpg"), 50)
+        assertIs<WorkspaceResult.Ok>(attached)
+        assertEquals(EntryKind.RECEIPT_ADDED, attached.change.facts.single().kind)
+        assertEquals(1, attached.change.snapshot.receipts.size)
+
+        // Replacing keeps one current image per token: the old one is not a second receipt.
+        val replaced = Workspace.attachReceipt(
+            attached.change.snapshot,
+            receipt("receipt-2", "receipt-two.jpg"),
+            51,
+        )
+        assertIs<WorkspaceResult.Ok>(replaced)
+        assertEquals(listOf("receipt-2"), replaced.change.snapshot.receipts.map { it.id })
+
+        val shared = Workspace.setReceiptAudience(replaced.change.snapshot, "receipt-2", ReceiptAudience.MY_CIRCLE)
+        assertIs<WorkspaceResult.Ok>(shared)
+        assertEquals(ReceiptAudience.MY_CIRCLE, shared.change.snapshot.receipts.single().audience)
+        assertEquals(EntryKind.RECEIPT_AUDIENCE_CHANGED, shared.change.facts.single().kind)
+
+        val removed = Workspace.removeReceipt(shared.change.snapshot, "receipt-2")
+        assertIs<WorkspaceResult.Ok>(removed)
+        assertTrue(removed.change.snapshot.receipts.isEmpty())
+        assertEquals(EntryKind.RECEIPT_REMOVED, removed.change.facts.single().kind)
+    }
+
+    @Test
+    fun `a receipt cannot attach to a token that is not here`() {
+        val orphan = TokenReceipt(
+            id = "receipt-1",
+            subjectKind = ReceiptSubject.GRANT,
+            subjectId = "missing-grant",
+            fileName = "receipt-one.jpg",
+            hash = "a".repeat(64),
+            audience = ReceiptAudience.ONLY_ME,
+            addedAt = 50,
+        )
+        assertIs<WorkspaceResult.Rejected>(Workspace.attachReceipt(onboarded(), orphan, 50))
     }
 
     @Test

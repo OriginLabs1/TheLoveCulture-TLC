@@ -7,6 +7,10 @@ import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -14,10 +18,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 // ---------------------------------------------------------------------------------------------
-// TLC design tokens — royal blue, azure, silver and cool white. The record is personal, so the
-// surface is quiet paper in light and midnight ink in dark. One accent family, no gradients that
-// shout, and no colour that reads as a fintech wallet. No bundled fonts: the system serif for
-// display and the system sans for text keep the download small and the licence surface clean.
+// TLC design tokens — royal blue, azure, silver, forest and a restrained royal purple. The record
+// is personal, so the surface is quiet paper in light and midnight ink in dark. Blue is the action
+// colour; forest marks what is received or verified; purple marks the Pioneer and stewardship.
+// Status colours are ink stamps, never surface washes, and never a second call to action. No
+// bundled fonts: the system serif for display and the system sans for text keep the download small
+// and the licence surface clean.
 // ---------------------------------------------------------------------------------------------
 
 private val RoyalBlue = Color(0xFF1B3A8C)
@@ -43,6 +49,75 @@ private val NightRaised = Color(0xFF102340)
 private val NightSoft = Color(0xFF172C4B)
 private val Moon = Color(0xFFF1F5FB)
 private val MoonSoft = Color(0xFFAFC0D8)
+
+// Two new accent families, used like ink stamps — never as a surface wash.
+// Forest green: received, verified, growth. Royal purple: Pioneer, stewardship, recognition.
+// Every pair below is checked at WCAG 2.2 AA or better (lowest is 7.54:1).
+private val Forest = Color(0xFF1E5B3E)
+private val ForestContainer = Color(0xFFDCEFE3)
+private val OnForestContainer = Color(0xFF0B3524)
+private val RoyalPurple = Color(0xFF4B2E83)
+private val RoyalPurpleContainer = Color(0xFFE9E1FA)
+private val OnRoyalPurpleContainer = Color(0xFF2A1750)
+
+private val DarkForest = Color(0xFF7FD1A8)
+private val DarkForestContainer = Color(0xFF123A2A)
+private val OnDarkForestContainer = Color(0xFFC9F2DC)
+private val DarkRoyalPurple = Color(0xFFC3A6FF)
+private val DarkRoyalPurpleContainer = Color(0xFF2E1F52)
+private val OnDarkRoyalPurpleContainer = Color(0xFFE9DFFF)
+
+/**
+ * Semantic colours that Material 3 does not provide.
+ *
+ * [forest] is for "received", "verified" and "growth". [royal] is for the Pioneer, stewardship
+ * and recognition. They are deliberately separate from [androidx.compose.material3.ColorScheme.primary]
+ * so a screen cannot accidentally turn a status into a call to action.
+ */
+@Immutable
+public data class TlcSemanticColors(
+    public val forest: Color,
+    public val onForest: Color,
+    public val forestContainer: Color,
+    public val onForestContainer: Color,
+    public val royal: Color,
+    public val onRoyal: Color,
+    public val royalContainer: Color,
+    public val onRoyalContainer: Color,
+)
+
+private val LightSemanticColors = TlcSemanticColors(
+    forest = Forest,
+    onForest = Color.White,
+    forestContainer = ForestContainer,
+    onForestContainer = OnForestContainer,
+    royal = RoyalPurple,
+    onRoyal = Color.White,
+    royalContainer = RoyalPurpleContainer,
+    onRoyalContainer = OnRoyalPurpleContainer,
+)
+
+private val DarkSemanticColors = TlcSemanticColors(
+    forest = DarkForest,
+    onForest = Color(0xFF052015),
+    forestContainer = DarkForestContainer,
+    onForestContainer = OnDarkForestContainer,
+    royal = DarkRoyalPurple,
+    onRoyal = Color(0xFF1B0F33),
+    royalContainer = DarkRoyalPurpleContainer,
+    onRoyalContainer = OnDarkRoyalPurpleContainer,
+)
+
+public val LocalTlcSemanticColors: androidx.compose.runtime.ProvidableCompositionLocal<TlcSemanticColors> =
+    staticCompositionLocalOf { LightSemanticColors }
+
+/** Read the TLC-only accents: `TlcPalette.colors.forest`, `.royal`. */
+public object TlcPalette {
+    public val colors: TlcSemanticColors
+        @Composable
+        @ReadOnlyComposable
+        get() = LocalTlcSemanticColors.current
+}
 
 private val LightScheme = lightColorScheme(
     primary = RoyalBlue,
@@ -138,10 +213,14 @@ public fun TlcTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit,
 ) {
-    MaterialTheme(
-        colorScheme = if (darkTheme) DarkScheme else LightScheme,
-        typography = TlcTypography,
-        shapes = TlcShapes,
-        content = content,
-    )
+    CompositionLocalProvider(
+        LocalTlcSemanticColors provides if (darkTheme) DarkSemanticColors else LightSemanticColors,
+    ) {
+        MaterialTheme(
+            colorScheme = if (darkTheme) DarkScheme else LightScheme,
+            typography = TlcTypography,
+            shapes = TlcShapes,
+            content = content,
+        )
+    }
 }

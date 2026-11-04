@@ -82,7 +82,7 @@ in the APK. It is entered by the person who will use it and kept on that device:
    backup.
 3. **Right reason.** The only reason to reveal is to make a transfer the person has chosen to make.
    There is no browseable directory and no copy path that survives the reveal window.
-4. **No network.** v0.0.5 has no networking code, so a destination cannot leave the device through
+4. **No network.** v0.0.6 has no networking code, so a destination cannot leave the device through
    the app. It can leave only if the person exports or shares something deliberately, and the vault
    itself is never part of an export.
 5. **Loss is honest.** Uninstalling the app or resetting the device destroys the Keystore key, so the

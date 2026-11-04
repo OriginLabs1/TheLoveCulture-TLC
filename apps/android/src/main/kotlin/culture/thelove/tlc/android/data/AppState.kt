@@ -1,5 +1,7 @@
 package culture.thelove.tlc.android.data
 
+import android.content.Context
+import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -20,8 +22,11 @@ import culture.thelove.tlc.experience.BundleResult
 import culture.thelove.tlc.experience.Dues
 import culture.thelove.tlc.experience.GrantEvent
 import culture.thelove.tlc.experience.Preferences
+import culture.thelove.tlc.experience.ReceiptAudience
+import culture.thelove.tlc.experience.ReceiptSubject
 import culture.thelove.tlc.experience.StateFile
 import culture.thelove.tlc.experience.StateResult
+import culture.thelove.tlc.experience.TokenReceipt
 import culture.thelove.tlc.experience.Workspace
 import culture.thelove.tlc.experience.WorkspaceChange
 import culture.thelove.tlc.experience.WorkspaceResult
@@ -41,12 +46,14 @@ import java.util.UUID
  * derived snapshot is written atomically. If the record refuses a fact, the snapshot is not written
  * at all. That is why the ledger can always explain the state, even after a crash.
  */
-public class AppState(filesDir: File) {
+public class AppState(context: Context) {
 
+    private val filesDir: File = context.applicationContext.filesDir
     public val journal: JournalState = JournalState(filesDir)
     private val stateFile = StateFile(filesDir)
     private val hasher = PlatformSha256()
     private val vault = BankVault(filesDir)
+    private val media = MediaFiles(context)
 
     public var loading: Boolean by mutableStateOf(true)
         private set
@@ -118,6 +125,104 @@ public class AppState(filesDir: File) {
     public suspend fun updatePreferences(preferences: Preferences): String? {
         val current = snapshot ?: return "The circle is not open yet."
         return commit(Workspace.updatePreferences(current, preferences))
+    }
+
+    // -----------------------------------------------------------------------------------------
+    // Profile and receipts (v0.0.6). Files are written first; state is committed second; a
+    // rejected commit removes the new file, so the folder can never hold orphaned evidence.
+    // -----------------------------------------------------------------------------------------
+
+    public fun mediaFile(name: String?): File? = media.file(name)
+
+    public suspend fun updateProfile(displayName: String, circleName: String): String? {
+        val current = snapshot ?: return "The circle is not open yet."
+        return commit(
+            Workspace.updateProfile(
+                snapshot = current,
+                displayName = displayName,
+                circleName = circleName,
+                photoRef = current.profile.photoRef,
+                now = System.currentTimeMillis(),
+            ),
+        )
+    }
+
+    public suspend fun setProfilePhoto(uri: Uri): String? {
+        val current = snapshot ?: return "The circle is not open yet."
+        val imported = media.importAvatar(uri) ?: return "That image could not be read."
+        val previous = current.profile.photoRef
+        val error = commit(
+            Workspace.updateProfile(
+                snapshot = current,
+                displayName = current.profile.displayName,
+                circleName = current.profile.circleName,
+                photoRef = imported.fileName,
+                now = System.currentTimeMillis(),
+            ),
+        )
+        if (error != null) {
+            media.delete(imported.fileName)
+            return error
+        }
+        if (previous != imported.fileName) media.delete(previous)
+        return null
+    }
+
+    public suspend fun removeProfilePhoto(): String? {
+        val current = snapshot ?: return "The circle is not open yet."
+        val previous = current.profile.photoRef ?: return null
+        val error = commit(
+            Workspace.updateProfile(
+                snapshot = current,
+                displayName = current.profile.displayName,
+                circleName = current.profile.circleName,
+                photoRef = null,
+                now = System.currentTimeMillis(),
+            ),
+        )
+        if (error == null) media.delete(previous)
+        return error
+    }
+
+    public suspend fun attachReceipt(
+        subjectKind: ReceiptSubject,
+        subjectId: String,
+        uri: Uri,
+        audience: ReceiptAudience,
+    ): String? {
+        val current = snapshot ?: return "The circle is not open yet."
+        val imported = media.importReceipt(uri) ?: return "That image could not be read."
+        val receipt = TokenReceipt(
+            id = "receipt-${UUID.randomUUID().toString().take(8)}",
+            subjectKind = subjectKind,
+            subjectId = subjectId,
+            fileName = imported.fileName,
+            hash = imported.hash,
+            audience = audience,
+            addedAt = System.currentTimeMillis(),
+        )
+        val previous = current.receipt(subjectKind, subjectId)?.fileName
+        val error = commit(Workspace.attachReceipt(current, receipt, System.currentTimeMillis()))
+        if (error != null) {
+            media.delete(imported.fileName)
+            return error
+        }
+        if (previous != imported.fileName) media.delete(previous)
+        return null
+    }
+
+    public suspend fun removeReceipt(receiptId: String): String? {
+        val current = snapshot ?: return "The circle is not open yet."
+        val receipt = current.receipts.firstOrNull { it.id == receiptId }
+            ?: return "That receipt is no longer here."
+        val error = commit(Workspace.removeReceipt(current, receiptId))
+        if (error == null) media.delete(receipt.fileName)
+        return error
+    }
+
+    public suspend fun setReceiptAudience(receiptId: String, audience: ReceiptAudience): String? {
+        val current = snapshot ?: return "The circle is not open yet."
+        return commit(Workspace.setReceiptAudience(current, receiptId, audience))
     }
 
     public suspend fun addCoSteward(name: String): String? {

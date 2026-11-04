@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The only path FileProvider may expose: the app's private media folder. A receipt is shared
+     as a single content URI with a one-shot read grant; the folder itself, the state file, the
+     record and the bank vault are not reachable. -->
+<paths>
+    <files-path name="media" path="media/" />
+</paths>

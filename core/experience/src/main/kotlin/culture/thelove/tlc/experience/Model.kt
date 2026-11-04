@@ -25,6 +25,8 @@ public data class Profile(
     public val recordId: String,
     public val createdAt: Long,
     public val handle: Handle? = null,
+    /** A file name inside the app's private media folder, never a path or a URL. */
+    public val photoRef: String? = null,
 ) {
     init {
         require(displayName.isNotBlank() && displayName.length <= MAX_NAME) {
@@ -36,12 +38,16 @@ public data class Profile(
         require(handle == null || !Handle.isReserved(handle.value)) {
             "That handle belongs to TLC and cannot be claimed by a person."
         }
+        require(photoRef == null || photoRef.matches(MEDIA_REF)) {
+            "A profile photo is a plain file name inside the private media folder."
+        }
     }
 
     public companion object {
         public const val MAX_NAME: Int = 80
         public const val MAX_CIRCLE: Int = 80
         private val RECORD_ID: Regex = Regex("[0-9a-f]{32}")
+        private val MEDIA_REF: Regex = Regex("[a-z0-9-]{1,80}\\.jpg")
     }
 }
 
@@ -123,6 +129,7 @@ public data class SupportIntent(
     public val state: SupportState,
     public val createdAt: Long,
     public val reference: String? = null,
+    public val claimedAt: Long? = null,
     public val acknowledgedAt: Long? = null,
 ) {
     init {
@@ -140,8 +147,62 @@ public data class SupportIntent(
     }
 }
 
-/** A local record that contact happened. The message body is deliberately absent. */
-public data class ContactEvent(
+/** What a receipt image belongs to. A receipt is evidence, never a movement of value. */
+public enum class ReceiptSubject { SUPPORT, DUE, GRANT, RECORD }
+
+/**
+ * Who may open a receipt image.
+ *
+ * The default for a token receipt is [THIS_TRANSFER]. [ONLY_ME] is the default for a personal
+ * receipt. Nothing is public unless a person chooses it, and every audience can be changed or
+ * revoked later.
+ */
+public enum class ReceiptAudience {
+    ONLY_ME,
+    THIS_TRANSFER,
+    MY_CIRCLE,
+    ANYONE_WITH_LINK,
+    PUBLIC_IN_RECORD,
+    ;
+
+    public val isShared: Boolean get() = this != ONLY_ME
+}
+
+/**
+ * One receipt image the person chose to keep.
+ *
+ * [fileName] points at a downscaled JPEG inside the private media folder. The file has no EXIF
+ * metadata and is never embedded in the state file, the record or a backup. [hash] lets the person
+ * prove the image they hold is the image that was recorded, without TLC ever reading it.
+ */
+public data class TokenReceipt(
+    public val id: String,
+    public val subjectKind: ReceiptSubject,
+    public val subjectId: String,
+    public val fileName: String,
+    public val hash: String,
+    public val audience: ReceiptAudience,
+    public val addedAt: Long,
+    public val note: String? = null,
+) {
+    init {
+        require(id.isNotBlank() && id.length <= 64) { "A receipt needs a stable id." }
+        require(subjectId.isNotBlank() && subjectId.length <= 64) { "A receipt needs its subject." }
+        require(fileName.matches(MEDIA_REF)) { "A receipt is a plain file name inside the private media folder." }
+        require(hash.length == 64 && hash.all { it in "0123456789abcdef" }) {
+            "A receipt hash is 64 lowercase hex characters."
+        }
+        require(addedAt > 0) { "A receipt needs a real time." }
+        require(note == null || note.length <= MAX_NOTE) { "A receipt note is at most $MAX_NOTE characters." }
+    }
+
+    public companion object {
+        public const val MAX_NOTE: Int = 280
+        private val MEDIA_REF: Regex = Regex("[a-z0-9-]{1,80}\\.jpg")
+    }
+}
+
+/** A local record that contact happened. The message body is deliberately absent. */public data class ContactEvent(
     public val id: String,
     public val channel: ContactChannel,
     public val purpose: ContactPurpose,
@@ -297,6 +358,7 @@ public data class AppSnapshot(
     public val bankAccounts: List<BankAccountRef> = emptyList(),
     public val contactLog: List<ContactEvent> = emptyList(),
     public val supports: List<SupportIntent> = emptyList(),
+    public val receipts: List<TokenReceipt> = emptyList(),
 ) {
     init {
         require(stewards.isNotEmpty()) { "A space needs at least one steward." }
@@ -319,6 +381,12 @@ public data class AppSnapshot(
         require(contactLog.map { it.id }.distinct().size == contactLog.size) {
             "Two contact events cannot share an id."
         }
+        require(receipts.map { it.id }.distinct().size == receipts.size) {
+            "Two receipts cannot share an id."
+        }
+        require(receipts.map { it.subjectKind to it.subjectId }.distinct().size == receipts.size) {
+            "A token can have one current receipt image; replace it instead of adding a second."
+        }
         require(people.none { person -> person.bankRefId != null && bankAccounts.none { it.id == person.bankRefId } }) {
             "A person cannot point at a bank reference that is not here."
         }
@@ -334,4 +402,7 @@ public data class AppSnapshot(
     public fun person(handle: Handle): Person? = people.firstOrNull { it.handle == handle }
 
     public fun bankRef(id: String?): BankAccountRef? = id?.let { key -> bankAccounts.firstOrNull { it.id == key } }
+
+    public fun receipt(subjectKind: ReceiptSubject, subjectId: String): TokenReceipt? =
+        receipts.firstOrNull { it.subjectKind == subjectKind && it.subjectId == subjectId }
 }

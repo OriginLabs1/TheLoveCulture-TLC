@@ -1,29 +1,29 @@
-# TLC — v0.0.5
+# TLC — v0.0.6
 
 Android-first shell over a sovereign, non-custodial core.
-Doctrine: [`CONTEXT.md`](CONTEXT.md) · Contract: [`SPECS.md`](SPECS.md) · Releases: [v0.0.5](https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/latest)
+Doctrine: [`CONTEXT.md`](CONTEXT.md) · Contract: [`SPECS.md`](SPECS.md) · Releases: [v0.0.6](https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/latest)
 
-**Status: trust and contact.** The record is proven, and v0.0.5 makes it usable between people.
-Names, numbers and a way to reach the Pioneer: `@handles` for people and reserved roles, a local
-address book, an encrypted bank vault that saves a destination once and reveals it only on purpose,
-Send Support, the renamed **Pioneer's Token**, and a purpose-first **Pioneer Desk**. The visual
-language is new — royal blue, azure and silver, no pink — with four tabs (Today, Record, People,
-Settings) and a Create sheet. Everything is still local-only: no account, no sync, no `INTERNET`
-permission, no custody. Accounts, sync, the SEF economy and the social layer are the next milestone.
-The store copy says the same thing — see
+**Status: tokens, receipts and faces.** The relationship is recorded, and v0.0.6 makes it visible.
+One Tokens surface shows every Support, Pioneer's Token and Growth Grant with its real state, its
+timeline and its receipt; receipt images can be attached, replaced, removed and shared with an
+audience you choose; and your profile photo and name are yours to edit. Forest green and royal
+purple join the palette as accents, with selective motion that respects the system setting.
+Everything is still local-only: no account, no sync, no `INTERNET` permission, no custody. The
+Received view shows what is on this device and never invents a number. Accounts, sync, encrypted
+messaging and the shared plane are the next milestone. The store copy says the same thing — see
 [`fastlane/metadata`](fastlane/metadata/android/en-US/full_description.txt).
 
-## Install v0.0.5
+## Install v0.0.6
 
-**[Download `tlc-0.0.5-foss.apk`](https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.5/tlc-0.0.5-foss.apk)**
+**[Download `tlc-0.0.6-foss.apk`](https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.6/tlc-0.0.6-foss.apk)**
 · [install page](https://originlabs1.github.io/TheLoveCulture-TLC/) ·
-[release page](https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/tag/v0.0.5) ·
-[SHA256SUMS](https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.5/SHA256SUMS) ·
-[signature](https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.5/tlc-0.0.5-foss.signature.txt)
+[release page](https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/tag/v0.0.6) ·
+[SHA256SUMS](https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.6/SHA256SUMS) ·
+[signature](https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.6/tlc-0.0.6-foss.signature.txt)
 
 ```sh
 sha256sum -c SHA256SUMS
-apksigner verify --print-certs tlc-0.0.5-foss.apk
+apksigner verify --print-certs tlc-0.0.6-foss.apk
 # certificate SHA-256: e04cb8aa2cf5fdeec043d917a74a5ba634121f2a0b98df92869a42bb4acb732c
 ```
 
@@ -38,9 +38,9 @@ these releases. F-Droid, Orion Store and Uptodown receive the same signed file; 
 |---|---|---|
 | Domain state machine (SK-01) | `core/domain` | 34 invariant tests green — roles, tokens, handles, NUBAN, dyad authority, fee state machine |
 | Hash-chained Pioneer ledger (SK-04, INV-08) | `core/ledger` | 53 tests green — tamper, reorder, truncation, torn writes, failed writes, replay and restore all caught |
-| Experience layer | `core/experience` | 31 tests green — onboarding, preferences, dyad, proposals, grants, tokens, Support, people, contact log, state and bundle codecs |
+| Experience layer | `core/experience` | 35 tests green — onboarding, preferences, dyad, proposals, grants, tokens, Support, people, contact log, profile and receipts, state and bundle codecs |
 | `ledger-verify` CLI (SPECS §B-3) | `tools/ledger-verify` | 9 tests — reads the app's own export; exit-code contract tested |
-| Android shell (Compose M3) | `apps/android` | onboarding, Today, Record, People, Bank vault, Support, Pioneer Desk, Grants, Token, Circle, Settings, Verify and About; type-checks against the real Compose classpath |
+| Android shell (Compose M3) | `apps/android` | onboarding, Today, Record, People, Bank vault, Support, Pioneer Desk, Grants, Token, Tokens, Profile, Circle, Settings, Verify and About; type-checks against the real Compose classpath |
 
 No code path in this repository moves, holds, pools or escrows money. `Effect` has
 `requiresCustody = false` on every member, and the ledger has no `BALANCE`/`TRANSFER`/`ESCROW`
@@ -50,7 +50,7 @@ entry kind — both enforced by tests, not by comment.
 
 ```bash
 make doctor        # toolchain + secret presence (never prints secrets)
-make verify        # compile + all 127 invariant tests, no Android SDK needed
+make verify        # compile + all 131 invariant tests, no Android SDK needed
 make ledger-verify # chain verification, including deliberate tampering
 make check-foss    # prove the foss channel has no Play Services / Firebase / tracking
 make shell-check   # type-check the shell without AAPT2 (any CPU)
@@ -92,8 +92,8 @@ Version identity lives in one file (`version.properties`); the git tag must equa
 
 ```bash
 ./scripts/bump-version.sh patch
-git add version.properties && git commit -m "release: v0.0.5"
-git tag v0.0.5 && git push origin main v0.0.5
+git add version.properties && git commit -m "release: v0.0.6"
+git tag v0.0.6 && git push origin main v0.0.6
 ```
 
 `.github/workflows/release.yml` then verifies the tag against `version.properties`, rejects a

@@ -1,5 +1,7 @@
 package culture.thelove.tlc.android.ui.screens
 
+import androidx.compose.animation.core.animateIntAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,6 +23,8 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
@@ -34,11 +38,15 @@ import culture.thelove.tlc.android.ui.Pill
 import culture.thelove.tlc.android.ui.RecordHero
 import culture.thelove.tlc.android.ui.SealPill
 import culture.thelove.tlc.android.ui.SectionCard
-import culture.thelove.tlc.android.ui.TlcMark
+import culture.thelove.tlc.android.ui.StatTile
+import culture.thelove.tlc.android.ui.TlcAvatar
+import culture.thelove.tlc.android.ui.tlcClickable
+import culture.thelove.tlc.android.ui.theme.TlcPalette
 import culture.thelove.tlc.domain.ObligationState
 import culture.thelove.tlc.domain.Role
 import culture.thelove.tlc.experience.AppSnapshot
 import culture.thelove.tlc.experience.GrantStage
+import culture.thelove.tlc.experience.SupportState
 
 /**
  * The home surface: who you are, that the record is intact, the four everyday verbs, and every
@@ -62,6 +70,8 @@ public fun TodayScreen(
     onVerify: () -> Unit,
     onCheckpoint: () -> Unit,
     onAbout: () -> Unit,
+    onTokens: () -> Unit,
+    onProfile: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val openProposals = snapshot.proposals.count { !it.closed }
@@ -71,8 +81,17 @@ public fun TodayScreen(
             it.state == ObligationState.INSTRUCTION_ISSUED ||
             it.state == ObligationState.PROOF_SUBMITTED
     }
-    val openSupports = snapshot.supports.count { it.state != culture.thelove.tlc.experience.SupportState.ACKNOWLEDGED }
+    val openSupports = snapshot.supports.count { it.state != SupportState.ACKNOWLEDGED }
     val openTotal = openProposals + openGrants + openDues + openSupports
+
+    val tokenTotal = snapshot.supports.size + snapshot.dues.size + snapshot.grants.size
+    val tokenReceived = snapshot.supports.count { it.state == SupportState.ACKNOWLEDGED }
+    val tokenTransferred = snapshot.supports.count { it.state != SupportState.INTENT } +
+        snapshot.dues.count {
+            it.state == ObligationState.ATTESTED ||
+                it.state == ObligationState.PROOF_SUBMITTED
+        } +
+        snapshot.grants.count { it.stage == GrantStage.PAID }
 
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -120,7 +139,11 @@ public fun TodayScreen(
                         }
                     }
                 }
-                TlcMark(modifier = Modifier.size(52.dp))
+                TlcAvatar(
+                    photoRef = snapshot.profile.photoRef,
+                    size = 56.dp,
+                    modifier = Modifier.tlcClickable(onClick = onProfile),
+                )
             }
         }
 
@@ -130,6 +153,15 @@ public fun TodayScreen(
                 headHash = headHash,
                 healthy = healthy,
                 sealLabel = sealLabel,
+            )
+        }
+
+        item(key = "circulation") {
+            CirculationStrip(
+                total = tokenTotal,
+                transferred = tokenTransferred,
+                received = tokenReceived,
+                onOpen = onTokens,
             )
         }
 
@@ -324,6 +356,61 @@ public fun TodayScreen(
             }
         }
     }
+}
+
+/**
+ * The live circulation strip. Three counts, no balance and no ranking: how many tokens exist,
+ * how many have left the offer stage, and how many the other side has acknowledged.
+ */
+@Composable
+private fun CirculationStrip(total: Int, transferred: Int, received: Int, onOpen: () -> Unit) {
+    val colors = TlcPalette.colors
+    SectionCard(title = stringResource(R.string.today_circulation)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            AnimatedCounter(
+                label = stringResource(R.string.tokens_segment_all),
+                value = total,
+                accent = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.weight(1f),
+            )
+            AnimatedCounter(
+                label = stringResource(R.string.tokens_transferred),
+                value = transferred,
+                accent = colors.forest,
+                modifier = Modifier.weight(1f),
+            )
+            AnimatedCounter(
+                label = stringResource(R.string.tokens_received_short),
+                value = received,
+                accent = colors.royal,
+                modifier = Modifier.weight(1f),
+            )
+        }
+        Text(
+            text = stringResource(
+                if (total == 0) R.string.today_circulation_none else R.string.today_tokens_body,
+            ),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        TextButton(onClick = onOpen) {
+            Text(stringResource(R.string.create_tokens))
+        }
+    }
+}
+
+@Composable
+private fun AnimatedCounter(label: String, value: Int, accent: androidx.compose.ui.graphics.Color, modifier: Modifier) {
+    val animated by animateIntAsState(
+        targetValue = value,
+        animationSpec = tween(650),
+        label = "today-$label",
+    )
+    StatTile(label = label, value = animated.toString(), modifier = modifier, accent = accent)
 }
 
 @Composable

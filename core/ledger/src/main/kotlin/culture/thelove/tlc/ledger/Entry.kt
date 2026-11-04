@@ -43,6 +43,18 @@ public enum class EntryKind {
 
     /** Contact happened through a channel. The message body is deliberately absent. */
     CONTACT_RECORDED,
+
+    /** A person changed their own name, circle name or profile photo on this device. */
+    PROFILE_UPDATED,
+
+    /** A receipt image was attached to a token. It is evidence, never a movement of value. */
+    RECEIPT_ADDED,
+
+    /** A receipt image was removed. The record keeps the fact, not the image. */
+    RECEIPT_REMOVED,
+
+    /** The audience for a receipt image changed. Sharing is explicit and revocable. */
+    RECEIPT_AUDIENCE_CHANGED,
 }
 
 public data class LedgerEntry(

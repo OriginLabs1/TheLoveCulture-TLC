@@ -47,6 +47,8 @@ public fun SettingsScreen(
     onContact: () -> Unit,
     onCircle: () -> Unit,
     onGrants: () -> Unit,
+    onTokens: () -> Unit,
+    onProfile: () -> Unit,
     onExportRecord: () -> Unit,
     onExportBundle: () -> Unit,
     onImportBundle: () -> Unit,
@@ -138,6 +140,18 @@ public fun SettingsScreen(
                         color = MaterialTheme.colorScheme.secondary,
                     )
                 }
+                SettingAction(
+                    title = stringResource(R.string.settings_profile),
+                    body = stringResource(R.string.settings_profile_body),
+                    enabled = !busy,
+                    onClick = onProfile,
+                )
+                SettingAction(
+                    title = stringResource(R.string.settings_tokens),
+                    body = stringResource(R.string.settings_tokens_body),
+                    enabled = !busy,
+                    onClick = onTokens,
+                )
                 SettingAction(
                     title = stringResource(R.string.settings_people),
                     body = stringResource(R.string.settings_people_body),

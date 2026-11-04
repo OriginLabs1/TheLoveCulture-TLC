@@ -130,6 +130,140 @@ public object Workspace {
     public fun updatePreferences(snapshot: AppSnapshot, preferences: Preferences): WorkspaceResult =
         WorkspaceResult.Ok(WorkspaceChange(snapshot.copy(preferences = preferences)))
 
+    /**
+     * Update the person's own profile. [photoRef] is the current file name (or `null` to remove
+     * the photo); the caller owns the file and must not change state until the file is written.
+     */
+    public fun updateProfile(
+        snapshot: AppSnapshot,
+        displayName: String,
+        circleName: String,
+        photoRef: String?,
+        now: Long,
+    ): WorkspaceResult {
+        val cleanName = displayName.trim()
+        if (cleanName.isBlank()) return WorkspaceResult.Rejected("A display name cannot be empty.")
+        return guarded {
+            val profile = snapshot.profile.copy(
+                displayName = cleanName,
+                circleName = circleName.trim().ifBlank { snapshot.profile.circleName },
+                photoRef = photoRef,
+            )
+            if (profile == snapshot.profile) {
+                return@guarded WorkspaceChange(snapshot, notice = "Nothing changed.")
+            }
+            val stewards = snapshot.stewards.map { steward ->
+                if (steward.role == StewardRole.PRIMARY) steward.copy(name = cleanName) else steward
+            }
+            val photoChanged = profile.photoRef != snapshot.profile.photoRef
+            val details = buildString {
+                append("Profile updated")
+                if (profile.displayName != snapshot.profile.displayName) append(" · name")
+                if (profile.circleName != snapshot.profile.circleName) append(" · circle")
+                if (photoChanged) append(if (profile.photoRef == null) " · photo removed" else " · photo")
+            }
+            WorkspaceChange(
+                snapshot = snapshot.copy(profile = profile, stewards = stewards),
+                facts = listOf(
+                    fact(
+                        kind = EntryKind.PROFILE_UPDATED,
+                        subject = details,
+                        at = now,
+                        key = "profile:${snapshot.profile.recordId}:updated:$now",
+                    ),
+                ),
+                notice = "Your profile is saved on this device.",
+            )
+        }
+    }
+
+    /**
+     * Attach (or replace) the one current receipt image for a token. Replacing keeps the same
+     * subject but a new id, so the timeline shows that the evidence changed.
+     */
+    public fun attachReceipt(
+        snapshot: AppSnapshot,
+        receipt: TokenReceipt,
+        now: Long,
+    ): WorkspaceResult {
+        val subjectExists = when (receipt.subjectKind) {
+            ReceiptSubject.SUPPORT -> snapshot.supports.any { it.id == receipt.subjectId }
+            ReceiptSubject.DUE -> snapshot.dues.any { it.id == receipt.subjectId }
+            ReceiptSubject.GRANT -> snapshot.grants.any { it.id == receipt.subjectId }
+            ReceiptSubject.RECORD -> true
+        }
+        if (!subjectExists) return WorkspaceResult.Rejected("That token is no longer here.")
+        return guarded {
+            val remaining = snapshot.receipts.filterNot {
+                it.subjectKind == receipt.subjectKind && it.subjectId == receipt.subjectId
+            }
+            WorkspaceChange(
+                snapshot = snapshot.copy(receipts = remaining + receipt),
+                facts = listOf(
+                    fact(
+                        kind = EntryKind.RECEIPT_ADDED,
+                        subject = "Receipt image attached · ${audienceLabel(receipt.audience)}",
+                        at = now,
+                        key = "receipt:${receipt.id}:added",
+                    ),
+                ),
+                notice = "Receipt image saved on this device.",
+            )
+        }
+    }
+
+    public fun removeReceipt(snapshot: AppSnapshot, receiptId: String): WorkspaceResult {
+        val receipt = snapshot.receipts.firstOrNull { it.id == receiptId }
+            ?: return WorkspaceResult.Rejected("That receipt is no longer here.")
+        return WorkspaceResult.Ok(
+            WorkspaceChange(
+                snapshot = snapshot.copy(receipts = snapshot.receipts.filterNot { it.id == receiptId }),
+                facts = listOf(
+                    fact(
+                        kind = EntryKind.RECEIPT_REMOVED,
+                        subject = "Receipt image removed",
+                        at = System.currentTimeMillis(),
+                        key = "receipt:${receipt.id}:removed",
+                    ),
+                ),
+                notice = "Receipt image removed. The record keeps only the fact.",
+            ),
+        )
+    }
+
+    public fun setReceiptAudience(
+        snapshot: AppSnapshot,
+        receiptId: String,
+        audience: ReceiptAudience,
+    ): WorkspaceResult {
+        val receipt = snapshot.receipts.firstOrNull { it.id == receiptId }
+            ?: return WorkspaceResult.Rejected("That receipt is no longer here.")
+        if (receipt.audience == audience) {
+            return WorkspaceResult.Ok(WorkspaceChange(snapshot, notice = "That audience is already set."))
+        }
+        val next = receipt.copy(audience = audience)
+        return WorkspaceResult.Ok(
+            WorkspaceChange(
+                snapshot = snapshot.copy(
+                    receipts = snapshot.receipts.map { if (it.id == receiptId) next else it },
+                ),
+                facts = listOf(
+                    fact(
+                        kind = EntryKind.RECEIPT_AUDIENCE_CHANGED,
+                        subject = "Receipt audience: ${audienceLabel(audience)}",
+                        at = System.currentTimeMillis(),
+                        key = "receipt:${receipt.id}:audience:${audience.name}",
+                    ),
+                ),
+                notice = if (audience.isShared) {
+                    "This receipt can now be seen by ${audienceLabel(audience).lowercase()}."
+                } else {
+                    "This receipt is private to you again."
+                },
+            ),
+        )
+    }
+
     public fun addCoSteward(snapshot: AppSnapshot, id: String, name: String): WorkspaceResult {
         if (snapshot.coSteward != null) {
             return WorkspaceResult.Rejected("This circle already has a Co-Steward.")
@@ -654,7 +788,7 @@ public object Workspace {
         val clean = reference.trim()
         if (clean.isBlank()) return WorkspaceResult.Rejected("Add the bank reference from your own app.")
         return guarded {
-            val next = support.copy(state = SupportState.CLAIMED, reference = clean)
+            val next = support.copy(state = SupportState.CLAIMED, reference = clean, claimedAt = now)
             WorkspaceChange(
                 snapshot = snapshot.copy(supports = snapshot.supports.replaceSupport(next)),
                 facts = listOf(
@@ -802,6 +936,14 @@ public object Workspace {
         TokenKind.REACTIVATION -> "Reactivation"
         TokenKind.COURTESY -> "Courtesy"
         TokenKind.JOY -> "Joy"
+    }
+
+    private fun audienceLabel(audience: ReceiptAudience): String = when (audience) {
+        ReceiptAudience.ONLY_ME -> "Only me"
+        ReceiptAudience.THIS_TRANSFER -> "This transfer"
+        ReceiptAudience.MY_CIRCLE -> "My circle"
+        ReceiptAudience.ANYONE_WITH_LINK -> "Anyone with the link"
+        ReceiptAudience.PUBLIC_IN_RECORD -> "Public in Record"
     }
 
     private fun grantNotice(stage: GrantStage): String = when (stage) {

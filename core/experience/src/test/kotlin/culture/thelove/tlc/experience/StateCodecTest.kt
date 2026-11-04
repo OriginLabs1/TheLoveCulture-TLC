@@ -13,7 +13,14 @@ import kotlin.test.assertTrue
 class StateCodecTest {
 
     private fun snapshot(): AppSnapshot = AppSnapshot(
-        profile = Profile("Ada", "The Okafor Circle", Role.LOVE_MODEL, "0123456789abcdef0123456789abcdef", 1_700_000_000_000),
+        profile = Profile(
+            displayName = "Ada",
+            circleName = "The Okafor Circle",
+            role = Role.LOVE_MODEL,
+            recordId = "0123456789abcdef0123456789abcdef",
+            createdAt = 1_700_000_000_000,
+            photoRef = "avatar-abc123.jpg",
+        ),
         preferences = Preferences(
             theme = ThemeMode.DARK,
             motion = false,
@@ -58,6 +65,29 @@ class StateCodecTest {
                 createdAt = 1_700_000_000_400,
             ),
         ),
+        supports = listOf(
+            SupportIntent(
+                id = "s1",
+                toHandle = culture.thelove.tlc.domain.Handle.of("tunde"),
+                kind = TokenKind.SUPPORTIVE,
+                amountKobo = 500_00,
+                state = SupportState.CLAIMED,
+                createdAt = 1_700_000_000_500,
+                reference = "GTB-123",
+                claimedAt = 1_700_000_000_600,
+            ),
+        ),
+        receipts = listOf(
+            TokenReceipt(
+                id = "receipt-1",
+                subjectKind = ReceiptSubject.SUPPORT,
+                subjectId = "s1",
+                fileName = "receipt-abc123.jpg",
+                hash = "0123456789abcdef".repeat(4),
+                audience = ReceiptAudience.THIS_TRANSFER,
+                addedAt = 1_700_000_000_700,
+            ),
+        ),
     )
 
     @Test
@@ -75,6 +105,18 @@ class StateCodecTest {
         assertEquals(original.grants, decoded.snapshot.grants)
         // members are sorted by the codec; compare content, not order.
         assertEquals(original.dues.first().copy(members = original.dues.first().members.sorted()), decoded.snapshot.dues.first())
+        assertEquals(original.supports, decoded.snapshot.supports)
+        assertEquals(original.receipts, decoded.snapshot.receipts)
+        assertEquals("avatar-abc123.jpg", decoded.snapshot.profile.photoRef)
+    }
+
+    @Test
+    fun `a profile photo and receipt are file names, never bytes`() {
+        val encoded = StateCodec.encode(snapshot())
+        assertTrue(encoded.contains("\"photo_ref\":\"avatar-abc123.jpg\""))
+        assertTrue(encoded.contains("\"file_name\":\"receipt-abc123.jpg\""))
+        // The state file never grows with the image; it carries the name and the fingerprint only.
+        assertTrue(encoded.length < 20_000)
     }
 
     @Test

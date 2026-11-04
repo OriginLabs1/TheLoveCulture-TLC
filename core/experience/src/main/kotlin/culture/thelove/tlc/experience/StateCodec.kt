@@ -29,7 +29,7 @@ import kotlinx.serialization.json.put
  *
  * Rules:
  *  - the format string is versioned; an unknown version is refused, never guessed at;
- *  - v1 is still read so a v0.0.4 device upgrades without losing its record; v2 is written;
+ *  - v1 and v2 are still read so a v0.0.5 device upgrades without losing its record; v3 is written;
  *  - every field is validated by its type's constructor, so a hand-edited file cannot produce an
  *    impossible screen;
  *  - optional collections default to empty, which makes the first launch and a future migration
@@ -37,7 +37,8 @@ import kotlinx.serialization.json.put
  *  - encoding is deterministic (sets are sorted), so an export can be diffed.
  *
  * A full bank account number is never encoded. State only ever holds [BankAccountRef]: bank,
- * last four digits, holder and a non-reversible fingerprint.
+ * last four digits, holder and a non-reversible fingerprint. A profile photo and a receipt are
+ * file names, never bytes, so the state file stays small and readable.
  */
 public sealed interface StateResult {
     public data class Ok(public val snapshot: AppSnapshot) : StateResult
@@ -47,11 +48,12 @@ public sealed interface StateResult {
 
 public object StateCodec {
 
-    public const val FORMAT: String = "tlc-state-v2"
-    public const val PREVIOUS_FORMAT: String = "tlc-state-v1"
+    public const val FORMAT: String = "tlc-state-v3"
+    public const val PREVIOUS_FORMAT: String = "tlc-state-v2"
+    public const val V1_FORMAT: String = "tlc-state-v1"
     public const val MAX_CHARS: Int = 1_000_000
 
-    private val READ_FORMATS: Set<String> = setOf(PREVIOUS_FORMAT, FORMAT)
+    private val READ_FORMATS: Set<String> = setOf(V1_FORMAT, PREVIOUS_FORMAT, FORMAT)
 
     public fun encode(snapshot: AppSnapshot): String = buildJsonObject {
         put("format", FORMAT)
@@ -62,6 +64,7 @@ public object StateCodec {
             put("record_id", snapshot.profile.recordId)
             put("created_at", snapshot.profile.createdAt)
             putNullable("handle", snapshot.profile.handle?.value)
+            putNullable("photo_ref", snapshot.profile.photoRef)
         })
         put("preferences", buildJsonObject {
             put("theme", snapshot.preferences.theme.name)
@@ -191,7 +194,22 @@ public object StateCodec {
                     put("state", support.state.name)
                     put("created_at", support.createdAt)
                     putNullable("reference", support.reference)
+                    putNullableNumber("claimed_at", support.claimedAt)
                     putNullableNumber("acknowledged_at", support.acknowledgedAt)
+                })
+            }
+        })
+        put("receipts", buildJsonArray {
+            snapshot.receipts.forEach { receipt ->
+                add(buildJsonObject {
+                    put("id", receipt.id)
+                    put("subject_kind", receipt.subjectKind.name)
+                    put("subject_id", receipt.subjectId)
+                    put("file_name", receipt.fileName)
+                    put("hash", receipt.hash)
+                    put("audience", receipt.audience.name)
+                    put("added_at", receipt.addedAt)
+                    putNullable("note", receipt.note)
                 })
             }
         })
@@ -212,7 +230,7 @@ public object StateCodec {
         return try {
             val format = root.string("format")
             if (format !in READ_FORMATS) return StateResult.Invalid("Unsupported state format: $format")
-            val fromV1 = format == PREVIOUS_FORMAT
+            val fromV1 = format == V1_FORMAT
 
             val profileObject = root.objectOrNull("profile")
                 ?: return StateResult.Invalid("The state has no profile.")
@@ -231,6 +249,7 @@ public object StateCodec {
                 recordId = recordId,
                 createdAt = profileObject.long("created_at"),
                 handle = handle,
+                photoRef = profileObject.nullableString("photo_ref"),
             )
 
             val preferences = root.objectOrNull("preferences")?.let { objectValue ->
@@ -367,7 +386,22 @@ public object StateCodec {
                     state = item.enum("state", SupportState.values()),
                     createdAt = item.long("created_at"),
                     reference = item.nullableString("reference"),
+                    claimedAt = item.nullableLong("claimed_at"),
                     acknowledgedAt = item.nullableLong("acknowledged_at"),
+                )
+            }
+
+            val receipts = root.arrayOrEmpty("receipts").map { element ->
+                val item = element.jsonObject
+                TokenReceipt(
+                    id = item.string("id"),
+                    subjectKind = item.enum("subject_kind", ReceiptSubject.values()),
+                    subjectId = item.string("subject_id"),
+                    fileName = item.string("file_name"),
+                    hash = item.string("hash"),
+                    audience = item.enum("audience", ReceiptAudience.values()),
+                    addedAt = item.long("added_at"),
+                    note = item.nullableString("note"),
                 )
             }
 
@@ -383,6 +417,7 @@ public object StateCodec {
                     bankAccounts = bankAccounts,
                     contactLog = contactLog,
                     supports = supports,
+                    receipts = receipts,
                 ),
             )
         } catch (e: Exception) {

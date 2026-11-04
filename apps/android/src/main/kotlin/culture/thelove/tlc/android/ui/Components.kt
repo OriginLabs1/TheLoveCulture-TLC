@@ -2,6 +2,7 @@ package culture.thelove.tlc.android.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -20,6 +22,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -28,21 +31,30 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import culture.thelove.tlc.android.R
 import culture.thelove.tlc.ledger.EntryKind
 import culture.thelove.tlc.ledger.LedgerEntry
+import java.io.File
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
+import android.graphics.BitmapFactory
 
 // ---------------------------------------------------------------------------------------------
 // Shared visual language. Everything here is presentation only: it reads a fact and draws it.
@@ -577,3 +589,102 @@ public fun TlcMark(
         )
     }
 }
+
+/**
+ * The person's own face, or the emblem until they choose one.
+ *
+ * The crossfade means a new photo arrives without a flash of empty space, and the fallback is the
+ * same vector emblem used everywhere else — no bundled raster, no broken-image box.
+ */
+@Composable
+public fun TlcAvatar(
+    photoRef: String?,
+    modifier: Modifier = Modifier,
+    size: Dp = 56.dp,
+) {
+    val directory = LocalMediaDir.current
+    val file = remember(photoRef, directory) {
+        if (directory == null || photoRef == null) null else File(directory, photoRef).takeIf { it.isFile }
+    }
+    val image = rememberFileImage(file, maxDimension = 320)
+    Box(
+        modifier = modifier
+            .size(size)
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.primaryContainer)
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape),
+        contentAlignment = Alignment.Center,
+    ) {
+        Crossfade(
+            targetState = image,
+            animationSpec = tween(240),
+            label = "avatar",
+        ) { bitmap ->
+            if (bitmap != null) {
+                Image(
+                    bitmap = bitmap,
+                    contentDescription = stringResource(R.string.profile_photo),
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop,
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Filled.Person,
+                    contentDescription = stringResource(R.string.profile_photo),
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier.size(size * 0.46f),
+                )
+            }
+        }
+    }
+}
+
+/** A receipt or other private image, decoded from the app's media folder. */
+@Composable
+public fun MediaImage(
+    file: File?,
+    contentDescription: String,
+    modifier: Modifier = Modifier,
+    maxDimension: Int = 720,
+) {
+    val image = rememberFileImage(file, maxDimension)
+    if (image == null) {
+        Box(
+            modifier = modifier.background(MaterialTheme.colorScheme.surfaceVariant),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = stringResource(R.string.receipt_missing),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    } else {
+        Image(
+            bitmap = image,
+            contentDescription = contentDescription,
+            modifier = modifier,
+            contentScale = ContentScale.Crop,
+        )
+    }
+}
+
+/** Decode a private JPEG at roughly the size it will be drawn. Runs once per file change. */
+@Composable
+public fun rememberFileImage(file: File?, maxDimension: Int): ImageBitmap? = remember(
+    file?.path,
+    file?.lastModified(),
+    maxDimension,
+) {
+    file?.let { decodeSampled(it, maxDimension) }
+}
+
+private fun decodeSampled(file: File, maxDimension: Int): ImageBitmap? = runCatching {
+    val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+    BitmapFactory.decodeFile(file.path, bounds)
+    if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return null
+    var sample = 1
+    while (maxOf(bounds.outWidth, bounds.outHeight) / (sample * 2) >= maxDimension) sample *= 2
+    val options = BitmapFactory.Options().apply { inSampleSize = sample }
+    BitmapFactory.decodeFile(file.path, options)?.asImageBitmap()
+}.getOrNull()

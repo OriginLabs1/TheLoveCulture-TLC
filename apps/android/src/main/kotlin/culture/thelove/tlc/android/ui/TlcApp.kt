@@ -3,6 +3,7 @@ package culture.thelove.tlc.android.ui
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.BackHandler
+import androidx.core.content.FileProvider
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
@@ -62,6 +63,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -96,9 +98,11 @@ import culture.thelove.tlc.android.ui.screens.GrantsScreen
 import culture.thelove.tlc.android.ui.screens.JournalScreen
 import culture.thelove.tlc.android.ui.screens.OnboardingScreen
 import culture.thelove.tlc.android.ui.screens.PeopleScreen
+import culture.thelove.tlc.android.ui.screens.ProfileScreen
 import culture.thelove.tlc.android.ui.screens.SettingsScreen
 import culture.thelove.tlc.android.ui.screens.SupportScreen
 import culture.thelove.tlc.android.ui.screens.TodayScreen
+import culture.thelove.tlc.android.ui.screens.TokensScreen
 import culture.thelove.tlc.android.ui.screens.VerifyScreen
 import culture.thelove.tlc.android.ui.theme.TlcTheme
 import culture.thelove.tlc.domain.BankAccount
@@ -107,6 +111,7 @@ import culture.thelove.tlc.domain.ContactIntent
 import culture.thelove.tlc.domain.ContactPurpose
 import culture.thelove.tlc.domain.Handle
 import culture.thelove.tlc.experience.GrantEvent
+import culture.thelove.tlc.experience.ReceiptAudience
 import culture.thelove.tlc.experience.ThemeMode
 import culture.thelove.tlc.ledger.LedgerEntry
 import culture.thelove.tlc.ledger.Merkle
@@ -132,6 +137,8 @@ public enum class Dest {
     CAPTURE,
     VERIFY,
     ABOUT,
+    TOKENS,
+    PROFILE,
     ;
 
     public val isTab: Boolean
@@ -141,9 +148,10 @@ public enum class Dest {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 public fun TlcApp(filesDir: File, modifier: Modifier = Modifier) {
-    val state = remember(filesDir) { AppState(filesDir) }
-    val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    val state = remember(context) { AppState(context) }
+    val mediaDir = remember(context) { File(context.filesDir, culture.thelove.tlc.android.data.MediaFiles.FOLDER) }
+    val scope = rememberCoroutineScope()
     val haptics = LocalHapticFeedback.current
     val clipboard = LocalClipboardManager.current
     val snackbar = remember { SnackbarHostState() }
@@ -155,6 +163,7 @@ public fun TlcApp(filesDir: File, modifier: Modifier = Modifier) {
     var onboardingBusy by rememberSaveable { mutableStateOf(false) }
     var onboardingError by rememberSaveable { mutableStateOf<String?>(null) }
     var actionBusy by remember { mutableStateOf(false) }
+    var processingPhoto by remember { mutableStateOf(false) }
     var capturing by remember { mutableStateOf(false) }
     var confirmReset by remember { mutableStateOf(false) }
     var confirmImport by remember { mutableStateOf(false) }
@@ -345,6 +354,46 @@ public fun TlcApp(filesDir: File, modifier: Modifier = Modifier) {
         }
     }
 
+    fun shareReceipt(fileName: String) {
+        val file = state.mediaFile(fileName)
+        if (file == null) {
+            notify(context.getString(R.string.receipt_missing))
+            return
+        }
+        val uri = runCatching {
+            FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+        }.getOrNull()
+        if (uri == null) {
+            notify(context.getString(R.string.receipt_failed))
+            return
+        }
+        val send = Intent(Intent.ACTION_SEND).apply {
+            type = "image/jpeg"
+            putExtra(Intent.EXTRA_STREAM, uri)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        runCatching {
+            context.startActivity(Intent.createChooser(send, context.getString(R.string.receipt_share_title)))
+        }.onFailure { notify(context.getString(R.string.receipt_failed)) }
+    }
+
+    fun savePhoto(uri: Uri) {
+        if (processingPhoto) return
+        processingPhoto = true
+        scope.launch {
+            try {
+                val error = state.setProfilePhoto(uri)
+                if (error != null) {
+                    snackbar.showSnackbar(error)
+                } else {
+                    snackbar.showSnackbar(context.getString(R.string.profile_photo_saved))
+                }
+            } finally {
+                processingPhoto = false
+            }
+        }
+    }
+
     fun capture(who: String, what: String) {
         if (capturing) return
         capturing = true
@@ -367,6 +416,10 @@ public fun TlcApp(filesDir: File, modifier: Modifier = Modifier) {
     }
 
     TlcTheme(darkTheme = darkTheme) {
+        CompositionLocalProvider(
+            LocalMotion provides (snapshot?.preferences?.motion ?: true),
+            LocalMediaDir provides mediaDir,
+        ) {
         Surface(
             modifier = modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background,
@@ -521,6 +574,8 @@ public fun TlcApp(filesDir: File, modifier: Modifier = Modifier) {
                                         onVerify = { go(Dest.VERIFY) },
                                         onCheckpoint = { go(Dest.SETTINGS) },
                                         onAbout = { go(Dest.ABOUT) },
+                                        onTokens = { go(Dest.TOKENS) },
+                                        onProfile = { go(Dest.PROFILE) },
                                     )
 
                                     Dest.RECORD -> JournalScreen(
@@ -655,6 +710,8 @@ public fun TlcApp(filesDir: File, modifier: Modifier = Modifier) {
                                         onContact = { go(Dest.CONTACT) },
                                         onCircle = { go(Dest.CIRCLE) },
                                         onGrants = { go(Dest.GRANTS) },
+                                        onTokens = { go(Dest.TOKENS) },
+                                        onProfile = { go(Dest.PROFILE) },
                                         onExportRecord = {
                                             exportRecord.launch(
                                                 context.getString(
@@ -722,6 +779,39 @@ public fun TlcApp(filesDir: File, modifier: Modifier = Modifier) {
                                     )
 
                                     Dest.ABOUT -> AboutScreen()
+
+                                    Dest.TOKENS -> TokensScreen(
+                                        snapshot = sealed,
+                                        busy = state.busy || actionBusy,
+                                        onOpenSupport = { supportFor = null; go(Dest.SUPPORT) },
+                                        onOpenGrants = { go(Dest.GRANTS) },
+                                        onOpenDues = { go(Dest.DUES) },
+                                        onAttachReceipt = { subject, id, uri, audience ->
+                                            act(R.string.receipt_saved) {
+                                                state.attachReceipt(subject, id, uri, audience)
+                                            }
+                                        },
+                                        onRemoveReceipt = { id ->
+                                            act(R.string.receipt_removed) { state.removeReceipt(id) }
+                                        },
+                                        onSetAudience = { id, audience ->
+                                            act(null) { state.setReceiptAudience(id, audience) }
+                                        },
+                                        onShareReceipt = { fileName -> shareReceipt(fileName) },
+                                    )
+
+                                    Dest.PROFILE -> ProfileScreen(
+                                        profile = sealed.profile,
+                                        busy = state.busy || actionBusy,
+                                        processingPhoto = processingPhoto,
+                                        onSave = { name, circle ->
+                                            act(R.string.profile_saved) { state.updateProfile(name, circle) }
+                                        },
+                                        onPickPhoto = { uri -> savePhoto(uri) },
+                                        onRemovePhoto = {
+                                            act(R.string.profile_photo_removed) { state.removeProfilePhoto() }
+                                        },
+                                    )
 
                                     Dest.CREATE -> Unit
                                 }
@@ -826,6 +916,12 @@ public fun TlcApp(filesDir: File, modifier: Modifier = Modifier) {
                             onClick = { showCreate = false; go(Dest.DUES) },
                         )
                         CreateRow(
+                            icon = Icons.Filled.List,
+                            title = stringResource(R.string.create_tokens),
+                            body = stringResource(R.string.create_tokens_body),
+                            onClick = { showCreate = false; go(Dest.TOKENS) },
+                        )
+                        CreateRow(
                             icon = Icons.Filled.Favorite,
                             title = stringResource(R.string.create_grant),
                             body = stringResource(R.string.create_grant_body),
@@ -863,6 +959,7 @@ public fun TlcApp(filesDir: File, modifier: Modifier = Modifier) {
                 )
             }
         }
+        }
     }
 }
 
@@ -883,6 +980,8 @@ private fun Dest.title(): String = stringResource(
         Dest.CAPTURE -> R.string.capture_title
         Dest.VERIFY -> R.string.verify_title
         Dest.ABOUT -> R.string.about_title
+        Dest.TOKENS -> R.string.tokens_title
+        Dest.PROFILE -> R.string.profile_title
     },
 )
 

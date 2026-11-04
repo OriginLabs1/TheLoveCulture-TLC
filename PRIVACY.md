@@ -1,6 +1,6 @@
 # Privacy Notice — TLC
 
-**Version:** 0.0.5 · **Applies to:** the TLC Android app and `tlc.app`
+**Version:** 0.0.6 · **Applies to:** the TLC Android app and `tlc.app`
 **Data regime:** Nigeria Data Protection Act 2023 (NDPA), GDPR-shaped by design (INV-10)
 **Contact:** tlcfounder@protonmail.com · https://sircollins.coreconcept1.net · https://t.me/CollinsRoyalMedium
 
@@ -23,18 +23,24 @@ purposes below. There is no separate analytics company, ad network or data broke
 | Contact log | purpose, channel and time of a Pioneer Desk contact | Keep an honest record that you reached out | On your device; never the message itself |
 | Fee evidence | proof image/PDF, bank reference, amount, timestamp | Prove *you* paid the Concept Pioneer directly | Encrypted object storage, 90 days, then hash only |
 | Receipts | obligation id, amount, attestation, hash chain | Your permanent record of what was attested | On your device + append-only ledger |
+| Images | profile photo, receipt image, image fingerprint | Show your face; keep the evidence for a token | App-private storage on your device; a file name and fingerprint in local state |
 | Technical | app version, OS version | Fix defects | On your device only, in this build |
 
-**In this build (0.0.5):** the app stores, on the device only, the recognition record you write, the
+**In this build (0.0.6):** the app stores, on the device only, the recognition record you write, the
 profile name, handle and circle name you enter, your presentation preferences, the people and
-handles you add, the Support and Pioneer's Token records you create, the local contact log, and any
-bank destination you deliberately save. A saved destination keeps the full account number only in
-the encrypted vault (AES-256-GCM with a key held by the Android Keystore); the state file, the
-record, a backup bundle and the contact log see only the bank name, the last four digits and a
-fingerprint. The state file, vault and record live in the app's private folder. There is no account,
-no sync and no crash reporting, so the account, relationship and fee-evidence rows above describe
-the product's intended scope, not data this version sends anywhere. Backup means exporting a bundle
-through the system file picker; TLC does not upload it.
+handles you add, the Support and Pioneer's Token records you create, the local contact log, any bank
+destination you deliberately save, and any profile or receipt image you pick. A saved destination
+keeps the full account number only in the encrypted vault (AES-256-GCM with a key held by the
+Android Keystore); the state file, the record, a backup bundle and the contact log see only the bank
+name, the last four digits and a fingerprint. An image is downscaled, re-encoded as JPEG and stripped
+of metadata before it is stored in the app's private media folder; the state and the record keep a
+file name and a SHA-256 fingerprint, never the bytes, and the image never enters a backup bundle or an
+export. Removing an image deletes the file. The state file, vault, record and media folder live in
+the app's private folder. There is no account, no sync and no crash reporting, so the account,
+relationship and fee-evidence rows above describe the product's intended scope, not data this version
+sends anywhere. Backup means exporting a bundle through the system file picker; TLC does not upload
+it. Sharing a receipt is a deliberate action through the system chooser and grants one file, not the
+folder.
 
 **Not collected, ever:** card numbers, bank passwords, full bank account numbers in plaintext or in
 any export, contacts from your address book, location, advertising identifiers, clipboard contents,
@@ -46,7 +52,7 @@ happened between two private bank accounts (INV-01).
 ## 3. The `foss` build is telemetry-free
 
 The `foss` flavour ships with **no** Google Play Services, Firebase, Crashlytics, ad SDK or
-third-party analytics. Version 0.0.5 contains no networking code at all and its APK does not request
+third-party analytics. Version 0.0.6 contains no networking code at all and its APK does not request
 the `INTERNET` permission — the release workflow checks both. When a networked feature arrives, this
 notice changes in the same release, and the app asks only for what that feature needs. The `full`
 flavour may add first-party integrations; each one is opt-in and listed in the release notes for
@@ -63,6 +69,7 @@ that version.
 | Data | Retention |
 |---|---|
 | Saved bank destination | Until you remove it in the vault, or uninstall the app; the key never leaves the Android Keystore |
+| Profile photo and receipt images | Until you replace or remove them, or uninstall the app |
 | Local contact log | Until you clear it, or uninstall the app |
 | Fee proofs (image/PDF) | 90 days, then deleted; only the SHA-256 hash and the attestation remain |
 | Receipts and ledger entries | 7 years (financial-record expectation) |

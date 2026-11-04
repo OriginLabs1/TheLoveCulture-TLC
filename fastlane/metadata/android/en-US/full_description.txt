@@ -2,6 +2,16 @@ TLC records recognition — who showed up for whom, and what they did — in a r
 
 It exists for one narrow purpose: to make care and contribution visible between people who trust each other, and to keep the memory of it beyond the reach of a silent edit.
 
+TOKENS, RECEIPTS AND FACES
+
+• One Tokens surface for everything that moves: Support, Pioneer's Token and Growth Grant, with an All / Sent / Received segment and an honest timeline from offer to acknowledgement.
+• Live counters for circulation, transferred and received. They describe movement only: there is no balance, no ranking and no pooled total.
+• Receipt images you own. Attach a photo or screenshot to a token, replace it, remove it, or open it full size. The image is downscaled, re-encoded and stripped of metadata before it is stored in the app's private folder; the record keeps a file name and a fingerprint, never the bytes.
+• Visibility is explicit and revocable: Only me, This transfer, My circle, Anyone with the link, or Public in Record. Sharing opens the system chooser and nothing leaves until you choose to send it.
+• Your profile photo and name are yours to edit. Pick, replace or remove the photo at any time; change your display name and circle without losing your handle or your record.
+• Forest green marks received, verified and growth; royal purple marks Pioneer, stewardship and recognition. Both are accents only, and every state is also spelled out in words.
+• Motion is selective: counters animate, cards reveal, taps respond — and turning motion off removes the animation without removing information.
+
 TRUST AND CONTACT
 
 • Handles give every person an address. Your profile gets a @handle at onboarding, validated locally. @pioneer is the official role and @sircollins is the person behind it; both are reserved, and both reach the same desk.
@@ -10,7 +20,7 @@ TRUST AND CONTACT
 • Send Support is the direct peer flow: Supportive or Recognition support to a person you know, with an optional amount and a reference. TLC records the offer, the claim and the acknowledgement. A claim is a statement, not a settlement.
 • Pioneer's Token replaces "Pioneer dues". Activation, Reactivation, Courtesy and Joy go directly to the Concept Pioneer's own account. TLC records the intent and the evidence; it never holds the money. The destination stays in the vault and is revealed only to the payer, only after the token exists.
 • The Pioneer Desk is purpose-first contact. Choose why you are writing, see the opening before it leaves the app, then pick a channel: Telegram, email or the website. WhatsApp is deferred because the founder's Telegram already uses that number. The local contact log keeps only the fact of contact — purpose, channel and time — never the message.
-• The Contact & Consent Framework is doctrine in this build. The public wording that describes it is under legal review and may change before v0.0.6.
+• The Contact & Consent Framework is doctrine in this build. The public wording that describes it is under legal review and may still change.
 
 A NEW SURFACE
 
@@ -39,7 +49,7 @@ WHAT THE RECORD DOES
 
 WHAT IT DOES NOT DO YET
 
-There is no account, no sync and no multi-device merge. A Co-Steward is a local persona, not a remote authenticated person. The remote Pioneer attestation desk, cross-device invitations, the SEF economy and the social layer are the next milestone, not a promise about this build.
+There is no account, no sync and no multi-device merge. A Co-Steward is a local persona, not a remote authenticated person. The Received view shows only what is on this device and does not invent a number; tokens sent from another device arrive when the shared plane ships. The remote Pioneer attestation desk, cross-device invitations, encrypted messaging, the SEF economy and the social layer are the next milestone, not a promise about this build.
 
 WHAT TLC WILL NEVER DO
 

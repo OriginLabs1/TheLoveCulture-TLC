@@ -36,6 +36,10 @@ class LedgerContractTest {
                 "SUPPORT_INTENT",
                 "SUPPORT_ACKNOWLEDGED",
                 "CONTACT_RECORDED",
+                "PROFILE_UPDATED",
+                "RECEIPT_ADDED",
+                "RECEIPT_REMOVED",
+                "RECEIPT_AUDIENCE_CHANGED",
             ),
             EntryKind.entries.map { it.name },
         )
