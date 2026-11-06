@@ -8,7 +8,7 @@ VERSION := $(shell sed -nE 's/^versionName=//p' version.properties)
 
 .DEFAULT_GOAL := help
 
-.PHONY: help doctor verify test ledger-verify demo check-foss android-build android-test lint security release-assets clean
+.PHONY: help doctor verify test ledger-verify demo check-foss android-build android-test lint security copy-lint release-assets clean
 
 help: ## Show targets
 	@grep -hE '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  %-16s %s\n", $$1, $$2}'
@@ -52,6 +52,9 @@ lint: ## Static analysis across core and the foss shell
 
 security: ## Secret scan (fails closed if gitleaks is present)
 	@if command -v gitleaks >/dev/null 2>&1; then gitleaks detect --no-banner --redact; else echo "! gitleaks not installed — CI runs it"; fi
+
+copy-lint: ## Fail on banned user-facing terms (SPECS §0.1 / SK-19)
+	@python3 scripts/copy-lint.py
 
 release-assets: ## Show what the release pipeline will publish for the current version
 	@echo "TLC $(VERSION)"

@@ -36,8 +36,27 @@ public class MediaFiles(context: Context) {
         return candidate.takeIf { it.isFile }
     }
 
-    public suspend fun importAvatar(uri: Uri): ImportedMedia? = withContext(Dispatchers.IO) {
-        import(uri = uri, prefix = "avatar", maxDimension = 720, square = true)
+    /**
+     * Import a framed avatar. [zoom] and [offsetX]/[offsetY] are the exact values the studio
+     * previewed: a square of `min(width, height) / zoom` is taken around the centre plus the
+     * normalised offset. The saved image is 720 px, re-encoded without metadata.
+     */
+    public suspend fun importAvatar(
+        uri: Uri,
+        zoom: Float = 1f,
+        offsetX: Float = 0f,
+        offsetY: Float = 0f,
+    ): ImportedMedia? = withContext(Dispatchers.IO) {
+        import(
+            uri = uri,
+            prefix = "avatar",
+            maxDimension = 720,
+            square = true,
+            zoom = zoom,
+            offsetX = offsetX,
+            offsetY = offsetY,
+            decodeMax = 1440,
+        )
     }
 
     public suspend fun importReceipt(uri: Uri): ImportedMedia? = withContext(Dispatchers.IO) {
@@ -49,10 +68,27 @@ public class MediaFiles(context: Context) {
         withContext(Dispatchers.IO) { File(root, name).delete() }
     }
 
-    private fun import(uri: Uri, prefix: String, maxDimension: Int, square: Boolean): ImportedMedia? {
-        val decoded = decode(uri, maxDimension) ?: return null
+    /** Remove every private image. Used only when the person resets to a fresh circle. */
+    public suspend fun clear() {
+        withContext(Dispatchers.IO) {
+            root.listFiles()?.forEach { it.delete() }
+        }
+    }
+
+    private fun import(
+        uri: Uri,
+        prefix: String,
+        maxDimension: Int,
+        square: Boolean,
+        zoom: Float = 1f,
+        offsetX: Float = 0f,
+        offsetY: Float = 0f,
+        decodeMax: Int = maxDimension,
+    ): ImportedMedia? {
+        val decoded = decode(uri, decodeMax) ?: return null
         val upright = orient(decoded, orientation(uri))
-        val scaled = scale(upright, maxDimension)
+        val framed = if (square) cropSquare(upright, zoom, offsetX, offsetY) else upright
+        val scaled = scale(framed, maxDimension)
         val squared = if (square) centerSquare(scaled) else scaled
         val name = "$prefix-${UUID.randomUUID().toString().replace("-", "").take(20)}.jpg"
         if (!root.exists()) root.mkdirs()
@@ -111,6 +147,19 @@ public class MediaFiles(context: Context) {
         val width = (bitmap.width * ratio).toInt().coerceAtLeast(1)
         val height = (bitmap.height * ratio).toInt().coerceAtLeast(1)
         return Bitmap.createScaledBitmap(bitmap, width, height, true)
+    }
+
+    private fun cropSquare(bitmap: Bitmap, zoom: Float, offsetX: Float, offsetY: Float): Bitmap {
+        val safeZoom = zoom.coerceIn(1f, 4f)
+        val side = (minOf(bitmap.width, bitmap.height) / safeZoom).toInt().coerceAtLeast(1)
+        val maxLeft = (bitmap.width - side).coerceAtLeast(0)
+        val maxTop = (bitmap.height - side).coerceAtLeast(0)
+        val left = ((bitmap.width - side) / 2f + offsetX * bitmap.width)
+            .toInt().coerceIn(0, maxLeft)
+        val top = ((bitmap.height - side) / 2f + offsetY * bitmap.height)
+            .toInt().coerceIn(0, maxTop)
+        if (left == 0 && top == 0 && side == bitmap.width && side == bitmap.height) return bitmap
+        return Bitmap.createBitmap(bitmap, left, top, side, side)
     }
 
     private fun centerSquare(bitmap: Bitmap): Bitmap {

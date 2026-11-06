@@ -1,7 +1,7 @@
 TLC 0.0.6 — Tokens, receipts & faces.
 
-• Tokens: one surface for every Support, Pioneer's Token and Growth Grant, with All / Sent / Received and a live timeline.
-• Live counters for circulation, transferred and received. No balance, no ranking, no pooled total.
+• Tokens: one surface for every Support, Pioneer's Token and Growth Grant, with All / Offered / Received and an honest timeline.
+• Circulation counters for offered, transferred and received. No balance, no ranking, no pooled total.
 • Receipts: attach, replace, remove and open full size. Downscaled, metadata-stripped and stored in the app's private folder.
 • Visibility: Only me, This transfer, My circle, Anyone with the link or Public in Record — explicit, revocable and recorded.
 • Profile: pick, replace or remove a photo; edit your display name and circle without losing your handle or record.

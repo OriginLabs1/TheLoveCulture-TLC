@@ -134,6 +134,11 @@ public class AppState(context: Context) {
 
     public fun mediaFile(name: String?): File? = media.file(name)
 
+    /** Delete private images; called only when the person resets to a fresh circle. */
+    public suspend fun clearMedia() {
+        media.clear()
+    }
+
     public suspend fun updateProfile(displayName: String, circleName: String): String? {
         val current = snapshot ?: return "The circle is not open yet."
         return commit(
@@ -147,9 +152,14 @@ public class AppState(context: Context) {
         )
     }
 
-    public suspend fun setProfilePhoto(uri: Uri): String? {
+    public suspend fun setProfilePhoto(
+        uri: Uri,
+        zoom: Float = 1f,
+        offsetX: Float = 0f,
+        offsetY: Float = 0f,
+    ): String? {
         val current = snapshot ?: return "The circle is not open yet."
-        val imported = media.importAvatar(uri) ?: return "That image could not be read."
+        val imported = media.importAvatar(uri, zoom, offsetX, offsetY) ?: return "That image could not be read."
         val previous = current.profile.photoRef
         val error = commit(
             Workspace.updateProfile(

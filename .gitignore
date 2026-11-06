@@ -13,6 +13,9 @@ secrets/
 build/
 .gradle/
 node_modules/
+__pycache__/
+*.pyc
+.kotlin/
 *.iml
 local.properties
 leak*.txt

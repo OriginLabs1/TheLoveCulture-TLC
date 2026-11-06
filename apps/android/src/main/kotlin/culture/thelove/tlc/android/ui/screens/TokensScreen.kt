@@ -5,11 +5,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateIntAsState
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -184,25 +180,25 @@ public fun TokensScreen(
                 eyebrow = stringResource(R.string.tokens_eyebrow),
                 title = stringResource(R.string.tokens_title),
                 body = stringResource(R.string.tokens_body),
-                trailing = { LivePill() },
+                trailing = { DevicePill() },
             )
         }
 
         item(key = "counters") {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                LiveCounter(
+                CirculationCounter(
                     label = stringResource(R.string.today_circulation),
                     value = all.size,
                     accent = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.weight(1f),
                 )
-                LiveCounter(
+                CirculationCounter(
                     label = stringResource(R.string.tokens_transferred),
                     value = transferred,
                     accent = TlcPalette.colors.forest,
                     modifier = Modifier.weight(1f),
                 )
-                LiveCounter(
+                CirculationCounter(
                     label = stringResource(R.string.tokens_received_short),
                     value = received.size,
                     accent = TlcPalette.colors.royal,
@@ -504,16 +500,8 @@ private fun grantToken(grant: GrowthGrant): TokenItem = TokenItem(
 )
 
 @Composable
-private fun LivePill() {
+private fun DevicePill() {
     val colors = TlcPalette.colors
-    val motion = culture.thelove.tlc.android.ui.LocalMotion.current
-    val transition = rememberInfiniteTransition(label = "live")
-    val alpha by transition.animateFloat(
-        initialValue = if (motion) 0.35f else 0.75f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(tween(1100), RepeatMode.Reverse),
-        label = "live-alpha",
-    )
     Surface(
         shape = RoundedCornerShape(999.dp),
         color = colors.forestContainer,
@@ -528,10 +516,10 @@ private fun LivePill() {
                 modifier = Modifier
                     .size(7.dp)
                     .clip(CircleShape)
-                    .background(colors.forest.copy(alpha = alpha)),
+                    .background(colors.forest),
             )
             Text(
-                text = stringResource(R.string.tokens_live),
+                text = stringResource(R.string.tokens_local_state),
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.SemiBold,
             )
@@ -540,7 +528,7 @@ private fun LivePill() {
 }
 
 @Composable
-private fun LiveCounter(label: String, value: Int, accent: Color, modifier: Modifier = Modifier) {
+private fun CirculationCounter(label: String, value: Int, accent: Color, modifier: Modifier = Modifier) {
     val animated by animateIntAsState(
         targetValue = value,
         animationSpec = tween(650),

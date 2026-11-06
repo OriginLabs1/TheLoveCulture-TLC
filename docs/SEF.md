@@ -1,10 +1,11 @@
 # The Standard Economic Framework (SEF) — Token Direction
 
-**Status:** direction recorded before v0.0.5 and implemented across v0.0.5 and v0.0.6. v0.0.5 shipped
-Pioneer's Token and Send Support; v0.0.6 added the shared Tokens surface with circulation counters,
-receipts and an honest timeline. This document records the founder's correction so the product does
-not carry two contradictory doctrines. The non-custody line has not moved: a Token is a record of
-value, not a balance.
+**Status:** direction recorded before v0.0.5 and **partly** implemented. v0.0.5 shipped Pioneer's
+Token and Send Support; v0.0.6 added the shared Tokens surface with circulation counters, receipts
+and an honest timeline. The domain still models `RECOGNITION_SIGNAL` only; `TokenValuation` and
+record-transfer provenance are not implemented yet (CONTEXT Appendix D). This document records the
+founder's correction so the product does not carry two contradictory doctrines. The non-custody line
+has not moved: a Token is a record of value, not a balance.
 
 ## The unit
 
@@ -46,10 +47,10 @@ version:
 6. **Two keys for irreversible acts.** A transfer or monetary distribution that changes another
    person's record needs the authority the dyad rules require.
 7. **Bank details stay inside the fee flow.** The Pioneer's bank details are released only to the
-   payer, only after the due exists, and expire. They are never compiled in, logged, stored in the
+   payer, only after the Token exists, and expire. They are never compiled in, logged, stored in the
    ledger, exported or shown to a third party. See [`SECURITY.md`](../SECURITY.md).
 
-## What has to change for v0.0.5
+## What still has to change
 
 | Area | v0.0.4 today | v0.0.5 direction |
 |---|---|---|
@@ -73,5 +74,5 @@ Any SEF change must pass all of these before it ships:
 - a distribution cannot be marked settled without the evidence the rules require;
 - the Pioneer's bank details cannot enter the record, an export, a log or a screenshot.
 
-Until those tests exist, v0.0.4's copy is the honest description of v0.0.4. The next version changes
-the copy and the code together.
+Until those tests exist, the current build's copy is the honest description of the current build. The
+next version changes the copy and the code together.

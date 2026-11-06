@@ -35,6 +35,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
@@ -48,6 +49,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import culture.thelove.tlc.android.R
 import culture.thelove.tlc.ledger.EntryKind
 import culture.thelove.tlc.ledger.LedgerEntry
@@ -591,28 +593,51 @@ public fun TlcMark(
 }
 
 /**
- * The person's own face, or the emblem until they choose one.
+ * The person's own face, or a monogram until they choose one.
  *
- * The crossfade means a new photo arrives without a flash of empty space, and the fallback is the
- * same vector emblem used everywhere else — no bundled raster, no broken-image box.
+ * The crossfade means a new photo arrives without a flash of empty space. With no photo the surface
+ * shows the person's initials over a quiet blue gradient, so a profile never looks unfinished and
+ * never shows a broken-image box. An optional ring is used for the large profile hero.
  */
 @Composable
 public fun TlcAvatar(
     photoRef: String?,
     modifier: Modifier = Modifier,
     size: Dp = 56.dp,
+    initials: String? = null,
+    ring: Boolean = false,
+    ringColor: Color = MaterialTheme.colorScheme.surface,
 ) {
     val directory = LocalMediaDir.current
     val file = remember(photoRef, directory) {
         if (directory == null || photoRef == null) null else File(directory, photoRef).takeIf { it.isFile }
     }
-    val image = rememberFileImage(file, maxDimension = 320)
+    val image = rememberFileImage(file, maxDimension = 512)
+    val monogram = remember(initials) {
+        initials
+            ?.trim()
+            ?.split(Regex("\\s+"))
+            ?.filter { it.isNotBlank() }
+            ?.take(2)
+            ?.mapNotNull { it.firstOrNull()?.uppercaseChar() }
+            ?.joinToString("")
+            ?.takeIf { it.isNotBlank() }
+    }
     Box(
         modifier = modifier
             .size(size)
+            .then(if (ring) Modifier.shadow(10.dp, CircleShape, clip = false) else Modifier)
             .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.primaryContainer)
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape),
+            .background(
+                Brush.linearGradient(
+                    listOf(
+                        MaterialTheme.colorScheme.primaryContainer,
+                        MaterialTheme.colorScheme.secondaryContainer,
+                        MaterialTheme.colorScheme.tertiaryContainer,
+                    ),
+                ),
+            )
+            .border(if (ring) 3.dp else 1.dp, if (ring) ringColor else MaterialTheme.colorScheme.outlineVariant, CircleShape),
         contentAlignment = Alignment.Center,
     ) {
         Crossfade(
@@ -626,6 +651,16 @@ public fun TlcAvatar(
                     contentDescription = stringResource(R.string.profile_photo),
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop,
+                )
+            } else if (monogram != null) {
+                Text(
+                    text = monogram,
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontFamily = FontFamily.Serif,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = (size.value * 0.34f).sp,
+                    ),
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
                 )
             } else {
                 Icon(

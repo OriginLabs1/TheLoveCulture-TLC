@@ -26,8 +26,11 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -48,6 +51,7 @@ import culture.thelove.tlc.experience.Person
 import culture.thelove.tlc.domain.TokenKind
 import culture.thelove.tlc.experience.SupportIntent
 import culture.thelove.tlc.experience.SupportState
+import kotlinx.coroutines.delay
 
 /**
  * Send Support: a gift between two private accounts, recorded as an intention and then as a claim.
@@ -69,10 +73,43 @@ public fun SupportScreen(
     var amountText by rememberSaveable { mutableStateOf("") }
     var claimFor by rememberSaveable { mutableStateOf<String?>(null) }
     var claimReference by rememberSaveable { mutableStateOf("") }
+    var methodSheet by rememberSaveable { mutableStateOf(false) }
+    var methodId by rememberSaveable { mutableStateOf<String?>(null) }
+    var deadline by rememberSaveable { mutableStateOf(0L) }
+    var secondsLeft by remember { mutableIntStateOf(0) }
     val kind = TokenKind.valueOf(kindName)
     val handle = Handle.parse(handleText)
     val amountKobo = amountText.filter { it.isDigit() }.toLongOrNull()?.times(100)
-    val valid = handle != null && (kind == TokenKind.RECOGNITION || (amountKobo != null && amountKobo > 0))
+    val methods = transferMethods()
+    val method = methods.firstOrNull { it.id == methodId }
+    val needsRoute = kind != TokenKind.RECOGNITION
+    val routeReady = !needsRoute || (method != null && secondsLeft > 0)
+    val valid = handle != null &&
+        (kind == TokenKind.RECOGNITION || (amountKobo != null && amountKobo > 0)) &&
+        routeReady
+
+    LaunchedEffect(methodId, deadline) {
+        while (methodId != null) {
+            val left = ((deadline - System.currentTimeMillis()) / 1000L).toInt().coerceAtLeast(0)
+            secondsLeft = left
+            if (left == 0) break
+            delay(1000)
+        }
+    }
+
+    if (methodSheet) {
+        TransferMethodSheet(
+            methods = methods,
+            selectedId = methodId,
+            onChoose = { chosen ->
+                methodId = chosen.id
+                deadline = System.currentTimeMillis() + ROUTE_WINDOW_MS
+                secondsLeft = (ROUTE_WINDOW_MS / 1000L).toInt()
+                methodSheet = false
+            },
+            onDismiss = { methodSheet = false },
+        )
+    }
 
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -159,6 +196,18 @@ public fun SupportScreen(
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         shape = MaterialTheme.shapes.large,
                     )
+                }
+
+                if (needsRoute) {
+                    if (method != null) {
+                        TransferMethodSummary(
+                            method = method,
+                            secondsLeft = secondsLeft,
+                            onOpen = { methodSheet = true },
+                        )
+                    } else {
+                        TransferMethodNone(onOpen = { methodSheet = true })
+                    }
                 }
 
                 Text(
@@ -308,6 +357,86 @@ private fun kindLabel(kind: TokenKind): String = when (kind) {
     TokenKind.COURTESY -> "Courtesy"
     TokenKind.JOY -> "Joy"
 }
+
+/**
+ * The real routes between two private accounts. Descriptors are the honest, typical shape of each
+ * route; the provider confirms the exact fee, timing and limit when the person leaves TLC. Routes
+ * that need an integration this build does not have are shown disabled rather than invented.
+ */
+@Composable
+private fun transferMethods(): List<TransferMethod> {
+    val sender = stringResource(R.string.transfer_method_payer_sender)
+    val unavailable = stringResource(R.string.transfer_method_unavailable)
+    val direct = stringResource(R.string.transfer_method_direct_name)
+    val fast = stringResource(R.string.transfer_method_fast_name)
+    val card = stringResource(R.string.transfer_method_card_name)
+    val agent = stringResource(R.string.transfer_method_agent_name)
+    val world = stringResource(R.string.transfer_method_world_name)
+    return listOf(
+        TransferMethod(
+            id = "direct-bank",
+            name = direct,
+            provider = stringResource(R.string.transfer_method_direct_provider),
+            fee = stringResource(R.string.transfer_method_direct_fee),
+            payer = sender,
+            timing = stringResource(R.string.transfer_method_timing_varies),
+            limit = stringResource(R.string.transfer_method_limit_bank),
+            badge = stringResource(R.string.transfer_method_direct_badge),
+            available = true,
+            unavailableReason = null,
+        ),
+        TransferMethod(
+            id = "instant-bank",
+            name = fast,
+            provider = stringResource(R.string.transfer_method_fast_provider),
+            fee = stringResource(R.string.transfer_method_fast_fee),
+            payer = sender,
+            timing = stringResource(R.string.transfer_method_timing_seconds),
+            limit = stringResource(R.string.transfer_method_limit_fast),
+            badge = stringResource(R.string.transfer_method_fast_badge),
+            available = true,
+            unavailableReason = null,
+        ),
+        TransferMethod(
+            id = "card",
+            name = card,
+            provider = stringResource(R.string.transfer_method_card_provider),
+            fee = stringResource(R.string.transfer_method_fee_provider),
+            payer = sender,
+            timing = stringResource(R.string.transfer_method_timing_minutes),
+            limit = stringResource(R.string.transfer_method_limit_provider),
+            badge = null,
+            available = false,
+            unavailableReason = unavailable,
+        ),
+        TransferMethod(
+            id = "agent",
+            name = agent,
+            provider = stringResource(R.string.transfer_method_agent_provider),
+            fee = stringResource(R.string.transfer_method_agent_fee),
+            payer = sender,
+            timing = stringResource(R.string.transfer_method_timing_same_day),
+            limit = stringResource(R.string.transfer_method_limit_agent),
+            badge = null,
+            available = false,
+            unavailableReason = unavailable,
+        ),
+        TransferMethod(
+            id = "international",
+            name = world,
+            provider = stringResource(R.string.transfer_method_world_provider),
+            fee = stringResource(R.string.transfer_method_world_fee),
+            payer = sender,
+            timing = stringResource(R.string.transfer_method_timing_days),
+            limit = stringResource(R.string.transfer_method_limit_world),
+            badge = null,
+            available = false,
+            unavailableReason = unavailable,
+        ),
+    )
+}
+
+private const val ROUTE_WINDOW_MS = 120_000L
 
 private fun stateLabel(state: SupportState): String = when (state) {
     SupportState.INTENT -> "Offered"

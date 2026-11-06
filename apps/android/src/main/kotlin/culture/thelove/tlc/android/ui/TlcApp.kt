@@ -86,7 +86,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import culture.thelove.tlc.android.R
 import culture.thelove.tlc.android.data.AppState
+import culture.thelove.tlc.android.data.IdentityError
+import culture.thelove.tlc.android.data.IdentityStore
 import culture.thelove.tlc.android.data.JournalState
+import culture.thelove.tlc.android.data.PresenceSettings
+import culture.thelove.tlc.android.data.PresenceStore
 import culture.thelove.tlc.android.data.SaveOutcome
 import culture.thelove.tlc.android.ui.screens.AboutScreen
 import culture.thelove.tlc.android.ui.screens.BankVaultScreen
@@ -96,9 +100,12 @@ import culture.thelove.tlc.android.ui.screens.ContactScreen
 import culture.thelove.tlc.android.ui.screens.DuesScreen
 import culture.thelove.tlc.android.ui.screens.GrantsScreen
 import culture.thelove.tlc.android.ui.screens.JournalScreen
+import culture.thelove.tlc.android.ui.screens.LockScreen
 import culture.thelove.tlc.android.ui.screens.OnboardingScreen
 import culture.thelove.tlc.android.ui.screens.PeopleScreen
+import culture.thelove.tlc.android.ui.screens.PresenceScreen
 import culture.thelove.tlc.android.ui.screens.ProfileScreen
+import culture.thelove.tlc.android.ui.screens.ProfileStats
 import culture.thelove.tlc.android.ui.screens.SettingsScreen
 import culture.thelove.tlc.android.ui.screens.SupportScreen
 import culture.thelove.tlc.android.ui.screens.TodayScreen
@@ -139,6 +146,7 @@ public enum class Dest {
     ABOUT,
     TOKENS,
     PROFILE,
+    PRESENCE,
     ;
 
     public val isTab: Boolean
@@ -155,6 +163,14 @@ public fun TlcApp(filesDir: File, modifier: Modifier = Modifier) {
     val haptics = LocalHapticFeedback.current
     val clipboard = LocalClipboardManager.current
     val snackbar = remember { SnackbarHostState() }
+
+    val identityStore = remember(context) { IdentityStore(context) }
+    val presenceStore = remember(context) { PresenceStore(context) }
+    var identity by remember { mutableStateOf(identityStore.identity()) }
+    var locked by remember { mutableStateOf(identity != null) }
+    var lockBusy by remember { mutableStateOf(false) }
+    var lockError by remember { mutableStateOf<String?>(null) }
+    var presence by remember { mutableStateOf(presenceStore.load()) }
 
     var destName by rememberSaveable { mutableStateOf(Dest.TODAY.name) }
     val dest = Dest.valueOf(destName)
@@ -198,6 +214,17 @@ public fun TlcApp(filesDir: File, modifier: Modifier = Modifier) {
     fun notify(message: String) {
         scope.launch { snackbar.showSnackbar(message) }
     }
+
+    fun identityMessage(error: IdentityError): String = context.getString(
+        when (error) {
+            IdentityError.INVALID_USERNAME -> R.string.identity_error_username
+            IdentityError.RESERVED_USERNAME -> R.string.identity_error_reserved
+            IdentityError.WEAK_PASSPHRASE -> R.string.identity_error_weak
+            IdentityError.WRONG_PASSPHRASE -> R.string.identity_error_wrong
+            IdentityError.NO_IDENTITY -> R.string.identity_error_missing
+            IdentityError.STORAGE -> R.string.identity_error_storage
+        },
+    )
 
     fun act(success: Int?, block: suspend () -> String?) {
         if (actionBusy) return
@@ -377,12 +404,12 @@ public fun TlcApp(filesDir: File, modifier: Modifier = Modifier) {
         }.onFailure { notify(context.getString(R.string.receipt_failed)) }
     }
 
-    fun savePhoto(uri: Uri) {
+    fun savePhoto(uri: Uri, zoom: Float, offsetX: Float, offsetY: Float) {
         if (processingPhoto) return
         processingPhoto = true
         scope.launch {
             try {
-                val error = state.setProfilePhoto(uri)
+                val error = state.setProfilePhoto(uri, zoom, offsetX, offsetY)
                 if (error != null) {
                     snackbar.showSnackbar(error)
                 } else {
@@ -391,6 +418,21 @@ public fun TlcApp(filesDir: File, modifier: Modifier = Modifier) {
             } finally {
                 processingPhoto = false
             }
+        }
+    }
+
+    /** A forgotten passphrase can only start a fresh circle: door, preferences, images and record. */
+    fun resetCircle() {
+        identityStore.clear()
+        presenceStore.reset()
+        identity = null
+        presence = PresenceSettings.PRIVATE
+        locked = false
+        lockError = null
+        scope.launch {
+            state.clearMedia()
+            val error = state.startFresh()
+            if (error != null) snackbar.showSnackbar(error)
         }
     }
 
@@ -441,20 +483,98 @@ public fun TlcApp(filesDir: File, modifier: Modifier = Modifier) {
                     OnboardingScreen(
                         submitting = onboardingBusy,
                         error = onboardingError,
-                        onFinish = { name, circle, role, handle ->
+                        onFinish = { name, circle, role, handle, passphrase ->
                             if (onboardingBusy) return@OnboardingScreen
                             scope.launch {
                                 onboardingBusy = true
                                 onboardingError = null
                                 val error = state.onboard(name, circle, role, handle)
-                                onboardingBusy = false
                                 if (error != null) {
                                     onboardingError = error
-                                } else if (state.snapshot?.preferences?.haptics != false) {
-                                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                } else {
+                                    val door = identityStore.create(
+                                        username = handle?.value ?: name,
+                                        displayName = name,
+                                        passphrase = passphrase,
+                                    )
+                                    if (door != null) {
+                                        onboardingError = identityMessage(door)
+                                    } else {
+                                        identity = identityStore.identity()
+                                        locked = false
+                                        if (state.snapshot?.preferences?.haptics != false) {
+                                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        }
+                                    }
+                                }
+                                onboardingBusy = false
+                            }
+                        },
+                    )
+                }
+
+                identity == null -> Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .safeDrawingPadding(),
+                ) {
+                    LockScreen(
+                        username = snapshot.profile.handle?.value.orEmpty(),
+                        displayName = snapshot.profile.displayName,
+                        setup = true,
+                        busy = lockBusy,
+                        error = lockError,
+                        onUnlock = { _, _ -> },
+                        onCreate = { name, passphrase ->
+                            if (!lockBusy) {
+                                lockBusy = true
+                                lockError = null
+                                val error = identityStore.create(
+                                    username = name,
+                                    displayName = snapshot.profile.displayName,
+                                    passphrase = passphrase,
+                                )
+                                lockBusy = false
+                                if (error != null) {
+                                    lockError = identityMessage(error)
+                                } else {
+                                    identity = identityStore.identity()
+                                    locked = false
+                                    lockError = null
                                 }
                             }
                         },
+                        onReset = {},
+                    )
+                }
+
+                locked -> Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .safeDrawingPadding(),
+                ) {
+                    LockScreen(
+                        username = identity?.username.orEmpty(),
+                        displayName = snapshot.profile.displayName,
+                        setup = false,
+                        busy = lockBusy,
+                        error = lockError,
+                        onUnlock = { name, passphrase ->
+                            if (!lockBusy) {
+                                lockBusy = true
+                                lockError = null
+                                val ok = identityStore.verify(name, passphrase)
+                                lockBusy = false
+                                if (ok) {
+                                    locked = false
+                                    lockError = null
+                                } else {
+                                    lockError = context.getString(R.string.identity_error_wrong)
+                                }
+                            }
+                        },
+                        onCreate = { _, _ -> },
+                        onReset = { resetCircle() },
                     )
                 }
 
@@ -802,14 +922,42 @@ public fun TlcApp(filesDir: File, modifier: Modifier = Modifier) {
 
                                     Dest.PROFILE -> ProfileScreen(
                                         profile = sealed.profile,
+                                        stats = ProfileStats(
+                                            people = sealed.people.size,
+                                            tokens = sealed.supports.size,
+                                            joinedAt = sealed.profile.createdAt,
+                                        ),
+                                        hasPassphrase = identity != null,
+                                        presence = presence,
                                         busy = state.busy || actionBusy,
                                         processingPhoto = processingPhoto,
                                         onSave = { name, circle ->
                                             act(R.string.profile_saved) { state.updateProfile(name, circle) }
                                         },
-                                        onPickPhoto = { uri -> savePhoto(uri) },
+                                        onSavePhoto = { uri, zoom, offsetX, offsetY ->
+                                            savePhoto(uri, zoom, offsetX, offsetY)
+                                        },
                                         onRemovePhoto = {
                                             act(R.string.profile_photo_removed) { state.removeProfilePhoto() }
+                                        },
+                                        onOpenPresence = { go(Dest.PRESENCE) },
+                                        onLock = {
+                                            locked = true
+                                            lockError = null
+                                        },
+                                        onSignOut = {
+                                            locked = true
+                                            lockError = null
+                                            go(Dest.TODAY)
+                                        },
+                                    )
+
+                                    Dest.PRESENCE -> PresenceScreen(
+                                        settings = presence,
+                                        people = sealed.people,
+                                        onSave = { next ->
+                                            presenceStore.save(next)
+                                            presence = next
                                         },
                                     )
 
@@ -834,10 +982,7 @@ public fun TlcApp(filesDir: File, modifier: Modifier = Modifier) {
                         TextButton(
                             onClick = {
                                 confirmReset = false
-                                scope.launch {
-                                    val error = state.startFresh()
-                                    if (error != null) snackbar.showSnackbar(error)
-                                }
+                                resetCircle()
                             },
                         ) {
                             Text(stringResource(R.string.onboard_begin))
@@ -850,7 +995,6 @@ public fun TlcApp(filesDir: File, modifier: Modifier = Modifier) {
                     },
                 )
             }
-
             if (confirmImport) {
                 AlertDialog(
                     onDismissRequest = { confirmImport = false },
@@ -982,6 +1126,7 @@ private fun Dest.title(): String = stringResource(
         Dest.ABOUT -> R.string.about_title
         Dest.TOKENS -> R.string.tokens_title
         Dest.PROFILE -> R.string.profile_title
+        Dest.PRESENCE -> R.string.presence_title
     },
 )
 

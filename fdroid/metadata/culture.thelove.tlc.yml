@@ -55,6 +55,20 @@ Description: |
   through the system chooser. Profile photos can be picked, replaced or removed. Everything remains
   local-only: the Received view shows what is on this device and does not invent a number.
 
+  v0.0.7 adds the door, the face and the route. A distinct username and a word/phrase passphrase
+  open the circle; a salted PBKDF2 verifier stays on the device and the passphrase itself is never
+  stored, logged or sent. There is no fingerprint, face, passkey or device-credential unlock
+  anywhere; the passphrase is the only door, and a build gate fails on any biometric or passkey API.
+  An avatar studio frames a photo with drag, pinch and zoom before saving the exact circle shown; a
+  profile hero, ringed avatar and initials monogram replace the previous layout. Presence is four
+  independent choices — online now, last seen, typing and read receipts — each starting at Nobody,
+  with invisible, selected and hidden people, coarse last seen and a live preview. A token transfer
+  now asks for the real Transfer Method: provider, fee, who pays, arrival, limit and availability,
+  with a two-minute held window and honest disabled states for routes this build cannot reach. TLC
+  still never holds, moves, pools or escrows money, and completes nothing on the person's behalf.
+  Presence choices are stored on this device and are the instruction the shared plane must obey;
+  there is still no server account, sync, multi-device merge or INTERNET permission.
+
   TLC never holds, moves, pools or escrows money. There is no wallet, no balance, no payment rail
   and no card data. The app shows where to send a payment and records the evidence you bring back;
   the transfer itself happens bank to bank between two private accounts. Recognition tokens are
@@ -110,14 +124,22 @@ Builds:
     output: apps/android/build/outputs/apk/foss/release/*.apk
     scanignore:
       - gradle/wrapper/gradle-wrapper.jar
+  - versionName: 0.0.7
+    versionCode: 7
+    commit: v0.0.7
+    gradle:
+      - assembleFossRelease
+    output: apps/android/build/outputs/apk/foss/release/*.apk
+    scanignore:
+      - gradle/wrapper/gradle-wrapper.jar
 
 # The same signed binary that GitHub Releases serves. F-Droid's buildserver builds from source and
 # verifies that its output matches this APK byte for byte; if it does not, the build fails rather
 # than silently shipping a differently-signed copy.
-Binaries: https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.6/tlc-0.0.6-foss.apk
+Binaries: https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.7/tlc-0.0.7-foss.apk
 AllowedAPKSigningKeys: e04cb8aa2cf5fdeec043d917a74a5ba634121f2a0b98df92869a42bb4acb732c
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 0.0.6
-CurrentVersionCode: 6
+CurrentVersion: 0.0.7
+CurrentVersionCode: 7

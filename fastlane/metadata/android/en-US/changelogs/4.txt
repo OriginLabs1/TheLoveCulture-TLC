@@ -4,7 +4,7 @@ TLC 0.0.4 — the whole shape of it.
 • Today: your circle, the health of the record, the everyday verbs and every open loop in one place.
 • Journal: search and filters, plus a Merkle proof sheet for any entry. Filters never change the record.
 • Growth Grants: pledge, attach evidence, name the witness, record the bank reference. A stage cannot be claimed without its evidence.
-• Pioneer dues: record a due, issue the instruction, submit your proof. The app does not pretend to attest a Pioneer payment.
+• Pioneer's Tokens: record a contribution, issue the instruction, submit your proof. The app does not pretend to attest a Pioneer transfer.
 • Circle: name a Co-Steward, open a two-key decision, see both signatures, and veto from either seat. These are local personas, not accounts yet.
 • Settings: theme, motion, haptics, Receptive Mode, export, verified backup and restore, seal sharing.
 • About: what TLC is now, what it is not yet, the module map, licence and source.

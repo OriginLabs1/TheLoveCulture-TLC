@@ -1,33 +1,41 @@
-# TLC — v0.0.6
+# TLC — v0.0.7
 
 Android-first shell over a sovereign, non-custodial core.
-Doctrine: [`CONTEXT.md`](CONTEXT.md) · Contract: [`SPECS.md`](SPECS.md) · Releases: [v0.0.6](https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/latest)
+Doctrine: [`CONTEXT.md`](CONTEXT.md) · Contract: [`SPECS.md`](SPECS.md) · Releases: [v0.0.7](https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/latest)
 
-**Status: tokens, receipts and faces.** The relationship is recorded, and v0.0.6 makes it visible.
-One Tokens surface shows every Support, Pioneer's Token and Growth Grant with its real state, its
-timeline and its receipt; receipt images can be attached, replaced, removed and shared with an
-audience you choose; and your profile photo and name are yours to edit. Forest green and royal
-purple join the palette as accents, with selective motion that respects the system setting.
-Everything is still local-only: no account, no sync, no `INTERNET` permission, no custody. The
-Received view shows what is on this device and never invents a number. Accounts, sync, encrypted
-messaging and the shared plane are the next milestone. The store copy says the same thing — see
-[`fastlane/metadata`](fastlane/metadata/android/en-US/full_description.txt).
+**Status: the door, the face and the route.** v0.0.7 adds the identity the next milestone needs: a
+distinct username and a word/phrase passphrase, with no biometric or passkey door anywhere. An
+avatar studio frames your photo before it is saved, presence is four independent choices that start
+at Nobody, and a token transfer asks which real route the value will take. Everything is still
+local-only: no server account, no sync, no `INTERNET` permission, no custody. Presence choices are
+stored on this device and are the instruction the shared plane must obey; the Transfer Method sheet
+describes real routes honestly and does not invent a provider quote. The store copy says the same
+thing — see [`fastlane/metadata`](fastlane/metadata/android/en-US/full_description.txt).
 
-## Install v0.0.6
+**Doctrine v0.0.2 — the direction the next build must earn.** TLC is an **instrument, not a bank**:
+people move real money between their own accounts, and TLC records the instruction, proof,
+attestation and receipt. The shared plane adds encrypted messaging, calls where supported, and the
+same token state on both sides; the identity, presence and Transfer Method surfaces in this build
+are the local half of that. **Pear/Holepunch** (Hypercore/Hyperswarm) is evaluated only for
+encrypted backup and nearby handoff — never as the authority for a shared fact. None of the shared
+plane is claimed for this build; see [`CONTEXT.md`](CONTEXT.md), [`SPECS.md`](SPECS.md) and the
+working plan [`docs/PLAN-v0.0.7.md`](docs/PLAN-v0.0.7.md).
 
-**[Download `tlc-0.0.6-foss.apk`](https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.6/tlc-0.0.6-foss.apk)**
+## Install v0.0.7
+
+**[Download `tlc-0.0.7-foss.apk`](https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.7/tlc-0.0.7-foss.apk)**
 · [install page](https://originlabs1.github.io/TheLoveCulture-TLC/) ·
-[release page](https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/tag/v0.0.6) ·
-[SHA256SUMS](https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.6/SHA256SUMS) ·
-[signature](https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.6/tlc-0.0.6-foss.signature.txt)
+[release page](https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/tag/v0.0.7) ·
+[SHA256SUMS](https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.7/SHA256SUMS) ·
+[signature](https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.7/tlc-0.0.7-foss.signature.txt)
 
 ```sh
 sha256sum -c SHA256SUMS
-apksigner verify --print-certs tlc-0.0.6-foss.apk
+apksigner verify --print-certs tlc-0.0.7-foss.apk
 # certificate SHA-256: e04cb8aa2cf5fdeec043d917a74a5ba634121f2a0b98df92869a42bb4acb732c
 ```
 
-Android 7.0 or newer. The APK asks for no `INTERNET` permission. Add
+Android 8.0 or newer (API 26). The APK asks for no `INTERNET` permission. Add
 `https://github.com/OriginLabs1/TheLoveCulture-TLC` to Obtainium for update checks straight from
 these releases. F-Droid, Orion Store and Uptodown receive the same signed file; see
 [`docs/DISTRIBUTION.md`](docs/DISTRIBUTION.md) for their status and the submission rules.
@@ -40,7 +48,7 @@ these releases. F-Droid, Orion Store and Uptodown receive the same signed file; 
 | Hash-chained Pioneer ledger (SK-04, INV-08) | `core/ledger` | 53 tests green — tamper, reorder, truncation, torn writes, failed writes, replay and restore all caught |
 | Experience layer | `core/experience` | 35 tests green — onboarding, preferences, dyad, proposals, grants, tokens, Support, people, contact log, profile and receipts, state and bundle codecs |
 | `ledger-verify` CLI (SPECS §B-3) | `tools/ledger-verify` | 9 tests — reads the app's own export; exit-code contract tested |
-| Android shell (Compose M3) | `apps/android` | onboarding, Today, Record, People, Bank vault, Support, Pioneer Desk, Grants, Token, Tokens, Profile, Circle, Settings, Verify and About; type-checks against the real Compose classpath |
+| Android shell (Compose M3) | `apps/android` | onboarding with passphrase, Today, Record, People, Bank vault, Support with Transfer Methods, Pioneer Desk, Grants, Token, Tokens, Profile with avatar studio, Presence, Circle, Settings, Verify and About; type-checks against the real Compose classpath |
 
 No code path in this repository moves, holds, pools or escrows money. `Effect` has
 `requiresCustody = false` on every member, and the ledger has no `BALANCE`/`TRANSFER`/`ESCROW`
@@ -52,6 +60,7 @@ entry kind — both enforced by tests, not by comment.
 make doctor        # toolchain + secret presence (never prints secrets)
 make verify        # compile + all 131 invariant tests, no Android SDK needed
 make ledger-verify # chain verification, including deliberate tampering
+make copy-lint     # fail on banned user-facing terms (SPECS §0.1 / SK-19)
 make check-foss    # prove the foss channel has no Play Services / Firebase / tracking
 make shell-check   # type-check the shell without AAPT2 (any CPU)
 make android-build # foss debug APK
@@ -92,8 +101,8 @@ Version identity lives in one file (`version.properties`); the git tag must equa
 
 ```bash
 ./scripts/bump-version.sh patch
-git add version.properties && git commit -m "release: v0.0.6"
-git tag v0.0.6 && git push origin main v0.0.6
+git add version.properties && git commit -m "release: v0.0.7"
+git tag v0.0.7 && git push origin main v0.0.7
 ```
 
 `.github/workflows/release.yml` then verifies the tag against `version.properties`, rejects a
@@ -120,7 +129,7 @@ design/logo       vector logo masters and the store-icon source
 
 ## Deliberately absent
 
-Wallet, balance, escrow, card data, admin superuser, analytics on amounts.
+No wallet, no balance, no escrow, no card data, no admin superuser, no analytics on amounts.
 Every one of those is a licence or a breach waiting to happen (CONTEXT §9).
 
 ## Licence

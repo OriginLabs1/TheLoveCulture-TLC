@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>TLC — recognition, kept honestly</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230B1B33'/%3E%3Cpath d='M32 49C32 49 12 37 12 24c0-8 7-13 13-13 4 0 6 2 7 4 1-2 3-4 7-4 6 0 13 5 13 13 0 13-20 25-20 25z' fill='%231466C7'/%3E%3C/svg%3E">
-<meta name="description" content="TLC is a local-first, non-custodial record of recognition and contribution. Download the signed v0.0.6 APK.">
+<meta name="description" content="TLC is a local-first, non-custodial record of recognition and contribution. Download the signed v0.0.7 APK.">
 <style>
   :root { color-scheme: light dark; --bg:#F6F8FC; --ink:#0B1B33; --muted:#4B5B73; --line:#D9E2EE; --accent:#1B3A8C; --accent2:#1466C7; --card:#FFFFFF; }
   @media (prefers-color-scheme: dark) { :root { --bg:#0B1B33; --ink:#EDF2F9; --muted:#A9B8CE; --line:#22375A; --accent:#6FA8FF; --accent2:#8FBFFF; --card:#10233F; } }
@@ -35,32 +35,35 @@
   <div class="mark" aria-hidden="true">♥</div>
   <h1>Recognition,<br>kept honestly.</h1>
   <p class="lede">TLC is a local-first, non-custodial record of care and contribution. It keeps a
-  tamper-evident journal for families, circles, community groups and cooperatives — without an
-  account, a sync server or a company holding the memory.</p>
+  tamper-evident journal for families, circles, community groups and cooperatives — without a
+  server account, a sync server or a company holding the memory.</p>
 
   <div class="actions">
-    <a class="button" href="https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.6/tlc-0.0.6-foss.apk">Download v0.0.6 APK</a>
-    <a class="button secondary" href="https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/tag/v0.0.6">Release notes</a>
+    <a class="button" href="https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.7/tlc-0.0.7-foss.apk">Download v0.0.7 APK</a>
+    <a class="button secondary" href="https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/tag/v0.0.7">Release notes</a>
   </div>
-  <p class="meta">Android 7.0+ · 1.4 MB · GPL-3.0-or-later · no <code>INTERNET</code> permission</p>
+  <p class="meta">Android 8.0+ · GPL-3.0-or-later · no <code>INTERNET</code> permission</p>
 
   <div class="card">
     <strong>Verify before you install.</strong>
     <pre><code>sha256sum -c SHA256SUMS
-apksigner verify --print-certs tlc-0.0.6-foss.apk</code></pre>
+apksigner verify --print-certs tlc-0.0.7-foss.apk</code></pre>
     <p class="meta">Certificate SHA-256: <code>e04cb8aa2cf5fdeec043d917a74a5ba634121f2a0b98df92869a42bb4acb732c</code></p>
-    <p class="meta"><a href="https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.6/SHA256SUMS">SHA256SUMS</a> ·
-    <a href="https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.6/tlc-0.0.6-foss.signature.txt">signature block</a> ·
-    <a href="https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.6/tlc-0.0.6-foss.dependencies.txt">dependency manifest</a></p>
+    <p class="meta"><a href="https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.7/SHA256SUMS">SHA256SUMS</a> ·
+    <a href="https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.7/tlc-0.0.7-foss.signature.txt">signature block</a> ·
+    <a href="https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.7/tlc-0.0.7-foss.dependencies.txt">dependency manifest</a></p>
   </div>
 
   <h2>What this build does</h2>
   <ul>
+    <li>A distinct username and a word/phrase passphrase open the circle. No fingerprint, face, passkey or device shortcut — the passphrase is the only door.</li>
+    <li>An avatar studio: pick a photo, then drag, pinch and zoom to frame the exact circle that is saved. With no photo, an initials monogram replaces the empty box.</li>
+    <li>Presence you control: online now, last seen, typing and read receipts each choose Nobody, Selected people, My circle or Everyone. Private by default, invisible overrides, with a live preview.</li>
+    <li>Transfer Methods inside a token transfer: real routes with provider, fee, payer, arrival, limit and availability, plus a two-minute held window. TLC never holds or moves the money.</li>
     <li>Onboarding, a local profile and a <code>@handle</code>, then Today, Record, People, Tokens, Settings and a Create sheet.</li>
     <li>An append-only, hash-chained record that is re-verified on every launch and opens read-only if it does not check out.</li>
-    <li>One Tokens surface for every Support, Pioneer's Token and Growth Grant, with live circulation counters and an honest timeline.</li>
+    <li>One Tokens surface for every Support, Pioneer's Token and Growth Grant, with circulation counters and an honest timeline.</li>
     <li>Receipt images you own: downscaled, metadata-stripped, stored privately, and shared only with an audience you choose.</li>
-    <li>Your own face and name: pick or replace a profile photo, edit your display name, and keep your handle and record.</li>
     <li>Names for people and roles: <code>@pioneer</code> is the official role and <code>@sircollins</code> is the person behind it.</li>
     <li>An encrypted bank vault: save a destination once, see only the last four digits, and reveal the full number only on purpose.</li>
     <li>Send Support, Pioneer's Token, a purpose-first Pioneer Desk, Growth Grants with evidence and witness stages.</li>
@@ -68,20 +71,22 @@ apksigner verify --print-certs tlc-0.0.6-foss.apk</code></pre>
   </ul>
 
   <h2>What it will never do</h2>
-  <p>TLC never holds, pools, escrows or moves money. There is no wallet, no balance, no payment rail
-  and no card data. A transfer happens bank to bank between two private accounts; TLC records the
-  intent, the instruction and the evidence.</p>
+  <p><strong>TLC is an instrument, not a bank.</strong> It never holds, pools, escrows or moves money.
+  There is no wallet, no balance, no payment rail in this build and no card data. A transfer happens
+  bank to bank between two private accounts; TLC records the intent, the instruction and the
+  evidence.</p>
   <p>A full bank account number is never compiled in and never enters the record. It lives only in the
   payer's encrypted vault, protected by the Android Keystore; the app shows the bank name, the last
   four digits and a fingerprint, and reveals the rest only on an explicit action.</p>
 
-  <h2>Direction for v0.0.7: accounts, sync and the social layer</h2>
-  <p>The unit of TLC's Standard Economic Framework is the <strong>Token</strong>: a record of a
-  meaningful resource, item, gift or monetary value. The non-custody line does not change — a Token
-  is a record of value, not a balance, and settlement stays bank to bank. This is recorded in
-  <a href="https://github.com/OriginLabs1/TheLoveCulture-TLC/blob/main/docs/SEF.md">docs/SEF.md</a>.
-  Accounts, cross-device sync, the remote attestation desk and the social layer are the next
-  milestone, not a promise about this build.</p>
+  <h2>What v0.0.7 does not claim</h2>
+  <p>The shared plane is still ahead. There is no server account, no sync, no multi-device merge and
+  no <code>INTERNET</code> permission in this build. Presence choices are stored on this device and
+  are the instruction the shared plane must obey. The Transfer Method sheet describes real routes
+  honestly; it does not invent a provider quote this build cannot see. Encrypted messaging, calls
+  where supported, cross-device presence and a Pear/Holepunch-style layer (Hypercore/Hyperswarm)
+  for encrypted backup and nearby handoff remain the next milestone, never the authority for shared
+  facts.</p>
 
   <h2>Other ways to install</h2>
   <p>Add <a href="https://github.com/OriginLabs1/TheLoveCulture-TLC">OriginLabs1/TheLoveCulture-TLC</a>

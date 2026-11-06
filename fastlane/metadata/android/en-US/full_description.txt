@@ -4,13 +4,23 @@ It exists for one narrow purpose: to make care and contribution visible between 
 
 TOKENS, RECEIPTS AND FACES
 
-• One Tokens surface for everything that moves: Support, Pioneer's Token and Growth Grant, with an All / Sent / Received segment and an honest timeline from offer to acknowledgement.
-• Live counters for circulation, transferred and received. They describe movement only: there is no balance, no ranking and no pooled total.
+• One Tokens surface for everything that moves: Support, Pioneer's Token and Growth Grant, with an All / Offered / Received segment and an honest timeline from offer to acknowledgement.
+• Circulation counters for offered, transferred and received. They describe movement only: there is no balance, no ranking and no pooled total.
 • Receipt images you own. Attach a photo or screenshot to a token, replace it, remove it, or open it full size. The image is downscaled, re-encoded and stripped of metadata before it is stored in the app's private folder; the record keeps a file name and a fingerprint, never the bytes.
 • Visibility is explicit and revocable: Only me, This transfer, My circle, Anyone with the link, or Public in Record. Sharing opens the system chooser and nothing leaves until you choose to send it.
-• Your profile photo and name are yours to edit. Pick, replace or remove the photo at any time; change your display name and circle without losing your handle or your record.
 • Forest green marks received, verified and growth; royal purple marks Pioneer, stewardship and recognition. Both are accents only, and every state is also spelled out in words.
 • Motion is selective: counters animate, cards reveal, taps respond — and turning motion off removes the animation without removing information.
+
+THE DOOR, THE FACE AND THE ROUTE
+
+• A distinct username and a word/phrase passphrase open the circle. Four ordinary words or one long line; a strength guide shows the shape without shaming. A salt and a PBKDF2 verifier stay on the device, and the passphrase is never stored, logged or sent.
+• No biometrics. Ever. There is no fingerprint prompt, no face prompt, no passkey sheet and no device-credential fallback. The passphrase is the only door, and a build gate fails on any biometric or passkey API.
+• Lock now returns to the passphrase screen. Sign out returns to the door and leaves the record on the device. A forgotten passphrase can be reset only by starting a fresh circle on this device; export a bundle first if you want to keep the record. A device with an older record but no passphrase is asked once to set the words, without discarding it.
+• An avatar studio frames your photo: drag to move, pinch or use the slider to zoom, reset, then save the exact circle shown. The preview and the saved file share one geometry, so a head is no longer cropped off by a silent centre crop. With no photo, an initials monogram sits on a quiet gradient.
+• A profile that reads like a person: a gradient hero, an overlapping ringed avatar, an edit badge, three honest counters, your details, your photo, your presence summary and the security of the door in one calm column.
+• Presence is four independent choices: Online now, Last seen, Typing and Read receipts. Each starts at Nobody and can separately be Nobody, Selected people, My circle or Everyone. Invisible overrides everything. Selected and hidden people are explicit, exact last seen is its own choice, and a live preview shows what one person would see. Silence is never rendered as offline.
+• A token transfer asks for the real Transfer Method while you are sending: provider, fee, who pays, arrival, limit and availability, with a two-minute held window and a one-tap switch. Direct bank and instant bank rail are usable today; card-funded, cash-agent and international routes are shown disabled with the reason rather than invented.
+• TLC never holds or moves the money. You complete the route in your own bank or licensed provider and bring back the reference.
 
 TRUST AND CONTACT
 
@@ -18,7 +28,7 @@ TRUST AND CONTACT
 • People is a small, deliberate address book. Add the people you actually support, give them a handle and a role, and attach one saved destination.
 • The Bank vault saves a destination once. The ten-digit account number is validated locally against its NUBAN check digit, encrypted with AES-256-GCM and a key held by the Android Keystore, and never written to the state, the record, a backup or a log. The app shows only the bank name, the last four digits and a fingerprint. Revealing the full number is an explicit action; it hides again on its own and the reveal is written to the record.
 • Send Support is the direct peer flow: Supportive or Recognition support to a person you know, with an optional amount and a reference. TLC records the offer, the claim and the acknowledgement. A claim is a statement, not a settlement.
-• Pioneer's Token replaces "Pioneer dues". Activation, Reactivation, Courtesy and Joy go directly to the Concept Pioneer's own account. TLC records the intent and the evidence; it never holds the money. The destination stays in the vault and is revealed only to the payer, only after the token exists.
+• Pioneer's Token replaces the old debt-like label. Activation, Reactivation, Courtesy and Joy go directly to the Concept Pioneer's own account. TLC records the intent and the evidence; it never holds the money. The destination stays in the vault and is revealed only to the payer, only after the token exists.
 • The Pioneer Desk is purpose-first contact. Choose why you are writing, see the opening before it leaves the app, then pick a channel: Telegram, email or the website. WhatsApp is deferred because the founder's Telegram already uses that number. The local contact log keeps only the fact of contact — purpose, channel and time — never the message.
 • The Contact & Consent Framework is doctrine in this build. The public wording that describes it is under legal review and may still change.
 
@@ -49,12 +59,13 @@ WHAT THE RECORD DOES
 
 WHAT IT DOES NOT DO YET
 
-There is no account, no sync and no multi-device merge. A Co-Steward is a local persona, not a remote authenticated person. The Received view shows only what is on this device and does not invent a number; tokens sent from another device arrive when the shared plane ships. The remote Pioneer attestation desk, cross-device invitations, encrypted messaging, the SEF economy and the social layer are the next milestone, not a promise about this build.
+There is no account on a server, no sync and no multi-device merge. A Co-Steward is a local persona, not a remote authenticated person. The Received view shows only what is on this device and does not invent a number; tokens sent from another device arrive when the shared plane ships. Presence choices are stored on this device and are the instruction the shared plane must obey. Transfer Methods describe real routes honestly; they do not invent a provider quote this build cannot see. Encrypted messaging, calls where supported, cross-device presence, the remote Pioneer attestation desk, cross-device invitations, the SEF economy and the social layer are the next milestone, not a promise about this build.
 
 WHAT TLC WILL NEVER DO
 
 • It never holds, moves, pools or escrows money. There is no wallet, no balance, no payment rail, no card data.
-• The app shows where to send a payment and records the evidence you bring back. The money moves between two private bank accounts, bank to bank, and TLC is not a party to it.
+• It never offers a fingerprint, face, passkey or device-credential door. Your passphrase is the only key.
+• The app shows where to send a transfer and records the evidence you bring back. The money moves between two private bank accounts, bank to bank, and TLC is not a party to it.
 • Recognition tokens are signals of appreciation: not currency, not transferable, not redeemable, not crypto.
 • No analytics on amounts, no advertising identifier, no third-party tracking.
 

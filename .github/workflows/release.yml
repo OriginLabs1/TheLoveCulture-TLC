@@ -127,6 +127,9 @@ jobs:
       - name: Core invariants
         run: ./gradlew verify --console=plain
 
+      - name: Copy lint (no banned user-facing terms)
+        run: python3 scripts/copy-lint.py
+
       - name: FOSS guard (no Play Services / Firebase / tracking)
         run: ./scripts/check-foss.sh
 

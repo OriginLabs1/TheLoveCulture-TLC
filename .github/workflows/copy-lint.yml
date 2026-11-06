@@ -1,0 +1,27 @@
+name: copy-lint
+
+# The word "dues" must never reach a user-facing surface. This gate scans rendered values (not
+# resource names), store copy, release notes and the notices. It is intentionally dependency-free
+# so it can run on any runner and locally with `make copy-lint`.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: copy-lint-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: banned terms
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: copy lint
+        run: python3 scripts/copy-lint.py

@@ -1,4 +1,4 @@
-# Distribution — v0.0.6
+# Distribution — v0.0.7
 
 One tag, one build, one signature. The source of truth is the GitHub Release; every other channel
 must carry the same signed APK, never a re-signed copy.
@@ -7,7 +7,7 @@ must carry the same signed APK, never a re-signed copy.
 
 | Channel | Status | Where |
 |---|---|---|
-| GitHub Releases | **Published** | <https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/tag/v0.0.6> |
+| GitHub Releases | **Published** | <https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/tag/v0.0.7> |
 | GitHub Pages install page | **Live** | <https://originlabs1.github.io/TheLoveCulture-TLC/> |
 | Obtainium | **Available** | add `https://github.com/OriginLabs1/TheLoveCulture-TLC` as a source |
 
@@ -15,9 +15,9 @@ Release facts:
 
 | | |
 |---|---|
-| APK | `tlc-0.0.6-foss.apk` |
-| versionName / versionCode | `0.0.6` / `6` |
-| Commit | tag `v0.0.6` |
+| APK | `tlc-0.0.7-foss.apk` |
+| versionName / versionCode | `0.0.7` / `7` |
+| Commit | tag `v0.0.7` |
 | Signature | APK Signature Scheme v2, RSA 4096 |
 | Certificate SHA-256 | `e04cb8aa2cf5fdeec043d917a74a5ba634121f2a0b98df92869a42bb4acb732c` |
 | Permissions | no `INTERNET` permission |
@@ -29,16 +29,16 @@ cannot.
 Verify a download:
 
 ```sh
-gh release download v0.0.6 --repo OriginLabs1/TheLoveCulture-TLC
+gh release download v0.0.7 --repo OriginLabs1/TheLoveCulture-TLC
 sha256sum -c SHA256SUMS
-apksigner verify --print-certs tlc-0.0.6-foss.apk
+apksigner verify --print-certs tlc-0.0.7-foss.apk
 ```
 
-v0.0.6 is built and published by the GitHub Actions release workflow on x86-64, which also emits the
+v0.0.7 is built and published by the GitHub Actions release workflow on x86-64, which also emits the
 build-provenance attestation. Verify that attestation for the tag:
 
 ```sh
-gh attestation verify tlc-0.0.6-foss.apk --repo OriginLabs1/TheLoveCulture-TLC
+gh attestation verify tlc-0.0.7-foss.apk --repo OriginLabs1/TheLoveCulture-TLC
 ```
 
 A local build is a verification step, not the published artifact.
@@ -54,7 +54,7 @@ copy are ready; only the account action is missing.
 2. Copy [`fdroid/metadata/culture.thelove.tlc.yml`](../fdroid/metadata/culture.thelove.tlc.yml) to
    `metadata/culture.thelove.tlc.yml` unchanged.
 3. Open a merge request. The metadata pins:
-   - `commit: v0.0.6` (the exact tag this release was built from),
+   - `commit: v0.0.7` (the exact tag this release was built from),
    - `Binaries:` to the GitHub APK,
    - `AllowedAPKSigningKeys:` to the project certificate above.
 4. F-Droid's buildserver rebuilds from source and compares the result. If it differs, the build
@@ -80,10 +80,10 @@ pull request to <https://github.com/RookieEnough/Orion-Data>:
 | `category` | `Social` |
 | `platform` | `Android` |
 | `author` | `Collins Christopher` |
-| `version` / `latestVersion` | `0.0.6` / `Latest` |
+| `version` / `latestVersion` | `0.0.7` / `Latest` |
 | `description` | the short description in [`fastlane/metadata`](../fastlane/metadata/android/en-US/short_description.txt) |
 
-Orion should resolve `tlc-0.0.6-foss.apk` from the GitHub Release above. The listing needs a direct
+Orion should resolve `tlc-0.0.7-foss.apk` from the GitHub Release above. The listing needs a direct
 icon URL and direct screenshot URLs; this repository does not yet carry raster screenshots, so the
 owner must supply or approve them before the Orion entry can be complete.
 
@@ -92,8 +92,8 @@ owner must supply or approve them before the Orion entry can be complete.
 Uptodown is a manual developer-console upload:
 
 1. Create the app once under `culture.thelove.tlc`.
-2. Upload the same `tlc-0.0.6-foss.apk`; versionCode `6`.
-3. Use [`changelogs/6.txt`](../fastlane/metadata/android/en-US/changelogs/6.txt) as the changelog and the
+2. Upload the same `tlc-0.0.7-foss.apk`; versionCode `7`.
+3. Use [`changelogs/7.txt`](../fastlane/metadata/android/en-US/changelogs/7.txt) as the changelog and the
    `fastlane/metadata` files as the listing copy.
 4. Supply the icon, feature graphic and screenshots from the release commit (still outstanding).
 5. Never upload a debug build, an unsigned build or a re-signed build.

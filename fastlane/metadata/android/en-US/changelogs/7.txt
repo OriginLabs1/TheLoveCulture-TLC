@@ -1,0 +1,12 @@
+TLC 0.0.7 — The door, the face and the route.
+
+• Identity: a distinct username and a word/phrase passphrase open the circle. Salted PBKDF2 verifier on the device; the passphrase is never stored, logged or sent.
+• No biometrics: no fingerprint, face, passkey or device shortcut. The copy and architecture gates fail the build on any biometric API.
+• Lock, sign out and recovery: lock now returns to the door; sign out leaves the record on the device; a forgotten passphrase can only start a fresh circle, after an export warning.
+• Avatar studio: pick, drag, pinch and zoom to frame the exact circle that is saved. No more silent centre crop.
+• Profile: gradient hero, ringed avatar, initials monogram, three honest counters, details, photo, presence summary and the door.
+• Presence: online now, last seen, typing and read receipts each choose Nobody / Selected people / My circle / Everyone. Private by default, invisible overrides, selected and hidden people, coarse last seen, live preview.
+• Transfer Methods: choose the real route inside a token transfer, with provider, fee, payer, arrival, limit, availability and a two-minute held window. TLC never holds or moves the money.
+• Still local-only: no server account, no sync, no multi-device merge, no INTERNET permission. Presence choices are stored on this device; the shared plane applies them when it ships.
+
+Still no Play Services, Firebase or analytics. No wallet, no balance, no escrow, no payment rail, no card data. No recurring charge is shown to anyone. The APK is signed with the project key and published unchanged to GitHub, F-Droid, Orion Store and Uptodown.

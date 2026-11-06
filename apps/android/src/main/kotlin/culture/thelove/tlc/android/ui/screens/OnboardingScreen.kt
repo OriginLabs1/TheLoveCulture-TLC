@@ -49,22 +49,34 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import culture.thelove.tlc.android.R
+import culture.thelove.tlc.android.data.IdentityError
+import culture.thelove.tlc.android.data.IdentityStore
 import culture.thelove.tlc.android.ui.Eyebrow
 import culture.thelove.tlc.android.ui.GlassPanel
 import culture.thelove.tlc.domain.Handle
 import culture.thelove.tlc.domain.Role
 
 /**
- * First launch. Three honest screens: what this is, what a role means, and the name the device
- * will greet you with. Nothing is created until the final tap, and nothing leaves the device.
+ * First launch. Four honest screens: what this is, what a role means, the name the device will
+ * greet you with, and the words that open the door. Nothing is created until the final tap, and
+ * nothing leaves the device. There is no biometric shortcut: the passphrase is the key.
  */
 @Composable
 public fun OnboardingScreen(
     submitting: Boolean,
     error: String?,
-    onFinish: (displayName: String, circleName: String, role: Role, handle: Handle?) -> Unit,
+    onFinish: (
+        displayName: String,
+        circleName: String,
+        role: Role,
+        handle: Handle?,
+        passphrase: String,
+    ) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var step by rememberSaveable { mutableIntStateOf(0) }
@@ -74,11 +86,17 @@ public fun OnboardingScreen(
     var handleEdited by rememberSaveable { mutableStateOf(false) }
     var roleName by rememberSaveable { mutableStateOf(Role.SINGLE.name) }
     var consented by rememberSaveable { mutableStateOf(false) }
+    var passphrase by rememberSaveable { mutableStateOf("") }
+    var passphraseAgain by rememberSaveable { mutableStateOf("") }
+    var reveal by rememberSaveable { mutableStateOf(false) }
     val role = Role.valueOf(roleName)
-    val last = step == 2
+    val last = step == 3
     val handle = Handle.parse(handleText)
     val handleReserved = handle != null && Handle.isReserved(handle.value)
-    val canFinish = name.isNotBlank() && handle != null && !handleReserved && consented && !submitting
+    val passphraseProblem = IdentityStore.passphraseProblem(passphrase)
+    val matches = passphrase.isNotEmpty() && passphrase == passphraseAgain
+    val canFinish = name.isNotBlank() && handle != null && !handleReserved && consented &&
+        passphraseProblem == null && matches && !submitting
 
     Column(
         modifier = modifier
@@ -115,7 +133,7 @@ public fun OnboardingScreen(
                     fontWeight = FontWeight.SemiBold,
                 )
                 Text(
-                    text = stringResource(R.string.onboard_step, step + 1, 3),
+                    text = stringResource(R.string.onboard_step, step + 1, 4),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -130,7 +148,7 @@ public fun OnboardingScreen(
         when (step) {
             0 -> WelcomeStep()
             1 -> RoleStep(selected = role, onSelect = { roleName = it.name })
-            else -> ProfileStep(
+            2 -> ProfileStep(
                 name = name,
                 circle = circle,
                 handleText = handleText,
@@ -153,6 +171,16 @@ public fun OnboardingScreen(
                     }
                 },
                 onConsent = { consented = it },
+            )
+            else -> PassphraseStep(
+                passphrase = passphrase,
+                again = passphraseAgain,
+                reveal = reveal,
+                problem = passphraseProblem,
+                matches = matches,
+                onPassphrase = { passphrase = it },
+                onAgain = { passphraseAgain = it },
+                onReveal = { reveal = it },
             )
         }
 
@@ -180,7 +208,7 @@ public fun OnboardingScreen(
             Button(
                 onClick = {
                     if (last) {
-                        onFinish(name.trim(), circle.trim(), role, Handle.parse(handleText))
+                        onFinish(name.trim(), circle.trim(), role, Handle.parse(handleText), passphrase)
                     } else {
                         step += 1
                     }
@@ -463,6 +491,126 @@ private fun ProfileStep(
         SectionNote(
             title = stringResource(R.string.onboard_ready),
             body = stringResource(R.string.settings_privacy_body),
+        )
+    }
+}
+
+@Composable
+private fun PassphraseStep(
+    passphrase: String,
+    again: String,
+    reveal: Boolean,
+    problem: IdentityError?,
+    matches: Boolean,
+    onPassphrase: (String) -> Unit,
+    onAgain: (String) -> Unit,
+    onReveal: (Boolean) -> Unit,
+) {
+    val strength = IdentityStore.strength(passphrase)
+    val words = IdentityStore.wordCount(passphrase)
+    Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        Eyebrow(stringResource(R.string.onboard_pass_eyebrow))
+        Text(
+            text = stringResource(R.string.onboard_pass_title),
+            style = MaterialTheme.typography.headlineMedium,
+        )
+        Text(
+            text = stringResource(R.string.onboard_pass_body),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+
+        OutlinedTextField(
+            value = passphrase,
+            onValueChange = onPassphrase,
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text(stringResource(R.string.onboard_pass_phrase)) },
+            placeholder = { Text(stringResource(R.string.onboard_pass_hint)) },
+            singleLine = true,
+            visualTransformation = if (reveal) {
+                VisualTransformation.None
+            } else {
+                PasswordVisualTransformation()
+            },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Password,
+                imeAction = ImeAction.Next,
+            ),
+            trailingIcon = {
+                TextButton(onClick = { onReveal(!reveal) }) {
+                    Text(stringResource(if (reveal) R.string.lock_hide else R.string.lock_show))
+                }
+            },
+            supportingText = {
+                Text(
+                    stringResource(
+                        if (words >= 4) R.string.onboard_pass_words_ok else R.string.onboard_pass_words,
+                        words,
+                    ),
+                )
+            },
+            shape = MaterialTheme.shapes.large,
+        )
+
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+            repeat(4) { index ->
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(6.dp)
+                        .clip(RoundedCornerShape(99.dp))
+                        .background(
+                            if (index < strength) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.surfaceVariant
+                            },
+                        ),
+                )
+            }
+            Text(
+                text = stringResource(
+                    when (strength) {
+                        4 -> R.string.onboard_pass_strength_4
+                        3 -> R.string.onboard_pass_strength_3
+                        2 -> R.string.onboard_pass_strength_2
+                        else -> R.string.onboard_pass_strength_1
+                    },
+                ),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+
+        OutlinedTextField(
+            value = again,
+            onValueChange = onAgain,
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text(stringResource(R.string.onboard_pass_again)) },
+            singleLine = true,
+            visualTransformation = if (reveal) {
+                VisualTransformation.None
+            } else {
+                PasswordVisualTransformation()
+            },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Password,
+                imeAction = ImeAction.Done,
+            ),
+            isError = again.isNotEmpty() && !matches,
+            supportingText = {
+                if (again.isNotEmpty() && !matches) {
+                    Text(stringResource(R.string.onboard_pass_mismatch))
+                } else if (problem == null && matches) {
+                    Text(stringResource(R.string.onboard_pass_ready))
+                }
+            },
+            shape = MaterialTheme.shapes.large,
+        )
+
+        SectionNote(
+            title = stringResource(R.string.onboard_pass_notice_title),
+            body = stringResource(R.string.onboard_pass_notice_body),
         )
     }
 }
