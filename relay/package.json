@@ -1,0 +1,15 @@
+{
+  "name": "tlc-relay",
+  "version": "0.0.8",
+  "private": true,
+  "type": "module",
+  "description": "Thin, open, replaceable shared plane for TLC: account handles, consent, E2EE envelopes and live presence.",
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.45.0"
+  }
+}

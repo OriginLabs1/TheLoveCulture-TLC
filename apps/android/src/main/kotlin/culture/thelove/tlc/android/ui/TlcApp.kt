@@ -91,7 +91,9 @@ import culture.thelove.tlc.android.data.IdentityStore
 import culture.thelove.tlc.android.data.JournalState
 import culture.thelove.tlc.android.data.PresenceSettings
 import culture.thelove.tlc.android.data.PresenceStore
+import culture.thelove.tlc.android.data.PeerAdapter
 import culture.thelove.tlc.android.data.SaveOutcome
+import culture.thelove.tlc.android.data.SharedPlane
 import culture.thelove.tlc.android.ui.screens.AboutScreen
 import culture.thelove.tlc.android.ui.screens.BankVaultScreen
 import culture.thelove.tlc.android.ui.screens.CaptureScreen
@@ -101,6 +103,7 @@ import culture.thelove.tlc.android.ui.screens.DuesScreen
 import culture.thelove.tlc.android.ui.screens.GrantsScreen
 import culture.thelove.tlc.android.ui.screens.JournalScreen
 import culture.thelove.tlc.android.ui.screens.LockScreen
+import culture.thelove.tlc.android.ui.screens.LiveScreen
 import culture.thelove.tlc.android.ui.screens.OnboardingScreen
 import culture.thelove.tlc.android.ui.screens.PeopleScreen
 import culture.thelove.tlc.android.ui.screens.PresenceScreen
@@ -133,6 +136,7 @@ public enum class Dest {
     TODAY,
     RECORD,
     PEOPLE,
+    LIVE,
     SETTINGS,
     CREATE,
     SUPPORT,
@@ -150,7 +154,7 @@ public enum class Dest {
     ;
 
     public val isTab: Boolean
-        get() = this == TODAY || this == RECORD || this == PEOPLE || this == SETTINGS
+        get() = this == TODAY || this == RECORD || this == PEOPLE || this == LIVE || this == SETTINGS
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -166,6 +170,7 @@ public fun TlcApp(filesDir: File, modifier: Modifier = Modifier) {
 
     val identityStore = remember(context) { IdentityStore(context) }
     val presenceStore = remember(context) { PresenceStore(context) }
+    val plane = remember(context) { SharedPlane(context) }
     var identity by remember { mutableStateOf(identityStore.identity()) }
     var locked by remember { mutableStateOf(identity != null) }
     var lockBusy by remember { mutableStateOf(false) }
@@ -191,6 +196,17 @@ public fun TlcApp(filesDir: File, modifier: Modifier = Modifier) {
     LaunchedEffect(Unit) { state.load() }
 
     val snapshot = state.snapshot
+    val liveHandle = identity?.username ?: snapshot?.profile?.handle?.value
+    LaunchedEffect(locked, liveHandle, snapshot != null) {
+        when {
+            locked -> plane.lock()
+            liveHandle != null -> plane.startIfEnabled(
+                handle = liveHandle,
+                display = snapshot?.profile?.displayName ?: identity?.displayName ?: liveHandle,
+                presence = presence,
+            )
+        }
+    }
     LaunchedEffect(revealed) {
         val account = revealed ?: return@LaunchedEffect
         delay(((state.snapshot?.preferences?.revealSeconds ?: 60) * 1000L))
@@ -359,6 +375,37 @@ public fun TlcApp(filesDir: File, modifier: Modifier = Modifier) {
         }
     }
 
+    val exportHandoff = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/json"),
+    ) { uri ->
+        if (uri != null) {
+            scope.launch {
+                val text = PeerAdapter.handoff(
+                    handle = identity?.username ?: state.snapshot?.profile?.handle?.value,
+                    displayName = state.snapshot?.profile?.displayName.orEmpty(),
+                    entries = state.entries,
+                    headHash = state.headHash,
+                )
+                val written = withContext(Dispatchers.IO) {
+                    runCatching {
+                        context.contentResolver.openOutputStream(uri)?.use {
+                            it.write(text.toByteArray(Charsets.UTF_8))
+                        } ?: error("no output stream")
+                    }
+                }
+                snackbar.showSnackbar(
+                    context.getString(
+                        if (written.isSuccess) {
+                            R.string.live_peer_export_done
+                        } else {
+                            R.string.live_peer_export_failed
+                        },
+                    ),
+                )
+            }
+        }
+    }
+
     val importBundle = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument(),
     ) { uri ->
@@ -425,6 +472,7 @@ public fun TlcApp(filesDir: File, modifier: Modifier = Modifier) {
     fun resetCircle() {
         identityStore.clear()
         presenceStore.reset()
+        plane.clear()
         identity = null
         presence = PresenceSettings.PRIVATE
         locked = false
@@ -641,6 +689,12 @@ public fun TlcApp(filesDir: File, modifier: Modifier = Modifier) {
                                         onClick = { go(Dest.PEOPLE) },
                                     )
                                     TlcNavItem(
+                                        selected = dest == Dest.LIVE,
+                                        label = stringResource(R.string.nav_live),
+                                        icon = { Icon(Icons.Filled.Send, contentDescription = null) },
+                                        onClick = { go(Dest.LIVE) },
+                                    )
+                                    TlcNavItem(
                                         selected = dest == Dest.SETTINGS,
                                         label = stringResource(R.string.nav_settings),
                                         icon = { Icon(Icons.Filled.Settings, contentDescription = null) },
@@ -727,6 +781,27 @@ public fun TlcApp(filesDir: File, modifier: Modifier = Modifier) {
                                         },
                                         onContact = { go(Dest.CONTACT) },
                                         onBankVault = { go(Dest.BANK) },
+                                    )
+
+                                    Dest.LIVE -> LiveScreen(
+                                        plane = plane,
+                                        handle = liveHandle,
+                                        displayName = sealed.profile.displayName,
+                                        presence = presence,
+                                        onConnect = {
+                                            liveHandle?.let {
+                                                plane.connect(it, sealed.profile.displayName, presence)
+                                            }
+                                        },
+                                        onDisconnect = { plane.stop() },
+                                        onExportHandoff = {
+                                            exportHandoff.launch(
+                                                context.getString(
+                                                    R.string.live_peer_file_name,
+                                                    dayStamp(),
+                                                ),
+                                            )
+                                        },
                                     )
 
                                     Dest.SUPPORT -> SupportScreen(
@@ -952,12 +1027,13 @@ public fun TlcApp(filesDir: File, modifier: Modifier = Modifier) {
                                         },
                                     )
 
-                                    Dest.PRESENCE -> PresenceScreen(
+                                     Dest.PRESENCE -> PresenceScreen(
                                         settings = presence,
                                         people = sealed.people,
                                         onSave = { next ->
                                             presenceStore.save(next)
                                             presence = next
+                                            plane.syncPresence(next)
                                         },
                                     )
 
@@ -1113,6 +1189,7 @@ private fun Dest.title(): String = stringResource(
         Dest.TODAY -> R.string.app_doctrine
         Dest.RECORD -> R.string.nav_record
         Dest.PEOPLE -> R.string.nav_people
+        Dest.LIVE -> R.string.nav_live
         Dest.SETTINGS -> R.string.nav_settings
         Dest.CREATE -> R.string.create_title
         Dest.SUPPORT -> R.string.support_title

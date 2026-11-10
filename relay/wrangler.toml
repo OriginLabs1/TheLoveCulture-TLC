@@ -1,0 +1,18 @@
+name = "tlc-relay"
+main = "src/worker.js"
+compatibility_date = "2026-11-01"
+workers_dev = true
+
+# One Durable Object owns the shared plane's ordered facts. It is deliberately replaceable: the
+# Wire shape is documented in relay/README.md, and the app treats the relay URL as configuration.
+[durable_objects]
+bindings = [
+  { name = "RELAY", class_name = "RelayHub" }
+]
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["RelayHub"]
+
+[observability]
+enabled = true

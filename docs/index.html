@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>TLC — recognition, kept honestly</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230B1B33'/%3E%3Cpath d='M32 49C32 49 12 37 12 24c0-8 7-13 13-13 4 0 6 2 7 4 1-2 3-4 7-4 6 0 13 5 13 13 0 13-20 25-20 25z' fill='%231466C7'/%3E%3C/svg%3E">
-<meta name="description" content="TLC is a local-first, non-custodial record of recognition and contribution. Download the signed v0.0.7 APK.">
+<meta name="description" content="TLC is a local-first, non-custodial record of recognition and contribution, with a live encrypted relay and a Pear companion. Download the signed v0.0.8 APK.">
 <style>
   :root { color-scheme: light dark; --bg:#F6F8FC; --ink:#0B1B33; --muted:#4B5B73; --line:#D9E2EE; --accent:#1B3A8C; --accent2:#1466C7; --card:#FFFFFF; }
   @media (prefers-color-scheme: dark) { :root { --bg:#0B1B33; --ink:#EDF2F9; --muted:#A9B8CE; --line:#22375A; --accent:#6FA8FF; --accent2:#8FBFFF; --card:#10233F; } }
@@ -35,32 +35,36 @@
   <div class="mark" aria-hidden="true">♥</div>
   <h1>Recognition,<br>kept honestly.</h1>
   <p class="lede">TLC is a local-first, non-custodial record of care and contribution. It keeps a
-  tamper-evident journal for families, circles, community groups and cooperatives — without a
-  server account, a sync server or a company holding the memory.</p>
+  tamper-evident journal for families, circles, community groups and cooperatives — and now adds a
+  thin, self-hostable relay for live encrypted messages and consented presence. The journal stays on
+  your device; the relay is a courier, never a company holding the memory.</p>
 
   <div class="actions">
-    <a class="button" href="https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.7/tlc-0.0.7-foss.apk">Download v0.0.7 APK</a>
-    <a class="button secondary" href="https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/tag/v0.0.7">Release notes</a>
+    <a class="button" href="https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.8/tlc-0.0.8-foss.apk">Download v0.0.8 APK</a>
+    <a class="button secondary" href="https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/tag/v0.0.8">Release notes</a>
   </div>
-  <p class="meta">Android 8.0+ · GPL-3.0-or-later · no <code>INTERNET</code> permission</p>
+  <p class="meta">Android 8.0+ · GPL-3.0-or-later · <code>INTERNET</code> only for the live relay</p>
 
   <div class="card">
     <strong>Verify before you install.</strong>
     <pre><code>sha256sum -c SHA256SUMS
-apksigner verify --print-certs tlc-0.0.7-foss.apk</code></pre>
+apksigner verify --print-certs tlc-0.0.8-foss.apk</code></pre>
     <p class="meta">Certificate SHA-256: <code>e04cb8aa2cf5fdeec043d917a74a5ba634121f2a0b98df92869a42bb4acb732c</code></p>
-    <p class="meta"><a href="https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.7/SHA256SUMS">SHA256SUMS</a> ·
-    <a href="https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.7/tlc-0.0.7-foss.signature.txt">signature block</a> ·
-    <a href="https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.7/tlc-0.0.7-foss.dependencies.txt">dependency manifest</a></p>
+    <p class="meta"><a href="https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.8/SHA256SUMS">SHA256SUMS</a> ·
+    <a href="https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.8/tlc-0.0.8-foss.signature.txt">signature block</a> ·
+    <a href="https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.8/tlc-0.0.8-foss.dependencies.txt">dependency manifest</a></p>
   </div>
 
   <h2>What this build does</h2>
   <ul>
+    <li><strong>Live now.</strong> A fifth Live tab connects to a self-hostable TLC relay. One-to-one messages are sealed on the device with P-256 ECDH + HKDF-SHA256 + AES-256-GCM and a sender signature; the relay carries ciphertext only. <em>E2EE alpha</em>, not a formally audited ratchet.</li>
+    <li><strong>Presence on the internet, on your terms.</strong> Online now, last seen, typing and read receipts are four separate signals. A signal you hide is sent as "not shared", never guessed as offline.</li>
+    <li><strong>A real account you can delete.</strong> Register a handle and device key, accept or block connection requests, send and receive messages with queued/sent/delivered/read states. Deleting the account removes the relay record, its connections and queued ciphertext.</li>
+    <li><strong>Pear companion.</strong> Export a record-shape-only handoff and replicate it with a Holepunch/Hyperswarm node over the public DHT. No subjects, amounts, photos, receipts or vault fields; no authority over a shared fact.</li>
     <li>A distinct username and a word/phrase passphrase open the circle. No fingerprint, face, passkey or device shortcut — the passphrase is the only door.</li>
     <li>An avatar studio: pick a photo, then drag, pinch and zoom to frame the exact circle that is saved. With no photo, an initials monogram replaces the empty box.</li>
-    <li>Presence you control: online now, last seen, typing and read receipts each choose Nobody, Selected people, My circle or Everyone. Private by default, invisible overrides, with a live preview.</li>
     <li>Transfer Methods inside a token transfer: real routes with provider, fee, payer, arrival, limit and availability, plus a two-minute held window. TLC never holds or moves the money.</li>
-    <li>Onboarding, a local profile and a <code>@handle</code>, then Today, Record, People, Tokens, Settings and a Create sheet.</li>
+    <li>Onboarding, a local profile and a <code>@handle</code>, then Today, Record, People, Tokens, Live, Settings and a Create sheet.</li>
     <li>An append-only, hash-chained record that is re-verified on every launch and opens read-only if it does not check out.</li>
     <li>One Tokens surface for every Support, Pioneer's Token and Growth Grant, with circulation counters and an honest timeline.</li>
     <li>Receipt images you own: downscaled, metadata-stripped, stored privately, and shared only with an audience you choose.</li>
@@ -79,14 +83,16 @@ apksigner verify --print-certs tlc-0.0.7-foss.apk</code></pre>
   payer's encrypted vault, protected by the Android Keystore; the app shows the bank name, the last
   four digits and a fingerprint, and reveals the rest only on an explicit action.</p>
 
-  <h2>What v0.0.7 does not claim</h2>
-  <p>The shared plane is still ahead. There is no server account, no sync, no multi-device merge and
-  no <code>INTERNET</code> permission in this build. Presence choices are stored on this device and
-  are the instruction the shared plane must obey. The Transfer Method sheet describes real routes
-  honestly; it does not invent a provider quote this build cannot see. Encrypted messaging, calls
-  where supported, cross-device presence and a Pear/Holepunch-style layer (Hypercore/Hyperswarm)
-  for encrypted backup and nearby handoff remain the next milestone, never the authority for shared
-  facts.</p>
+  <h2>What v0.0.8 does not claim</h2>
+  <p>The relay is a courier, not a bank and not an authority over the private record. The ledger, vault,
+  drafts, photos and receipts stay on the device and work in airplane mode. Transfer Method execution
+  through a licensed provider, cross-device merge, calls and the remote Pioneer attestation desk are
+  the next milestone. Messages are sealed with audited JCA primitives composed directly, so the app
+  labels them <em>E2EE alpha</em>; a formally audited messaging protocol is future work. The Pear node
+  is an optional companion, never the authority for a shared fact.</p>
+  <p>Presence is filtered on the relay against your consent record. The relay necessarily sees handles,
+  connection state, timing, sizes and IP addresses; it never sees message text or the private record.
+  Undelivered ciphertext is pruned at 30 days, and deleting your account deletes it sooner.</p>
 
   <h2>Other ways to install</h2>
   <p>Add <a href="https://github.com/OriginLabs1/TheLoveCulture-TLC">OriginLabs1/TheLoveCulture-TLC</a>

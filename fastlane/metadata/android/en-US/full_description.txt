@@ -57,9 +57,18 @@ WHAT THE RECORD DOES
 • It repairs an interrupted write by dropping only the incomplete line, then verifying what remains.
 • It refuses a damaged state file or backup bundle rather than silently replacing or merging it.
 
+THE SHARED PLANE, LIVE
+
+• A fifth Live tab connects to a thin, self-hostable TLC relay for one-to-one messages and presence. It is optional: the private record, vault, drafts, photos and receipts still work in airplane mode.
+• Messages are sealed on the device with P-256 ECDH, HKDF-SHA256 and AES-256-GCM, with a SHA256withECDSA sender signature. Keys are wrapped by an Android Keystore AES-256-GCM key. The relay stores ciphertext, a conversation id, timing and size — never message text. This composes audited JCA primitives directly, so it is labelled E2EE alpha, not a formally audited ratchet.
+• Presence is filtered on the relay against your consent record. Online now, last seen, typing and read receipts each have an audience, and a signal you did not share is sent as "not shared" rather than guessed as offline.
+• Register a handle and device key, accept or block connection requests, and send with queued, sent, delivered and read states. A changed device key raises a warning instead of being accepted silently.
+• Delete the account from the Live tab. The relay removes the account record, its connections and queued ciphertext. Undelivered ciphertext is pruned at 30 days regardless.
+• Pear companion: export a record-shape-only handoff and replicate it with a Holepunch/Hyperswarm node over the public DHT. The handoff carries no subjects, amounts, photos, receipts or vault fields, and the peer layer has no authority over a shared fact.
+
 WHAT IT DOES NOT DO YET
 
-There is no account on a server, no sync and no multi-device merge. A Co-Steward is a local persona, not a remote authenticated person. The Received view shows only what is on this device and does not invent a number; tokens sent from another device arrive when the shared plane ships. Presence choices are stored on this device and are the instruction the shared plane must obey. Transfer Methods describe real routes honestly; they do not invent a provider quote this build cannot see. Encrypted messaging, calls where supported, cross-device presence, the remote Pioneer attestation desk, cross-device invitations, the SEF economy and the social layer are the next milestone, not a promise about this build.
+There is no cross-device merge of the private record, no calls and no remote Pioneer attestation desk. The relay is a courier, not an authority. Transfer Method execution through a licensed provider is the next milestone. A Co-Steward is a local persona, not a remote authenticated person. The Received view shows only what is on this device and does not invent a number. Encrypted messaging is E2EE alpha, and an audited ratcheting protocol is future work. Running the Pear node is a separate choice and does not by itself sync the private record.
 
 WHAT TLC WILL NEVER DO
 
@@ -71,7 +80,7 @@ WHAT TLC WILL NEVER DO
 
 PRIVATE BY CONSTRUCTION
 
-This build contains no networking code and its APK does not request the INTERNET permission. Nothing leaves the device unless you export or share it. The full bank account number stays inside the encrypted vault and is never copied into the record, a backup, a log or a notification. There is no Google Play Services, no Firebase, no analytics and no proprietary SDK.
+The private record, vault, drafts, photos and receipts stay on the device. The APK requests INTERNET and ACCESS_NETWORK_STATE for the relay only; it requests no storage, contacts, location, camera or microphone permission. Cleartext HTTP is disabled and a network security config pins TLS. The relay processes handles, connection state, timing, sizes and IP addresses; it never receives your passphrase, message text, the vault or the ledger. The full bank account number stays inside the encrypted vault and is never copied into the record, a backup, a log or a notification. There is no Google Play Services, no Firebase, no analytics and no proprietary SDK.
 
 CHECK IT YOURSELF
 

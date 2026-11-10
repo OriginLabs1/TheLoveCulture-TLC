@@ -133,6 +133,18 @@ jobs:
       - name: FOSS guard (no Play Services / Firebase / tracking)
         run: ./scripts/check-foss.sh
 
+      - name: Relay tests
+        run: |
+          cd relay
+          npm ci --no-audit --no-fund
+          npm test
+
+      - name: Peer companion tests
+        run: |
+          cd peer
+          npm ci --no-audit --no-fund
+          npm test
+
       - name: Assemble signed release APK
         run: ./gradlew :apps:android:assembleFossRelease --console=plain
 
@@ -166,18 +178,35 @@ jobs:
           fi
           echo "✓ certificate $ACTUAL matches release-key.properties"
 
-          # The privacy policy says the app does not reach the network. Prove it on the binary.
-          # Capture the output first: a piped `if cmd | grep` would treat a broken aapt2 as a pass.
+          # v0.0.8 ships the shared plane, so the binary must request INTERNET and must not opt
+          # into cleartext. Capture output first: a piped `if cmd | grep` treats a broken aapt2 as a pass.
           PERMS="$("$BUILD_TOOLS/aapt2" dump permissions "$APK")" || {
             echo "✗ aapt2 could not read the manifest"; exit 1;
           }
-          if grep -qi 'android.permission.INTERNET' <<<"$PERMS"; then
-            echo "✗ the foss APK requests INTERNET but this release has no networking code"
-            echo "  A networked feature must change PRIVACY.md and this guard in the same commit."
+          if ! grep -qi 'android.permission.INTERNET' <<<"$PERMS"; then
+            echo "✗ the shared plane is enabled but the APK does not request INTERNET"
+            echo "  The relay, presence and E2EE messaging cannot work without it."
             echo "$PERMS"
             exit 1
           fi
-          echo "✓ no INTERNET permission"
+          echo "✓ INTERNET permission present"
+
+          # Live traffic must only ever go over TLS. Reject a manifest that opts into cleartext
+          # or drops the network security config.
+          MANIFEST="$("$BUILD_TOOLS/aapt2" dump xmltree "$APK" --file AndroidManifest.xml)" || {
+            echo "✗ aapt2 could not read AndroidManifest.xml"; exit 1;
+          }
+          CLEARTEXT="$(grep -i 'usesCleartextTraffic' <<<"$MANIFEST" || true)"
+          if grep -qiE '0xffffffff|true' <<<"$CLEARTEXT"; then
+            echo "✗ the manifest sets usesCleartextTraffic=true — relay traffic would be plaintext"
+            echo "$CLEARTEXT"
+            exit 1
+          fi
+          if ! grep -qi 'networkSecurityConfig' <<<"$MANIFEST"; then
+            echo "✗ the manifest is missing android:networkSecurityConfig"
+            exit 1
+          fi
+          echo "✓ cleartext disabled, network security config present"
 
           # A dependency-graph check can be satisfied while classes still arrive in the dex.
           unzip -l "$APK" | grep -qE 'classes[0-9]*\.dex' || {

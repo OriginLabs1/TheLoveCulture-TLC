@@ -1,0 +1,22 @@
+{
+  "name": "tlc-peer",
+  "version": "0.0.8",
+  "private": true,
+  "description": "TLC Pear/Holepunch companion: replicate signed record handoffs over Hyperswarm.",
+  "license": "GPL-3.0-or-later",
+  "main": "src/node.js",
+  "bin": {
+    "tlc-peer": "src/cli.js"
+  },
+  "scripts": {
+    "start": "node src/cli.js host",
+    "test": "node --test test/*.test.js"
+  },
+  "dependencies": {
+    "hypercore": "^11.40.3",
+    "hyperswarm": "^4.17.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

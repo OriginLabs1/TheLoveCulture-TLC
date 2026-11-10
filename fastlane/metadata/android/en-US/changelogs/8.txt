@@ -1,0 +1,10 @@
+TLC 0.0.8 — The shared plane is live.
+
+• Live tab: a real relay connection for one-to-one messages and presence. Messages are sealed on the device with P-256 ECDH + HKDF-SHA256 + AES-256-GCM and a sender signature; the relay carries ciphertext only. Labelled E2EE alpha — audited primitives, not a formally audited ratchet.
+• Presence over the internet, still on your terms: online now, last seen, typing and read receipts each choose Nobody / Selected people / My circle / Everyone. A hidden signal is sent as "not shared", never guessed as offline.
+• Accounts you can delete: register a handle and device key, accept or block connection requests, send with queued / sent / delivered / read states, and remove the relay account, its connections and queued ciphertext from the Live tab.
+• Short memory: undelivered ciphertext is pruned at 30 days; account deletion removes it immediately.
+• Pear companion: export a record-shape-only handoff from Live and replicate it with a Holepunch/Hyperswarm node over the public DHT. No subjects, amounts, photos, receipts or vault fields; no authority over a shared fact.
+• Permissions: INTERNET and ACCESS_NETWORK_STATE for the relay only. Cleartext HTTP is disabled and TLS is pinned by a network security config. No storage, contacts, location, camera or microphone permission.
+
+Still no Play Services, Firebase or analytics. No wallet, no balance, no escrow, no payment rail, no card data, no custody. The private record, vault, drafts, photos and receipts still work in airplane mode. The APK is signed with the project key and published unchanged to GitHub, F-Droid, Orion Store and Uptodown.

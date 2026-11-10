@@ -14,6 +14,7 @@ tasks.register("verify") {
         ":core:domain:test",
         ":core:ledger:test",
         ":core:experience:test",
+        ":core:shared:test",
         ":tools:ledger-verify:test",
     )
 }

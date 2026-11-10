@@ -69,13 +69,27 @@ Description: |
   Presence choices are stored on this device and are the instruction the shared plane must obey;
   there is still no server account, sync, multi-device merge or INTERNET permission.
 
+  v0.0.8 adds the shared plane. A fifth Live tab connects to a thin, self-hostable TLC relay for
+  one-to-one messages and presence. Messages are sealed on the device with P-256 ECDH, HKDF-SHA256
+  and AES-256-GCM with a SHA256withECDSA sender signature; the relay stores ciphertext, a
+  conversation id, timing and size, never plaintext. This composes audited JCA primitives directly
+  and is labelled E2EE alpha, not a formally audited ratchet. Presence is filtered on the relay
+  against a consent record: online now, last seen, typing and read receipts each have an audience,
+  and a hidden signal is sent as "not shared", never guessed as offline. An account can be deleted
+  from the app, which removes its connections and queued ciphertext; undelivered ciphertext is
+  pruned at 30 days. A companion Pear/Holepunch node replicates a record-shape-only handoff over
+  Hyperswarm and never receives subjects, amounts, photos, receipts or vault fields. The private
+  record, vault, drafts and images still work in airplane mode.
+
   TLC never holds, moves, pools or escrows money. There is no wallet, no balance, no payment rail
   and no card data. The app shows where to send a payment and records the evidence you bring back;
   the transfer itself happens bank to bank between two private accounts. Recognition tokens are
   signals of appreciation — not currency, not transferable, not redeemable, not crypto.
 
-  The build contains no networking code and its APK does not request the INTERNET permission. It
-  contains no Google Play Services, no Firebase, no analytics and no proprietary SDK.
+  The APK requests INTERNET and ACCESS_NETWORK_STATE for the relay only; it requests no storage,
+  contacts, location, camera or microphone permission. Cleartext HTTP is disabled and a network
+  security config pins TLS. It contains no Google Play Services, no Firebase, no analytics and no
+  proprietary SDK.
 
   The record is append-only and hash-chained, and the same verification is available outside the
   app through the ledger-verify command-line tool in the source repository.
@@ -132,14 +146,22 @@ Builds:
     output: apps/android/build/outputs/apk/foss/release/*.apk
     scanignore:
       - gradle/wrapper/gradle-wrapper.jar
+  - versionName: 0.0.8
+    versionCode: 8
+    commit: v0.0.8
+    gradle:
+      - assembleFossRelease
+    output: apps/android/build/outputs/apk/foss/release/*.apk
+    scanignore:
+      - gradle/wrapper/gradle-wrapper.jar
 
 # The same signed binary that GitHub Releases serves. F-Droid's buildserver builds from source and
 # verifies that its output matches this APK byte for byte; if it does not, the build fails rather
 # than silently shipping a differently-signed copy.
-Binaries: https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.7/tlc-0.0.7-foss.apk
+Binaries: https://github.com/OriginLabs1/TheLoveCulture-TLC/releases/download/v0.0.8/tlc-0.0.8-foss.apk
 AllowedAPKSigningKeys: e04cb8aa2cf5fdeec043d917a74a5ba634121f2a0b98df92869a42bb4acb732c
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 0.0.7
-CurrentVersionCode: 7
+CurrentVersion: 0.0.8
+CurrentVersionCode: 8

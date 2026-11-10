@@ -1,9 +1,10 @@
 # TLC — SPECS
 
 > Executable contract. Doctrine and rationale: `CONTEXT.md` v0.0.2 (wins on conflict).
-> **Baseline:** the shipped v0.0.6 local-only shell (no account, no sync, no `INTERNET`).
-> **Target:** the v0.0.7 shared plane described here — **Android-first**, with the release cut line
-> in §0.2 and the seven mandate proofs in §0.3. The working plan is `docs/PLAN-v0.0.7.md`.
+> **Baseline:** the shipped v0.0.7 local-only shell (no account, no sync, no `INTERNET`).
+> **Target:** the shared plane described here — **shipped in v0.0.8**, Android-first, with the
+> release cut line in §0.2 and the seven mandate proofs in §0.3. The working plan is
+> `docs/PLAN-v0.0.8.md`.
 > Normative keywords: **MUST / MUST NOT / SHOULD / MAY** (RFC 2119).
 > This file has three split parts — **SKILLS** (capabilities), **TOOLS** (build & runtime) and
 > **WORKFLOWS** (ordered procedures) — plus a traceability map and a test matrix that bind them to

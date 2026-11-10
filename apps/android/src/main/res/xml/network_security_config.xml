@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The relay is HTTPS/WSS only. A person may point the app at a self-hosted relay, but it must
+     present a valid certificate; there is no cleartext fallback and no user-installed CA bypass. -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

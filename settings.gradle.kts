@@ -18,6 +18,7 @@ dependencyResolutionManagement {
 include(":core:domain")
 include(":core:ledger")
 include(":core:experience")
+include(":core:shared")
 include(":tools:ledger-verify")
 
 // The Android shell needs the Android SDK. It joins the build only where one exists

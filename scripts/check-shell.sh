@@ -74,6 +74,7 @@ PY
   echo "  const val VERSION_NAME: String = \"$(sed -n 's/^versionName *= *//p' version.properties)\""
   echo "  const val VERSION_CODE: Int = $(sed -n 's/^versionCode *= *//p' version.properties)"
   echo '  const val DISTRIBUTION: String = "foss"'
+  echo '  const val TLC_RELAY_URL: String = "https://tlc-relay.access1tutamailcom.workers.dev"'
   echo '  const val FEATURE_PUSH: Boolean = false'
   echo '  const val FEATURE_TELEMETRY: Boolean = false'
   echo '  const val DEBUG: Boolean = true'

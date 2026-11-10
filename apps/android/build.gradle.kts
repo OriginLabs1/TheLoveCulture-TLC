@@ -27,6 +27,13 @@ android {
         targetSdk = libs.versions.targetSdk.get().toInt()
         versionCode = tlcVersionCode
         versionName = tlcVersionName
+        // The shared plane is configuration, never a hard-coded claim. The canonical relay is the
+        // one OriginLabs1 runs; another operator deploys relay/ and rebuilds with this value.
+        buildConfigField(
+            "String",
+            "TLC_RELAY_URL",
+            "\"https://tlc-relay.access1tutamailcom.workers.dev\"",
+        )
         resourceConfigurations += listOf("en", "en-rNG")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -102,10 +109,12 @@ dependencies {
     implementation(project(":core:domain"))
     implementation(project(":core:ledger"))
     implementation(project(":core:experience"))
+    implementation(project(":core:shared"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.okhttp)
 
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)
