@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="union_bg">#06070C</color>
+    <color name="union_panel">#10121C</color>
+    <color name="union_accent">#8B8DFF</color>
+    <color name="union_icon_bg">#0B0D16</color>
+</resources>
