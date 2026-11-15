@@ -1,0 +1,20 @@
+[package]
+name = "union-core"
+version = "0.0.1"
+edition = "2021"
+description = "Union trust core: canonical hashing for audit and ledger chains."
+license = "AGPL-3.0-only"
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+sha2 = "0.10"
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

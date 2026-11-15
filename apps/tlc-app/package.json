@@ -1,0 +1,35 @@
+{
+  "name": "union",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "description": "Union \u2014 one connected environment for communication, relationships, discovery, learning, experiences, intelligence and meaningful participation.",
+  "license": "AGPL-3.0-only",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && node scripts/postbuild.mjs",
+    "preview": "vite preview --host 127.0.0.1 --port 4173",
+    "check": "svelte-check --tsconfig ./tsconfig.json",
+    "test": "node scripts/build-tests.mjs && node --test tests/*.test.mjs",
+    "test:relay": "node --test server/test/*.test.mjs",
+    "icons": "node scripts/gen-icons.mjs",
+    "wasm": "node scripts/build-wasm.mjs",
+    "apk": "sh scripts/build-apk.sh",
+    "release": "node scripts/release.mjs",
+    "deploy": "node scripts/deploy-cloudflare.mjs",
+    "pretest": "node scripts/build-tests.mjs"
+  },
+  "dependencies": {
+    "@noble/curves": "1.8.1",
+    "@noble/hashes": "1.7.1",
+    "@scure/base": "1.2.4",
+    "qrcode-generator": "^1.5.0"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "7.3.1",
+    "svelte": "5.57.3",
+    "svelte-check": "^4.3.0",
+    "typescript": "^5.9.0",
+    "vite": "8.3.8"
+  }
+}

@@ -1,0 +1,5 @@
+# Union is a personal environment, not a public content site.
+# The app itself is installable; there is nothing to crawl.
+User-agent: *
+Allow: /
+Disallow: /api/

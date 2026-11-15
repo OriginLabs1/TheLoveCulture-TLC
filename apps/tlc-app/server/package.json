@@ -1,0 +1,15 @@
+{
+  "name": "union-relay",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "description": "Optional Cloudflare Worker + D1 relay for Union. Store-and-forward only; it cannot read message bodies.",
+  "license": "AGPL-3.0-only",
+  "scripts": {
+    "dev": "node dev.mjs",
+    "dev:worker": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "schema": "wrangler d1 execute union-relay --remote --file schema.sql",
+    "test": "node --test test/*.test.mjs"
+  }
+}
