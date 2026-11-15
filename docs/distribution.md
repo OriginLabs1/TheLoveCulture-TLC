@@ -11,7 +11,7 @@ Union ships three ways from the same source:
 | Surface | State |
 |---|---|
 | Pages deployment | **Live** at <https://union-app-9ni.pages.dev> |
-| Signed APK | **Live** at `/Union-0.0.1.apk` (383,099 bytes, SHA-256 `a54a599e…f85fc8`) |
+| Signed APK | **Live** at `/Union-0.0.1.apk` (383,099 bytes, SHA-256 `905116ad…162ed2`) |
 | Relay | **Live** at <https://union-relay.access1tutamailcom.workers.dev> |
 | `union.cculture.net` | DNS verified; custom domain **pending** |
 | `union-app.cculture.net` | DNS verified; custom domain **pending** |
