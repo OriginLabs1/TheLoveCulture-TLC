@@ -1,8 +1,11 @@
 <script lang="ts">
+  import A2UISurface from '../components/A2UISurface.svelte';
   import Empty from '../components/Empty.svelte';
   import Icon from '../components/Icon.svelte';
   import TopBar from '../components/TopBar.svelte';
   import { union } from '../lib/store.svelte';
+  import { buildUnionSurface, surfaceKindFor, type A2UIAction } from '../lib/a2ui';
+  import { TOTAL_BADGES } from '../lib/navigation';
   import { toasts } from '../lib/toast.svelte';
   import type { AiMessage } from '../lib/types';
   import { relative } from '../lib/util';
@@ -18,9 +21,36 @@
   let projectName = $state('');
   let projectAbout = $state('');
   let showNew = $state(false);
+  let surfaceOpen = $state(true);
+
+  const starters = [
+    'What should I do next this week?',
+    'Explain how consent works here.',
+    'Draft a page for my work.',
+    'Where does my progress stand?'
+  ];
 
   const active = $derived(threads.find((t) => t.id === activeId) ?? threads[0]);
   const messages = $derived(active ? union.aiMessagesIn(active.id) : []);
+  const lastReply = $derived([...messages].reverse().find((m) => m.role === 'assistant'));
+  const lastPrompt = $derived([...messages].reverse().find((m) => m.role === 'user'));
+  const surface = $derived.by(() => {
+    const ctx = {
+      name: union.identity?.name || union.identity?.handle || 'friend',
+      connections: union.acceptedConnections.length,
+      badges: union.earnedBadges.length,
+      totalBadges: TOTAL_BADGES,
+      unread: union.unreadMessages,
+      pending: union.incomingRequests.length,
+      memories: union.memories.length,
+      courses: union.enrollments.length,
+      nextLesson: union.nextLesson?.lesson.title,
+      nextCourse: union.nextLesson?.course.title,
+      activation: union.activation.status,
+      relay: Boolean(union.relayUrl)
+    };
+    return buildUnionSurface(lastReply ? surfaceKindFor(lastReply.text, lastPrompt?.text ?? '') : 'briefing', ctx);
+  });
 
   // Keep the picker and the composer pointed at the same conversation once
   // the first thread exists (or after the selected one is deleted).
@@ -44,11 +74,17 @@
 
   async function send() {
     const text = draft.trim();
-    if (!text || !active) return;
+    if (!text) return;
     draft = '';
     busy = true;
     try {
-      await union.sendAi(active.id, text);
+      let threadId = active?.id;
+      if (!threadId) {
+        const thread = await union.createAiThread();
+        activeId = thread.id;
+        threadId = thread.id;
+      }
+      await union.sendAi(threadId, text);
     } catch (error) {
       toasts.push(error instanceof Error ? error.message : String(error), 'error');
     } finally {
@@ -83,6 +119,20 @@
     projectName = '';
     projectAbout = '';
     toasts.push('Project created.', 'success');
+  }
+
+  function handleSurface(action: A2UIAction, values: Record<string, string>) {
+    if (action.type === 'ask') {
+      draft = action.text;
+      const missing = Object.entries(values).filter(([, v]) => !v.trim());
+      if (missing.length) {
+        toasts.push('Add the details in the surface first.', 'warn');
+        return;
+      }
+      void send();
+      return;
+    }
+    if (action.type === 'dismiss') surfaceOpen = false;
   }
 
   function actionLabel(state: string): string {
@@ -125,10 +175,24 @@
       </div>
     </div>
 
+    {#if surfaceOpen}
+      <div class="surface-slot">
+        {#key surface.id}
+          <A2UISurface {surface} onaction={handleSurface} />
+        {/key}
+        <button class="surface-hide" onclick={() => (surfaceOpen = false)}>Hide composed surface</button>
+      </div>
+    {/if}
+
     {#if threads.length === 0}
       <Empty icon="spark" title="No conversation yet" text="Ask about a record, draft a page, prepare a gathering, or think through a decision. Actions are proposed, never taken silently.">
         {#snippet action()}<button class="btn primary" onclick={newThread} disabled={busy}>Start a conversation</button>{/snippet}
       </Empty>
+      <div class="starters">
+        {#each starters as starter (starter)}
+          <button class="chip plain starter" onclick={() => { if (!active) { void newThread(); } draft = starter; }}>{starter}</button>
+        {/each}
+      </div>
     {:else}
       <div class="threadbar">
         <select bind:value={activeId} aria-label="Conversation">
@@ -174,6 +238,12 @@
         {/each}
         {#if busy}<div class="bubble assistant"><div class="thinking"><span></span><span></span><span></span></div></div>{/if}
       </section>
+
+      <div class="starters compact">
+        {#each starters.slice(0, 3) as starter (starter)}
+          <button class="chip plain starter" onclick={() => (draft = starter)}>{starter}</button>
+        {/each}
+      </div>
 
       <div class="composer">
         <textarea
@@ -240,15 +310,29 @@
 
 <style>
   .threadbar { margin-top: 12px; }
+  .surface-slot { margin-top: 14px; display: flex; flex-direction: column; gap: 7px; }
+  .surface-hide {
+    align-self: flex-end;
+    background: none; border: 0; padding: 2px 3px;
+    color: var(--faint); font-size: 0.67rem; font-weight: 620;
+    letter-spacing: 0.02em;
+  }
+  .surface-hide:hover { color: var(--accent); }
+  .starters { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+  .starters.compact { margin: 12px 0 0; overflow-x: auto; flex-wrap: nowrap; scrollbar-width: none; }
+  .starters.compact::-webkit-scrollbar { display: none; }
+  .starter { flex: none; min-height: 32px; padding: 6px 11px; font-size: 0.7rem; }
+  .starter:hover { border-color: color-mix(in srgb, var(--accent) 26%, var(--line)); color: var(--accent); }
   .chat { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
   .bubble {
     max-width: 92%;
-    padding: 11px 13px;
-    border-radius: 15px;
+    padding: 12px 15px;
+    border-radius: 22px 22px 22px 8px;
     border: 1px solid var(--line);
-    background: var(--panel);
+    background: var(--surface);
+    box-shadow: var(--shadow-1);
   }
-  .bubble.user { align-self: flex-end; background: color-mix(in srgb, var(--accent) 12%, var(--panel)); border-color: color-mix(in srgb, var(--accent) 26%, var(--line)); }
+  .bubble.user { align-self: flex-end; border-radius: 22px 22px 8px 22px; background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 20%, transparent); box-shadow: none; }
   .bubble.assistant { align-self: flex-start; }
   .bubble .markdown { font-size: 0.88rem; line-height: 1.58; }
   .bubble .markdown p { margin: 0.4em 0; }
@@ -257,27 +341,45 @@
   .who { display: flex; align-items: center; gap: 5px; color: var(--faint); font-size: 0.68rem; font-weight: 650; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 4px; }
   .stamp { color: var(--faint); font-size: 0.64rem; margin-top: 6px; text-align: right; }
   .bubble.user .stamp { text-align: left; }
-  .actionbox { margin-top: 10px; padding: 10px; border: 1px solid color-mix(in srgb, var(--amber) 28%, var(--line)); border-radius: 11px; background: color-mix(in srgb, var(--amber) 6%, var(--panel)); }
-  .actionbox.done { border-color: color-mix(in srgb, var(--green) 28%, var(--line)); background: color-mix(in srgb, var(--green) 5%, var(--panel)); }
-  .actionbox.failed { border-color: color-mix(in srgb, var(--rose) 28%, var(--line)); background: color-mix(in srgb, var(--rose) 5%, var(--panel)); }
-  .composer { display: flex; align-items: flex-end; gap: 8px; margin-top: 12px; position: sticky; bottom: 78px; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(10px); padding: 6px 0; }
+  .actionbox { margin-top: 10px; padding: 11px 12px; border: 1px solid color-mix(in srgb, var(--amber) 26%, var(--line)); border-radius: 15px; background: var(--amber-soft); }
+  .actionbox.done { border-color: color-mix(in srgb, var(--green) 26%, var(--line)); background: var(--green-soft); }
+  .actionbox.failed { border-color: color-mix(in srgb, var(--rose) 26%, var(--line)); background: var(--rose-soft); }
+  .composer {
+    display: flex; align-items: flex-end; gap: 8px;
+    margin-top: 12px;
+    position: sticky;
+    bottom: calc(88px + env(safe-area-inset-bottom));
+    padding: 8px;
+    border-radius: 26px;
+    background: var(--glass-strong);
+    border: 1px solid var(--glass-edge);
+    backdrop-filter: blur(26px) saturate(190%);
+    -webkit-backdrop-filter: blur(26px) saturate(190%);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.6), var(--shadow-2);
+  }
+  .composer textarea { border: 0; background: transparent; box-shadow: none; padding: 8px 6px; }
+  .composer textarea:focus { box-shadow: none; background: transparent; }
+  @media (min-width: 1080px) {
+    /* The dock becomes a rail, so the composer can sit near the floor. */
+    .composer { bottom: 18px; }
+  }
   .composer textarea { min-height: 48px; max-height: 140px; }
   .sendbtn {
     width: 46px; height: 46px; flex: none;
-    background: linear-gradient(135deg, #a9abff 0%, #7b7dfa 48%, #8f6cf0 100%);
-    color: #080910; border-color: rgb(255 255 255 / 0.22);
-    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.5), 0 12px 28px -12px rgb(123 125 250 / 0.7);
+    background: var(--accent);
+    color: var(--accent-ink); border-color: transparent;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.3), 0 12px 28px -12px color-mix(in srgb, var(--accent) 70%, transparent);
     transition: transform 240ms var(--ease-spring), filter 200ms ease;
   }
   .sendbtn:hover { filter: brightness(1.06); }
   .sendbtn:active { transform: scale(0.94); }
   .sendbtn:disabled { opacity: 0.4; }
   .thinking { display: flex; gap: 4px; padding: 4px 2px; }
-  .thinking span { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-2); animation: blink 1.1s infinite; }
+  .thinking span { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: blink 1.1s infinite; }
   .thinking span:nth-child(2) { animation-delay: 0.15s; }
   .thinking span:nth-child(3) { animation-delay: 0.3s; }
   @keyframes blink { 0%, 60%, 100% { opacity: 0.25; } 30% { opacity: 1; } }
-  .capico { width: 36px; height: 36px; border-radius: 11px; flex: none; display: grid; place-items: center; background: var(--panel-2); border: 1px solid var(--line); color: var(--accent-2); }
+  .capico { width: 36px; height: 36px; border-radius: 12px; flex: none; display: grid; place-items: center; background: var(--accent-soft); border: 1px solid color-mix(in srgb, var(--accent) 16%, transparent); color: var(--accent); }
   .listitem.static:hover { border-color: var(--line); }
   .mems { white-space: normal; font-weight: 500; line-height: 1.5; }
 </style>

@@ -11,7 +11,7 @@
 </script>
 
 <div class="empty">
-  <span class="orb"><Icon name={icon} size={22} /></span>
+  <span class="orb"><Icon name={icon} size={22} stroke={1.6} /></span>
   <h3>{title}</h3>
   <p>{text}</p>
   {#if action}<div class="action">{@render action()}</div>{/if}
@@ -20,25 +20,34 @@
 <style>
   .empty {
     text-align: center;
-    padding: 44px 20px;
+    padding: 46px 22px;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 8px;
   }
   .orb {
-    width: 58px;
-    height: 58px;
-    border-radius: 20px;
+    position: relative;
+    width: 60px;
+    height: 60px;
+    border-radius: 22px 22px 22px 10px;
     display: grid;
     place-items: center;
-    color: var(--accent-2);
-    background: linear-gradient(155deg, rgb(139 141 255 / 0.18), rgb(139 141 255 / 0.04));
-    border: 1px solid rgb(139 141 255 / 0.24);
-    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08), 0 12px 30px -16px rgb(139 141 255 / 0.6);
-    margin-bottom: 6px;
+    color: var(--accent);
+    background:
+      radial-gradient(80% 80% at 28% 18%, rgb(255 255 255 / 0.7), transparent 60%),
+      var(--accent-soft);
+    border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.5), 0 16px 34px -20px color-mix(in srgb, var(--accent) 55%, transparent);
+    margin-bottom: 8px;
   }
-  h3 { margin: 0; font-family: var(--font-display); font-weight: 600; letter-spacing: -0.018em; font-size: 1.14rem; }
-  p { margin: 0; color: var(--muted); font-size: 0.84rem; line-height: 1.6; max-width: 36ch; }
+  h3 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.026em;
+    font-size: 1.16rem;
+  }
+  p { margin: 0; color: var(--muted); font-size: 0.84rem; line-height: 1.6; max-width: 38ch; }
   .action { margin-top: 12px; }
 </style>

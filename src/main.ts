@@ -3,8 +3,10 @@ import { mount } from 'svelte';
 import App from './App.svelte';
 import { router } from './lib/router.svelte';
 import { union } from './lib/store.svelte';
+import { watchShellChrome } from './lib/native';
 
 router.init();
+watchShellChrome();
 
 // Android's back gesture: close a sheet first, otherwise let the shell use
 // WebView history. Returning false tells the shell to go back or background us.

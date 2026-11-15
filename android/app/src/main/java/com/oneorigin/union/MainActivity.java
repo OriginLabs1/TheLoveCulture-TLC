@@ -37,8 +37,9 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        getWindow().setStatusBarColor(Color.parseColor("#06070C"));
-        getWindow().setNavigationBarColor(Color.parseColor("#06070C"));
+        int chrome = getResources().getColor(R.color.union_bg, getTheme());
+        getWindow().setStatusBarColor(chrome);
+        getWindow().setNavigationBarColor(chrome);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             getWindow().setStatusBarContrastEnforced(false);
             getWindow().setNavigationBarContrastEnforced(false);
@@ -57,7 +58,7 @@ public class MainActivity extends Activity {
         }
 
         web = new WebView(this);
-        web.setBackgroundColor(Color.parseColor("#06070C"));
+        web.setBackgroundColor(getResources().getColor(R.color.union_bg, getTheme()));
         web.setOverScrollMode(WebView.OVER_SCROLL_NEVER);
         web.setVerticalScrollBarEnabled(false);
         web.setHorizontalScrollBarEnabled(false);
@@ -87,6 +88,14 @@ public class MainActivity extends Activity {
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
+        }
+        // The design system owns light and dark; the WebView must not apply
+        // its own algorithmic darkening on top of it.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            settings.setForceDark(WebSettings.FORCE_DARK_OFF);
+        }
+        if (Build.VERSION.SDK_INT >= 33) {
+            settings.setAlgorithmicDarkeningAllowed(false);
         }
         settings.setUserAgentString(settings.getUserAgentString() + " Union/0.0.1");
 

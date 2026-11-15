@@ -16,6 +16,8 @@ import android.provider.MediaStore;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.util.Base64;
+import android.view.HapticFeedbackConstants;
+import android.view.WindowInsetsController;
 import android.webkit.JavascriptInterface;
 import android.widget.Toast;
 
@@ -191,9 +193,46 @@ public class UnionHost {
             return;
         }
         final int value = parsed;
+        final boolean light = Color.luminance(value) > 0.5;
         activity.runOnUiThread(() -> {
-            activity.getWindow().setStatusBarColor(value);
-            activity.getWindow().setNavigationBarColor(value);
+            android.view.Window window = activity.getWindow();
+            window.setStatusBarColor(value);
+            window.setNavigationBarColor(value);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                WindowInsetsController controller = window.getInsetsController();
+                if (controller != null) {
+                    int mask = WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+                        | WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
+                    controller.setSystemBarsAppearance(light ? mask : 0, mask);
+                }
+            } else {
+                int flags = light
+                    ? android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                        | android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+                    : 0;
+                window.getDecorView().setSystemUiVisibility(flags);
+            }
+        });
+    }
+
+    /** A short physical confirmation, matching the web layer's haptic(). */
+    @JavascriptInterface
+    public void haptic(String kind) {
+        final String value = kind == null ? "tap" : kind;
+        activity.runOnUiThread(() -> {
+            int effect = HapticFeedbackConstants.VIRTUAL_KEY;
+            if ("select".equals(value)) {
+                effect = HapticFeedbackConstants.CLOCK_TICK;
+            } else if ("success".equals(value)) {
+                effect = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
+                    ? HapticFeedbackConstants.CONFIRM
+                    : HapticFeedbackConstants.VIRTUAL_KEY;
+            } else if ("warn".equals(value)) {
+                effect = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
+                    ? HapticFeedbackConstants.REJECT
+                    : HapticFeedbackConstants.LONG_PRESS;
+            }
+            activity.getWindow().getDecorView().performHapticFeedback(effect);
         });
     }
 

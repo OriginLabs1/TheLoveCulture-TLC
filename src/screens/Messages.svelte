@@ -408,7 +408,7 @@
   .status.failed { color: var(--rose); }
   .status.sent { color: var(--faint); }
   .status.delivered, .status.read { color: var(--teal); }
-  .retry { border: 0; background: none; padding: 0; margin-top: 2px; color: var(--accent-2); font-size: 0.68rem; }
+  .retry { border: 0; background: none; padding: 0; margin-top: 2px; color: var(--accent); font-size: 0.68rem; }
   .systemnote {
     align-self: center; max-width: 92%;
     display: flex; gap: 7px; align-items: flex-start;
@@ -427,7 +427,7 @@
   .connreq strong { font-size: 0.84rem; }
   .connreq p { margin: 5px 0 0; }
   .attachments { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
-  .attach { display: flex; align-items: center; gap: 8px; padding: 7px 9px; border-radius: 9px; background: rgb(0 0 0 / 0.2); border: 1px solid var(--line); color: var(--ink); font-size: 0.76rem; text-decoration: none; }
+  .attach { display: flex; align-items: center; gap: 8px; padding: 7px 9px; border-radius: 9px; background: var(--surface-2); border: 1px solid var(--line-soft); color: var(--ink); font-size: 0.76rem; text-decoration: none; }
   .attach small { display: block; color: var(--faint); font-size: 0.66rem; }
   .imgwrap img { max-height: 220px; border-radius: 10px; display: block; }
   .composer {
@@ -450,11 +450,11 @@
   }
   .sendbtn {
     width: 40px; height: 40px; flex: none; border-radius: 13px;
-    border: 1px solid rgb(255 255 255 / 0.22);
-    background: linear-gradient(135deg, #a9abff 0%, #7b7dfa 48%, #8f6cf0 100%);
-    color: #080910;
+    border: 1px solid transparent;
+    background: var(--accent);
+    color: var(--accent-ink);
     display: grid; place-items: center;
-    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.45), 0 10px 24px -12px rgb(123 125 250 / 0.7);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.3), 0 10px 24px -12px color-mix(in srgb, var(--accent) 70%, transparent);
     transition: transform 240ms var(--ease-spring), filter 200ms ease;
   }
   .sendbtn:hover { filter: brightness(1.06); }
@@ -466,14 +466,14 @@
   .threadico {
     width: 42px; height: 42px; border-radius: 50%; flex: none;
     display: grid; place-items: center;
-    background: var(--panel-2); border: 1px solid var(--line); color: var(--accent-2);
+    background: var(--accent-soft); border: 1px solid color-mix(in srgb, var(--accent) 16%, transparent); color: var(--accent);
   }
   .searchbar {
     display: flex; align-items: center; gap: 9px;
     margin-top: 14px; padding: 0 13px;
-    border: 1px solid var(--line); border-radius: 13px; background: var(--bg-2);
+    border: 1px solid var(--line); border-radius: 16px; background: var(--surface-2);
   }
   .searchbar :global(svg) { color: var(--faint); flex: none; }
   .searchbar input { border: 0; background: transparent; box-shadow: none !important; padding-left: 0; min-height: 44px; }
-  .inline { border: 0; background: none; padding: 0; color: var(--accent-2); font-size: inherit; text-decoration: underline; }
+  .inline { border: 0; background: none; padding: 0; color: var(--accent); font-size: inherit; text-decoration: underline; }
 </style>

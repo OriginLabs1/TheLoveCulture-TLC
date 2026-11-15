@@ -9,6 +9,7 @@ interface UnionHost {
   share(text: string): void;
   openExternal(url: string): void;
   setTheme(color: string): void;
+  haptic?(kind: string): void;
   exit(): void;
   /** Present from v0.0.1 Android shell: writes into Downloads/Union. */
   saveFile?(name: string, mime: string, base64: string): string;
@@ -113,6 +114,33 @@ export function setSystemTheme(color: string): void {
   try { host.setTheme(color); } catch { /* older shell */ }
 }
 
+export function syncShellChrome(): void {
+  if (typeof window === 'undefined') return;
+  const dark = window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false;
+  const color = dark ? '#101116' : '#f4f1ea';
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', color);
+  setSystemTheme(color);
+}
+
+export function watchShellChrome(): void {
+  if (typeof window === 'undefined' || !window.matchMedia) return;
+  const mq = window.matchMedia('(prefers-color-scheme: dark)');
+  syncShellChrome();
+  mq.addEventListener('change', syncShellChrome);
+}
+
 export function exitApp(): void {
   if (host) host.exit();
+}
+
+/** A small physical confirmation. Native shells use the platform haptic
+ *  engine; browsers fall back to the vibration API where it exists. */
+export function haptic(kind: 'select' | 'tap' | 'success' | 'warn' = 'tap'): void {
+  if (host?.haptic) {
+    try { host.haptic(kind); return; } catch { /* older shell */ }
+  }
+  if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+    const pattern = kind === 'success' ? [12, 34, 16] : kind === 'warn' ? [22, 40, 22] : 9;
+    try { navigator.vibrate(pattern); } catch { /* not permitted */ }
+  }
 }

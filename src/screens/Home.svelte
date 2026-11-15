@@ -67,9 +67,15 @@
       <Avatar name={me?.name ?? 'Union'} color={me?.color ?? '#5b5bd6'} size={42} ring />
     </button>
   </div>
-  <p class="eyebrow">{today}</p>
+  <p class="eyebrow accent">{today}</p>
   <h1 class="display">{greeting}, <em>{firstName}</em>.</h1>
   <p class="tagline">{CONSTITUTION_TAGLINE}</p>
+
+  <button class="commandbar" onclick={() => router.go('/ai')} aria-label="Ask Union">
+    <span class="cmdorb"><Icon name="spark" size={17} /></span>
+    <span class="cmdtext"><strong>Ask Union</strong><span>Think, plan, find people, make a move</span></span>
+    <span class="cmdsend" aria-hidden="true"><Icon name="arrow-right" size={17} /></span>
+  </button>
 </header>
 
 <main class="screen home">
@@ -93,9 +99,11 @@
     </div>
 
     <div class="card-actions">
-      <button class="btn sm soft" onclick={() => (shareOpen = true)}><Icon name="qr" size={15} /> Share card</button>
-      <button class="btn sm" onclick={() => router.go('/people')}><Icon name="user" size={15} /> People</button>
-      <button class="iconbtn sm push" onclick={() => router.go('/settings')} aria-label="Settings"><Icon name="settings" size={15} /></button>
+      <div class="split">
+        <button onclick={() => (shareOpen = true)}><Icon name="qr" size={15} /> Share card</button>
+        <button onclick={() => router.go('/people')} aria-label="People"><Icon name="user" size={15} /></button>
+      </div>
+      <button class="btn sm soft push" onclick={() => router.go('/settings')}><Icon name="tune" size={15} /> Tune</button>
     </div>
 
     <div class="idfoot">
@@ -124,7 +132,7 @@
   {/if}
 
   <section class="section">
-    <div class="section-head"><h2>{next ? 'Continue exploring' : 'A useful next step'}</h2></div>
+    <div class="section-head"><h2>{next ? 'Continue exploring' : 'A useful next step'}</h2><button class="more" onclick={() => router.go('/learning')}>Learning</button></div>
     {#if next}
       <button class="card linkcard nextcard" onclick={() => router.go(`/learning/${next.course.slug}`)}>
         <div class="row top nextrow">
@@ -303,13 +311,13 @@
   .masthead {
     max-width: var(--maxw);
     margin: 0 auto;
-    padding: calc(14px + env(safe-area-inset-top)) var(--pad) 6px;
+    padding: calc(16px + env(safe-area-inset-top)) var(--pad) 4px;
     animation: mast-in 620ms var(--ease) both;
   }
   @keyframes mast-in {
     from { opacity: 0; transform: translateY(-8px); }
   }
-  .brandrow { display: flex; align-items: center; gap: 10px; margin-bottom: 22px; }
+  .brandrow { display: flex; align-items: center; gap: 10px; margin-bottom: 30px; }
   .wordmark { display: inline-flex; align-items: center; gap: 9px; }
   .wordmark span {
     font-size: 0.68rem;
@@ -321,21 +329,31 @@
   .version { font-size: 0.6rem; letter-spacing: 0.07em; }
   .avatar-btn { background: none; border: 0; padding: 0; border-radius: 50%; transition: transform 240ms var(--ease-spring); }
   .avatar-btn:active { transform: scale(0.94); }
-  .masthead .eyebrow { margin-bottom: 6px; }
+  .masthead .eyebrow { margin-bottom: 8px; }
   .masthead h1 {
     margin: 0;
-    font-size: clamp(2.15rem, 9vw, 3rem);
-    letter-spacing: -0.025em;
-    line-height: 0.98;
+    font-size: clamp(2.3rem, 9.2vw, 3.15rem);
+    letter-spacing: -0.05em;
+    line-height: 0.96;
   }
   .tagline {
-    margin: 12px 0 0;
-    max-width: 38ch;
-    color: var(--faint);
-    font-size: 0.79rem;
+    margin: 13px 0 0;
+    max-width: 40ch;
+    color: var(--muted);
+    font-size: 0.82rem;
     line-height: 1.55;
   }
-  .home { padding-top: 16px; }
+  .commandbar { margin-top: 22px; }
+  .cmdorb {
+    width: 38px; height: 38px;
+    border-radius: 13px;
+    display: grid; place-items: center;
+    flex: none;
+    background: var(--accent-soft);
+    border: 1px solid color-mix(in srgb, var(--accent) 16%, transparent);
+    color: var(--accent);
+  }
+  .home { padding-top: 18px; }
 
   .identity { padding: 19px; }
   .idtop { display: flex; align-items: flex-start; gap: 13px; }
@@ -375,10 +393,10 @@
   .nextorb {
     width: 46px; height: 46px; border-radius: 15px; flex: none;
     display: grid; place-items: center;
-    background: linear-gradient(150deg, rgb(139 141 255 / 0.22), rgb(139 141 255 / 0.05));
-    color: var(--accent-2);
-    border: 1px solid rgb(139 141 255 / 0.24);
-    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08);
+    background: var(--accent-soft);
+    color: var(--accent);
+    border: 1px solid color-mix(in srgb, var(--accent) 18%, transparent);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.45);
   }
   .nextbody { min-width: 0; flex: 1; }
   .nexttitle { display: block; font-family: var(--font-display); font-size: 1.12rem; font-weight: 500; letter-spacing: -0.018em; line-height: 1.2; }
@@ -386,12 +404,13 @@
   .cap { padding-top: 18px; }
   .capindex {
     position: absolute;
-    top: 14px;
-    right: 15px;
-    font-size: 0.62rem;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    color: rgb(255 255 255 / 0.22);
+    top: 15px;
+    right: 16px;
+    font-size: 0.61rem;
+    font-weight: 650;
+    letter-spacing: 0.12em;
+    color: var(--faint);
+    opacity: 0.72;
   }
   .progresscard .progressrow { align-items: center; gap: 16px; }
   .progresscopy { min-width: 0; }
@@ -401,11 +420,11 @@
   .threadmark {
     width: 38px; height: 38px; border-radius: 50%; flex: none;
     display: grid; place-items: center;
-    background: rgb(255 255 255 / 0.04); border: 1px solid var(--line); color: var(--accent-2);
+    background: var(--surface-2); border: 1px solid var(--line-soft); color: var(--accent);
   }
   .threadmark.coin { color: var(--gold); }
   .install { display: flex; align-items: center; gap: 12px; }
-  .install > :global(svg) { color: var(--accent-2); }
+  .install > :global(svg) { color: var(--accent); }
   .homefoot { margin: 42px 0 10px; text-align: center; }
   .footmark {
     display: inline-flex; align-items: center; gap: 8px;
@@ -416,7 +435,7 @@
   .homefoot .tiny + .tiny { margin-top: 2px; }
   .sharecard { display: flex; flex-direction: column; gap: 14px; }
   .linkbox {
-    background: rgb(0 0 0 / 0.3); border: 1px solid var(--line); border-radius: 12px;
+    background: var(--surface-2); border: 1px solid var(--line-soft); border-radius: 14px;
     padding: 11px 13px; font-size: 0.7rem; color: var(--muted);
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }

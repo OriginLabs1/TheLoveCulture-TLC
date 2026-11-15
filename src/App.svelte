@@ -154,26 +154,37 @@
     position: absolute;
     inset: 0;
     border-radius: 50%;
-    border: 1px solid rgb(255 255 255 / 0.08);
+    border: 1px solid var(--line);
   }
-  .b1 { inset: 8px; border-style: dashed; animation: spin 22s linear infinite; }
-  .b2 { border-color: rgb(139 141 255 / 0.18); animation: spin 30s linear infinite reverse; }
+  .b1 { inset: 8px; border-style: dashed; animation: spin 26s linear infinite; }
+  .b2 { border-color: color-mix(in srgb, var(--accent) 22%, transparent); animation: spin 34s linear infinite reverse; }
   .bmark {
-    width: 66px; height: 66px;
-    border-radius: 50%;
+    width: 72px; height: 72px;
+    border-radius: 26px;
     display: grid; place-items: center;
-    background: radial-gradient(circle at 32% 26%, rgb(40 44 68 / 0.9), rgb(9 10 17 / 0.9));
-    border: 1px solid rgb(255 255 255 / 0.12);
-    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.12), 0 22px 50px -18px rgb(0 0 0 / 0.9);
+    background:
+      radial-gradient(circle at 30% 24%, rgb(255 255 255 / 0.9), transparent 62%),
+      var(--surface);
+    border: 1px solid var(--line);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.8), 0 26px 60px -24px rgb(23 24 29 / 0.34);
   }
-  .boottype { display: flex; flex-direction: column; gap: 2px; }
-  .boot h1 { margin: 0; font-size: 2.4rem; letter-spacing: -0.02em; }
-  .boot p { margin: 0; letter-spacing: 0.03em; }
+  .bootorb::before {
+    content: "";
+    position: absolute;
+    inset: 16px;
+    border-radius: 50%;
+    background: radial-gradient(circle, color-mix(in srgb, var(--accent) 22%, transparent), transparent 68%);
+    filter: blur(20px);
+    animation: breathe 3.6s ease-in-out infinite alternate;
+  }
+  .boottype { display: flex; flex-direction: column; gap: 4px; }
+  .boot h1 { margin: 0; font-size: 2.5rem; letter-spacing: -0.045em; }
+  .boot p { margin: 0; letter-spacing: 0.035em; }
   .loader {
-    width: 96px;
-    height: 3px;
+    width: 104px;
+    height: 4px;
     border-radius: 999px;
-    background: rgb(255 255 255 / 0.08);
+    background: var(--surface-3);
     overflow: hidden;
     margin-top: 10px;
     position: relative;
@@ -184,7 +195,7 @@
     width: 40%;
     border-radius: inherit;
     background: linear-gradient(90deg, transparent, var(--accent), var(--teal), transparent);
-    animation: slide 1.3s var(--ease) infinite;
+    animation: slide 1.35s var(--ease) infinite;
   }
   .bootfine { font-size: 0.64rem; color: var(--faint); letter-spacing: 0.12em; text-transform: uppercase; }
   .fatal {
@@ -203,6 +214,7 @@
   .fatal h1 { margin: 8px 0 0; font-size: 1.6rem; }
   .fatal p { margin: 0; max-width: 40ch; }
   @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes breathe { to { opacity: 0.4; transform: scale(1.08); } }
   @keyframes slide { from { transform: translateX(-110%); } to { transform: translateX(260%); } }
   @keyframes fade-in { from { opacity: 0; transform: scale(0.98); } }
 </style>

@@ -1,7 +1,9 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import Icon from './Icon.svelte';
   import { router } from '../lib/router.svelte';
   import { union } from '../lib/store.svelte';
+  import { haptic } from '../lib/native';
 
   let {
     items = [
@@ -15,6 +17,9 @@
 
   const pending = $derived(union.incomingRequests.length);
   const unread = $derived(union.unreadMessages);
+  const activeIndex = $derived(
+    Math.max(0, items.findIndex((item) => (item.path === '/' ? router.path === '/' || router.path === '' : router.at(item.path))))
+  );
 
   function active(path: string): boolean {
     if (path === '/') return router.path === '/' || router.path === '';
@@ -26,22 +31,45 @@
     if (path === '/people') return pending;
     return 0;
   }
+
+  function go(path: string, isActive: boolean) {
+    if (isActive) return;
+    haptic('select');
+    router.go(path);
+  }
+
+  /* The rail needs room beside the content, so the shell marks the body
+     while the viewport is wide enough for it. */
+  onMount(() => {
+    const mq = window.matchMedia('(min-width: 1080px)');
+    const sync = () => document.body.classList.toggle('has-rail', mq.matches);
+    sync();
+    mq.addEventListener('change', sync);
+    return () => {
+      mq.removeEventListener('change', sync);
+      document.body.classList.remove('has-rail');
+    };
+  });
 </script>
 
 <nav aria-label="Primary">
-  <div class="dock">
+  <div class="dock" style={`--active:${activeIndex}`}>
+    <span class="glow" aria-hidden="true"></span>
     {#each items as item (item.path)}
-      <button class:active={active(item.path)} onclick={() => router.go(item.path)} aria-current={active(item.path) ? 'page' : undefined}>
+      <button
+        class:active={active(item.path)}
+        onclick={() => go(item.path, active(item.path))}
+        aria-current={active(item.path) ? 'page' : undefined}
+      >
         <span class="iconwrap">
-          <Icon name={item.icon} size={20} stroke={active(item.path) ? 1.9 : 1.6} />
+          <Icon name={item.icon} size={20} stroke={active(item.path) ? 2 : 1.65} />
           {#if badgeFor(item.path) > 0}
-            <span class="dot">{badgeFor(item.path) > 9 ? '9+' : badgeFor(item.path)}</span>
+            <span class="dot" aria-label={`${badgeFor(item.path)} waiting`}>{badgeFor(item.path) > 9 ? '9+' : badgeFor(item.path)}</span>
           {/if}
         </span>
         <span class="label">{item.label}</span>
       </button>
     {/each}
-    <span class="active-glow" aria-hidden="true" style={`transform:translateX(${Math.max(0, items.findIndex((i) => active(i.path))) * 100}%)`}></span>
   </div>
 </nav>
 
@@ -50,39 +78,44 @@
     position: fixed;
     z-index: 40;
     left: 50%;
-    bottom: calc(10px + env(safe-area-inset-bottom));
+    bottom: calc(12px + env(safe-area-inset-bottom));
     translate: -50% 0;
-    width: min(calc(100% - 20px), 560px);
-    padding: 0;
+    width: min(calc(100% - 24px), 560px);
   }
   .dock {
     position: relative;
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    padding: 7px;
-    border-radius: 26px;
-    background: linear-gradient(180deg, rgb(26 30 47 / 0.82), rgb(11 13 21 / 0.92));
-    border: 1px solid rgb(255 255 255 / 0.1);
-    backdrop-filter: blur(26px) saturate(165%);
-    -webkit-backdrop-filter: blur(26px) saturate(165%);
+    padding: 6px;
+    border-radius: 30px;
+    background: var(--glass-strong);
+    border: 1px solid var(--glass-edge);
+    backdrop-filter: blur(30px) saturate(190%);
+    -webkit-backdrop-filter: blur(30px) saturate(190%);
     box-shadow:
-      0 28px 70px -20px rgb(0 0 0 / 0.92),
-      0 2px 10px rgb(0 0 0 / 0.4),
-      inset 0 1px 0 rgb(255 255 255 / 0.09);
-    overflow: hidden;
+      inset 0 1px 0 rgb(255 255 255 / 0.7),
+      0 30px 70px -24px rgb(23 24 29 / 0.36),
+      0 2px 8px rgb(23 24 29 / 0.06);
   }
-  .dock::before {
-    content: "";
+  @media (prefers-color-scheme: dark) {
+    .dock {
+      box-shadow:
+        inset 0 1px 0 rgb(255 255 255 / 0.09),
+        0 30px 70px -24px rgb(0 0 0 / 0.85),
+        0 2px 8px rgb(0 0 0 / 0.4);
+    }
+  }
+  .glow {
     position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(140deg, rgb(255 255 255 / 0.16), transparent 36%, transparent 68%, rgb(139 141 255 / 0.22));
-    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
+    z-index: 0;
+    top: 6px;
+    left: 6px;
+    width: calc((100% - 12px) / 5);
+    height: calc(100% - 12px);
+    border-radius: 25px;
+    background: radial-gradient(60% 70% at 50% 40%, color-mix(in srgb, var(--accent) 13%, transparent), transparent 74%);
+    transform: translateX(calc(var(--active) * 100%));
+    transition: transform 480ms var(--ease);
     pointer-events: none;
   }
   button {
@@ -94,66 +127,90 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 2px;
-    padding: 5px 2px 4px;
-    min-height: 56px;
-    border-radius: 19px;
+    gap: 3px;
+    padding: 7px 2px 5px;
+    min-height: 58px;
+    border-radius: 25px;
     transition: color 240ms ease;
+    -webkit-tap-highlight-color: transparent;
   }
   button:active { transform: scale(0.94); }
-  button.active { color: var(--accent-2); }
+  button.active { color: var(--ink); }
   .iconwrap {
     position: relative;
     display: grid;
     place-items: center;
-    width: 48px;
-    height: 29px;
-    border-radius: 10px;
-    transition: background 300ms var(--ease), box-shadow 300ms var(--ease), transform 300ms var(--ease-spring);
+    width: 50px;
+    height: 30px;
+    border-radius: 15px;
+    transition: background 300ms var(--ease), box-shadow 300ms var(--ease), transform 340ms var(--ease-spring);
   }
   button.active .iconwrap {
-    background: linear-gradient(180deg, rgb(139 141 255 / 0.28), rgb(139 141 255 / 0.1));
-    box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 0.16),
-      0 6px 18px -8px rgb(139 141 255 / 0.7);
+    background: var(--accent-soft);
+    color: var(--accent);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.4);
     transform: translateY(-1px);
   }
   .label {
-    font-size: 0.62rem;
-    font-weight: 600;
-    letter-spacing: 0.035em;
-    opacity: 0.82;
+    font-size: 0.61rem;
+    font-weight: 640;
+    letter-spacing: 0.045em;
+    opacity: 0.78;
     transition: opacity 240ms ease;
   }
   button.active .label { opacity: 1; }
   .dot {
     position: absolute;
-    top: -4px;
-    right: 6px;
-    min-width: 16px;
-    height: 16px;
+    top: -5px;
+    right: 4px;
+    min-width: 17px;
+    height: 17px;
     padding: 0 4px;
-    border-radius: 8px;
-    background: linear-gradient(180deg, #ff8fa3, #f4637a);
+    border-radius: 9px;
+    background: var(--rose);
     color: #fff;
-    font-size: 0.6rem;
+    font-size: 0.58rem;
     font-weight: 700;
     display: grid;
     place-items: center;
-    border: 2px solid #10131e;
-    box-shadow: 0 4px 10px -2px rgb(255 143 163 / 0.5);
+    border: 2px solid var(--surface);
+    box-shadow: 0 4px 10px -2px color-mix(in srgb, var(--rose) 55%, transparent);
   }
-  /* A soft wash follows the active item without moving layout. */
-  .active-glow {
-    position: absolute;
-    z-index: 0;
-    left: 7px;
-    bottom: 6px;
-    width: calc(20% - 2.8px);
-    height: 52px;
-    border-radius: 18px;
-    background: radial-gradient(62% 74% at 50% 58%, rgb(139 141 255 / 0.15), transparent 72%);
-    transition: transform 460ms var(--ease);
-    pointer-events: none;
+  @media (prefers-color-scheme: dark) {
+    /* The dark rose is light; ink keeps the count legible. */
+    .dot { color: #240910; }
+  }
+
+  /* Desktop: a quiet navigation rail instead of a dock. */
+  @media (min-width: 1080px) {
+    nav {
+      left: 18px;
+      bottom: auto;
+      top: 50%;
+      translate: 0 -50%;
+      width: auto;
+    }
+    .dock {
+      grid-template-columns: 1fr;
+      gap: 4px;
+      padding: 10px;
+      border-radius: 32px;
+    }
+    .glow {
+      top: 10px;
+      left: 10px;
+      width: calc(100% - 20px);
+      height: 64px;
+      border-radius: 22px;
+      transform: translateY(calc(var(--active) * 68px));
+      transition: transform 480ms var(--ease);
+    }
+    button {
+      width: 72px;
+      min-height: 64px;
+      padding: 8px 2px 6px;
+      border-radius: 22px;
+    }
+    .label { font-size: 0.6rem; }
   }
 </style>

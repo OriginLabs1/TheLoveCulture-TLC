@@ -6,7 +6,9 @@ This is the first release that is meant to be used, not demonstrated: installabl
 
 ## Highlights
 
-- **Premium mobile interface** — “Quiet Signal”: obsidian glass, iris accent, champagne for value, spring motion, reduced-motion support. Google Sans throughout, Google Sans Code for keys and hashes.
+- **Premium mobile interface** — “Lumen”: warm porcelain ground, ultramarine signal, champagne for value, selective liquid glass, lacquered hero cards, Material 3 Expressive shapes, spring motion and reduced-motion support. Light by default, with a tuned dark theme and matching native system bars. Google Sans throughout, Google Sans Code for keys and hashes.
+- **Adaptive surface** — a floating glass dock on phones and a vertical rail from 1080 px, a flexible app bar that collapses on scroll, grouped and split buttons, and an “Ask Union” command bar.
+- **A2UI agent surfaces** — the assistant can compose a safe, validated interface beside the conversation (headings, stats, lists, forms, actions) from a fixed catalog. Only four allowlisted actions exist, nothing executes without approval, and invalid surfaces fall back to text.
 - **Ten working capability areas** — communication, community, people/consent, learning, experiences, presence, assistant, mentorship, economy, operations.
 - **Local-first identity** — Ed25519 identity derived from its public key; X25519 + HKDF + AES-256-GCM sealed messages; the relay sees ciphertext and routing metadata only.
 - **Android shell** — 375 KB signed APK, Android 9+, one permission (`INTERNET`), Keystore-backed secret store, loopback asset server for a secure WebView origin.
@@ -66,7 +68,11 @@ Read [docs/economy.md](../docs/economy.md) before requesting activation.
 - `npm run check` — 0 errors, 0 warnings
 - `npm test` — 10/10
 - `npm run test:relay` — 8/8
+- All 14 routes audited at a 360 px phone viewport: no horizontal overflow, no console errors
+- Light and dark contrast audits: text meets WCAG AA on paper, tonal chips and the hero card
+- Desktop layout at 1280 px: rail navigation, centred column, composer offset, no overflow
 - Fresh install → onboarding → encrypted-backup step → Home verified in a browser
+- Assistant flow verified: prompt → A2UI presence form → submit → tailored draft → approve → page appears in Presence with a badge
 - Activation request → proof → verified → reactivation section verified in a browser
 - APK signature, permissions, `minSdk` and packaged assets inspected
 

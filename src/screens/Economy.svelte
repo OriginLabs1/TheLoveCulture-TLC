@@ -641,12 +641,12 @@
   .fnum {
     height: 4px;
     border-radius: 999px;
-    background: rgb(255 255 255 / 0.08);
+    background: var(--surface-3);
     font-size: 0;
     transition: background 500ms var(--ease);
   }
-  .flowstep.done .fnum { background: linear-gradient(90deg, var(--accent), var(--teal)); box-shadow: 0 0 10px rgb(139 141 255 / 0.4); }
-  .flowstep.on .fnum { background: linear-gradient(90deg, var(--gold), var(--gold-2)); box-shadow: 0 0 10px rgb(232 198 144 / 0.4); }
+  .flowstep.done .fnum { background: linear-gradient(90deg, var(--accent), var(--teal)); box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 40%, transparent); }
+  .flowstep.on .fnum { background: linear-gradient(90deg, var(--gold), var(--gold-2)); box-shadow: 0 0 10px color-mix(in srgb, var(--gold) 40%, transparent); }
   .flabel { font-size: 0.64rem; font-weight: 600; letter-spacing: 0.04em; color: var(--faint); }
   .flowstep.done .flabel, .flowstep.on .flabel { color: var(--ink-2); }
   .herostatus { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
@@ -659,7 +659,7 @@
     padding: 13px 15px;
     border: 1px solid var(--line-soft);
     border-radius: 14px;
-    background: rgb(0 0 0 / 0.22);
+    background: var(--surface-2);
   }
   .amountline > div { display: flex; flex-direction: column; gap: 2px; }
   .amountline strong { font-size: 1.2rem; line-height: 1; }
@@ -673,13 +673,13 @@
     align-items: center;
     gap: 13px;
     padding: 16px;
-    border: 1px dashed rgb(255 255 255 / 0.18);
-    border-radius: 16px;
-    background: rgb(255 255 255 / 0.018);
+    border: 1px dashed var(--line-strong);
+    border-radius: 18px;
+    background: var(--surface);
     cursor: pointer;
     transition: border-color 220ms ease, background 220ms ease;
   }
-  .dropzone:hover { border-color: rgb(139 141 255 / 0.45); background: rgb(139 141 255 / 0.045); }
+  .dropzone:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); background: var(--accent-mist); }
   .dropzone.hasproof { border-style: solid; }
   .dropcopy { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
   .dropcopy strong { font-size: 0.86rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -691,7 +691,7 @@
     padding: 12px;
     border: 1px solid var(--line);
     border-radius: 16px;
-    background: rgb(0 0 0 / 0.24);
+    background: var(--surface-2);
   }
   .proofimg { width: 100%; max-height: 260px; object-fit: contain; border-radius: 10px; background: #05060a; }
   .proofimg.preview { max-height: 220px; }
@@ -704,8 +704,8 @@
   .live {
     display: inline-flex; align-items: center; gap: 5px;
     font-size: 0.64rem; font-weight: 620; color: var(--green);
-    border: 1px solid rgb(82 224 164 / 0.25);
-    background: rgb(82 224 164 / 0.08);
+    border: 1px solid color-mix(in srgb, var(--green) 28%, transparent);
+    background: var(--green-soft);
     border-radius: 999px; padding: 3px 8px; flex: none;
   }
   .live span { width: 5px; height: 5px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse 2.4s ease-in-out infinite; }
@@ -720,7 +720,7 @@
     line-height: 1.55;
     white-space: pre-wrap;
     color: var(--muted);
-    background: rgb(0 0 0 / 0.32);
+    background: var(--surface-2);
     border: 1px solid var(--line-soft);
     border-radius: 12px;
   }
@@ -735,6 +735,6 @@
   .ledgeritem .main span { white-space: normal; }
   .ledgeritem .amount { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; flex: none; }
   .ledgeritem .amount strong { font-size: 0.86rem; }
-  .capico { width: 36px; height: 36px; border-radius: 11px; flex: none; display: grid; place-items: center; background: rgb(255 255 255 / 0.04); border: 1px solid var(--line); color: var(--accent-2); }
+  .capico { width: 36px; height: 36px; border-radius: 12px; flex: none; display: grid; place-items: center; background: var(--accent-soft); border: 1px solid color-mix(in srgb, var(--accent) 16%, transparent); color: var(--accent); }
   .listitem.static:hover { border-color: var(--line); }
 </style>

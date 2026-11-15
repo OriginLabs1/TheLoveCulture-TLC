@@ -115,7 +115,9 @@ docs/                economy, privacy, relay, build, distribution, design
 
 ## Design
 
-**Quiet Signal**: obsidian glass, one iris accent, champagne for value, calm motion that confirms rather than demands attention. Typography is **Google Sans** throughout, with **Google Sans Code** for hashes and keys. The type is bundled, so the interface renders identically offline.
+**Lumen**: a warm porcelain ground, one ultramarine signal, champagne for value, selective liquid glass and lacquered hero cards. Material 3 Expressive shapes and spring motion, light by default with a tuned dark theme. Typography is **Google Sans** throughout, with **Google Sans Code** for hashes and keys. The type is bundled, so the interface renders identically offline.
+
+The assistant also speaks **A2UI**: a small, versioned catalog of headings, stats, lists, forms and actions, validated before rendering and limited to four allowlisted actions. Nothing an agent composes can execute without approval, and the catalog is designed to map one-to-one onto Jetpack Compose + Material 3 later.
 
 More: [docs/design.md](docs/design.md).
 

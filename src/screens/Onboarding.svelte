@@ -357,12 +357,14 @@
     width: 74px; height: 74px;
     border-radius: 50%;
     display: grid; place-items: center;
-    background: radial-gradient(circle at 32% 26%, rgb(40 44 68 / 0.9), rgb(10 11 18 / 0.85));
-    border: 1px solid rgb(255 255 255 / 0.13);
+    background:
+      radial-gradient(circle at 32% 26%, rgb(255 255 255 / 0.92), transparent 62%),
+      var(--surface);
+    border: 1px solid var(--line);
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 0.14),
-      0 20px 50px -18px rgb(0 0 0 / 0.9),
-      0 0 60px -10px rgb(139 141 255 / 0.35);
+      inset 0 1px 0 rgb(255 255 255 / 0.8),
+      0 22px 54px -22px rgb(23 24 29 / 0.34),
+      0 0 60px -14px color-mix(in srgb, var(--accent) 30%, transparent);
     position: relative;
     z-index: 2;
   }
@@ -370,21 +372,21 @@
     position: absolute;
     inset: 0;
     border-radius: 50%;
-    border: 1px solid rgb(255 255 255 / 0.075);
+    border: 1px solid var(--line);
   }
   .o1 { inset: 12px; border-style: dashed; animation: spin 40s linear infinite; }
-  .o2 { inset: 0; border-color: rgb(139 141 255 / 0.16); animation: spin 26s linear infinite reverse; }
-  .o3 { inset: 26px; border-color: rgb(94 234 212 / 0.14); animation: spin 18s linear infinite; }
+  .o2 { inset: 0; border-color: color-mix(in srgb, var(--accent) 20%, transparent); animation: spin 26s linear infinite reverse; }
+  .o3 { inset: 26px; border-color: color-mix(in srgb, var(--teal) 22%, transparent); animation: spin 18s linear infinite; }
   .sat {
     position: absolute;
     width: 5px; height: 5px;
     border-radius: 50%;
-    background: var(--accent-2);
-    box-shadow: 0 0 12px 2px rgb(139 141 255 / 0.7);
+    background: var(--accent);
+    box-shadow: 0 0 12px 2px color-mix(in srgb, var(--accent) 60%, transparent);
   }
   .s1 { top: 6px; left: 50%; animation: pulse 3.4s ease-in-out infinite; }
-  .s2 { bottom: 20px; right: 12px; background: var(--teal); box-shadow: 0 0 12px 2px rgb(94 234 212 / 0.6); animation: pulse 4.2s ease-in-out infinite 0.8s; }
-  .s3 { top: 34px; left: 8px; background: var(--gold); box-shadow: 0 0 12px 2px rgb(232 198 144 / 0.5); animation: pulse 3.8s ease-in-out infinite 1.4s; }
+  .s2 { bottom: 20px; right: 12px; background: var(--teal); box-shadow: 0 0 12px 2px color-mix(in srgb, var(--teal) 50%, transparent); animation: pulse 4.2s ease-in-out infinite 0.8s; }
+  .s3 { top: 34px; left: 8px; background: var(--gold); box-shadow: 0 0 12px 2px color-mix(in srgb, var(--gold) 45%, transparent); animation: pulse 3.8s ease-in-out infinite 1.4s; }
   @keyframes spin { to { transform: rotate(360deg); } }
   @keyframes pulse { 50% { opacity: 0.35; transform: scale(0.7); } }
 
@@ -402,18 +404,20 @@
     padding: 12px 14px;
     border: 1px solid var(--line-soft);
     border-radius: 16px;
-    background: linear-gradient(165deg, rgb(24 27 43 / 0.55), rgb(10 12 19 / 0.6));
-    backdrop-filter: blur(8px);
+    background: var(--glass);
+    backdrop-filter: blur(18px) saturate(170%);
+    -webkit-backdrop-filter: blur(18px) saturate(170%);
+    box-shadow: var(--shadow-1);
   }
   .pico {
     width: 30px; height: 30px; border-radius: 10px; flex: none;
     display: grid; place-items: center;
-    background: rgb(139 141 255 / 0.12);
-    border: 1px solid rgb(139 141 255 / 0.2);
-    color: var(--accent-2);
+    background: var(--accent-soft);
+    border: 1px solid color-mix(in srgb, var(--accent) 18%, transparent);
+    color: var(--accent);
     margin-top: 1px;
   }
-  .pico.gold { background: rgb(232 198 144 / 0.1); border-color: rgb(232 198 144 / 0.24); color: var(--gold); }
+  .pico.gold { background: var(--gold-soft); border-color: color-mix(in srgb, var(--gold) 24%, transparent); color: var(--gold); }
   .principles strong { color: var(--ink); font-weight: 620; }
 
   .cta { display: flex; flex-direction: column; gap: 4px; margin-top: 4px; }
@@ -424,7 +428,7 @@
   .domainhead .eyebrow { margin: 0; white-space: nowrap; }
   .hair { flex: 1; height: 1px; background: linear-gradient(90deg, var(--line), transparent); }
   .domain-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
-  .domain-list .chip { background: rgb(255 255 255 / 0.02); }
+  .domain-list .chip { background: var(--surface-2); }
   .fine { color: var(--faint); font-size: 0.72rem; line-height: 1.6; margin: 6px 0 0; }
 
   .sub { display: flex; align-items: flex-start; gap: 13px; padding: 4px 0 2px; }
@@ -433,16 +437,16 @@
   .sub .eyebrow { margin: 0; }
   .sub p { margin: 0; }
   .stepdots { display: flex; gap: 5px; margin-bottom: 10px; }
-  .stepdots span { width: 22px; height: 3px; border-radius: 999px; background: rgb(255 255 255 / 0.1); }
-  .stepdots span.on { background: linear-gradient(90deg, var(--accent), var(--teal)); box-shadow: 0 0 10px rgb(139 141 255 / 0.4); }
+  .stepdots span { width: 22px; height: 3px; border-radius: 999px; background: var(--surface-3); }
+  .stepdots span.on { background: linear-gradient(90deg, var(--accent), var(--teal)); box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 35%, transparent); }
 
-  .formcard { background: linear-gradient(168deg, rgb(23 26 41 / 0.72), rgb(10 12 20 / 0.88)); }
+  .formcard { background: var(--surface); }
   .handlebox {
     display: flex; align-items: center; gap: 2px;
-    border: 1px solid var(--line); background: rgb(5 6 11 / 0.55); border-radius: 14px;
+    border: 1px solid var(--line); background: var(--surface-2); border-radius: 16px;
     padding-left: 14px; color: var(--faint);
   }
-  .handlebox:focus-within { border-color: color-mix(in srgb, var(--accent) 64%, var(--line)); box-shadow: 0 0 0 3px rgb(139 141 255 / 0.15); }
+  .handlebox:focus-within { border-color: color-mix(in srgb, var(--accent) 64%, var(--line)); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 13%, transparent); }
   .handlebox input { border: 0; box-shadow: none !important; background: transparent; padding-left: 2px; }
 
   .experience .label { font-size: 0.84rem; color: var(--ink); }
@@ -451,7 +455,7 @@
     display: flex; flex-direction: column; gap: 5px; align-items: flex-start;
     padding: 14px; text-align: left;
     border: 1px solid var(--line); border-radius: 16px;
-    background: rgb(255 255 255 / 0.02);
+    background: var(--surface-2);
     color: var(--muted);
     transition: border-color 220ms ease, background 220ms ease, transform 260ms var(--ease);
   }
@@ -468,13 +472,13 @@
     transition: opacity 200ms ease, transform 260ms var(--ease-spring);
   }
   .choice.on {
-    border-color: rgb(139 141 255 / 0.5);
-    background: linear-gradient(160deg, rgb(139 141 255 / 0.13), rgb(139 141 255 / 0.04));
-    box-shadow: 0 12px 30px -20px rgb(139 141 255 / 0.8);
+    border-color: color-mix(in srgb, var(--accent) 50%, var(--line));
+    background: var(--accent-mist);
+    box-shadow: 0 12px 30px -20px color-mix(in srgb, var(--accent) 60%, transparent);
   }
   .choice.on .checkmark { opacity: 1; transform: none; background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
   .choice.on .checkmark :global(svg) { color: var(--accent-ink); }
-  .choice.on :global(svg), .choice.on strong { color: var(--accent-2); }
+  .choice.on :global(svg), .choice.on strong { color: var(--accent); }
 
   .idpreview .previewname { font-size: 1.2rem; }
   .bigavatar {
@@ -484,6 +488,6 @@
       radial-gradient(circle at 30% 22%, color-mix(in srgb, var(--tint) 60%, white), transparent 65%),
       var(--tint);
     font-weight: 700; color: #fff; flex: none;
-    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.18);
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.24);
   }
 </style>

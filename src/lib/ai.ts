@@ -111,8 +111,21 @@ function count(records: UnionRecord[], type: string): number {
   return records.filter((r) => r.type === type).length;
 }
 
+/** Pull the subject out of a draft-page request, including “draft a short
+ *  Presence page about …”. Returns null when this is not a page request. */
+function pageSubject(text: string): string | null {
+  const m = text.match(
+    /(?:draft|write|compose|help me draft|help me write)\s+(?:a\s+|an\s+)?(?:(?:short|small|simple|honest|new)\s+)*(?:presence\s+)?page(?:\s+(?:called|titled|about|for))?\s+["“']?([^"”'\n.]{3,60})["”']?/i
+  );
+  return m ? m[1].trim().replace(/[\s,;:]+$/, '') : null;
+}
+
 function localAnswer(req: AiRequest): string {
   const text = req.text.trim();
+  const subject = pageSubject(text);
+  if (subject) {
+    return `A page is a small place, not a funnel. For “${subject}”, try this shape — **Title:** the practice in five words. **One sentence:** who it is for and what changes. **Two sections:** what you do, and how someone can take part. Then publish in **Presence** and make a read-only link with an expiry.`;
+  }
   const found = KB.find((entry) => entry.match.test(text));
   if (found) return found.answer;
   const openThreads = count(req.records, 'thread');
@@ -178,12 +191,12 @@ function propose(req: AiRequest): Omit<AiAction, 'state'> | undefined {
       description: 'Save this as an AI memory you can delete later'
     };
   }
-  m = text.match(/draft (?:a )?page(?: (?:called|titled|about))? ["“']?([^"”'\n.]{3,60})["”']?/i);
-  if (m) {
+  const subject = pageSubject(text);
+  if (subject) {
     return {
       tool: 'draft_page',
-      args: { title: m[1].trim(), tagline: 'A small, useful place.', about: '' },
-      description: `Draft a Presence page called “${m[1].trim()}”`
+      args: { title: subject, tagline: 'A small, useful place.', about: '' },
+      description: `Draft a Presence page called “${subject}”`
     };
   }
   return undefined;
