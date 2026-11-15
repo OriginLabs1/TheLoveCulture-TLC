@@ -2,6 +2,8 @@ name = "union-relay"
 main = "src/index.js"
 compatibility_date = "2025-01-01"
 compatibility_flags = ["nodejs_compat"]
+workers_dev = true
+preview_urls = false
 
 # The relay is optional. Union works fully offline without it; a relay only
 # adds store-and-forward delivery, a handle directory and shared public rooms.
@@ -9,13 +11,16 @@ compatibility_flags = ["nodejs_compat"]
 [[d1_databases]]
 binding = "DB"
 database_name = "union-relay"
-database_id = "REPLACE_WITH_YOUR_D1_ID"
+database_id = "5994448e-1e86-4c38-8867-d11189898670"
 
 [vars]
-# Comma-separated browser origins allowed to call the relay.
-# Set this to your Pages origin in production, e.g.
-# ALLOWED_ORIGINS = "https://originlabs1.github.io"
-ALLOWED_ORIGINS = "*"
+# Browser origins allowed to call the relay. Union works without the relay.
+ALLOWED_ORIGINS = "https://union.cculture.net,https://union-app.cculture.net,https://union-app-9ni.pages.dev"
+
+[[routes]]
+# A stable, first-party endpoint for the optional relay.
+pattern = "union-relay.cculture.net"
+custom_domain = true
 
 [observability]
 enabled = true

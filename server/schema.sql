@@ -1,7 +1,7 @@
 -- Union relay schema (Cloudflare D1 / SQLite).
 -- Apply with: npx wrangler d1 execute union-relay --remote --file schema.sql
 
-PRAGMA journal_mode = WAL;
+-- D1 manages journaling itself; PRAGMA journal_mode is not authorized.
 
 CREATE TABLE IF NOT EXISTS identities (
   id          TEXT PRIMARY KEY,

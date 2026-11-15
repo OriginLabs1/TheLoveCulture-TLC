@@ -67,7 +67,7 @@ Read [docs/economy.md](../docs/economy.md) before requesting activation.
 
 - `npm run check` — 0 errors, 0 warnings
 - `npm test` — 10/10
-- `npm run test:relay` — 8/8
+- `npm run test:relay` — 9/9
 - All 14 routes audited at a 360 px phone viewport: no horizontal overflow, no console errors
 - Light and dark contrast audits: text meets WCAG AA on paper, tonal chips and the hero card
 - Desktop layout at 1280 px: rail navigation, centred column, composer offset, no overflow

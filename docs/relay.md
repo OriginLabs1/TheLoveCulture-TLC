@@ -9,6 +9,23 @@ Union works without a server. The relay adds four conveniences:
 
 It cannot read message bodies. It verifies every write with Ed25519 and stores ciphertext.
 
+## A live deployment
+
+Union's own relay is deployed at **https://union-relay.access1tutamailcom.workers.dev**.
+The Worker also declares the custom domain `https://union-relay.cculture.net`; use the
+`workers.dev` address until that hostname resolves directly. It runs with D1 database
+`union-relay` (`5994448e-1e86-4c38-8867-d11189898670`) and allows these browser origins:
+
+```
+https://union.cculture.net
+https://union-app.cculture.net
+https://union-app-9ni.pages.dev
+```
+
+It is optional: the app is complete offline, and a self-hosted relay works the same way.
+Requests from any other origin receive no `access-control-allow-origin` header, so a
+browser refuses them; a same-origin or server-to-server caller is unaffected.
+
 ## What you need
 
 - A Cloudflare account (the free plan is enough for personal use).
@@ -29,12 +46,16 @@ npx wrangler@4 d1 execute union-relay --remote --file schema.sql
 
 # Set your Pages origin instead of "*"
 #   [vars]
-#   ALLOWED_ORIGINS = "https://originlabs1.github.io"
+#   ALLOWED_ORIGINS = "https://union.cculture.net,https://union-app.cculture.net"
 
 npx wrangler@4 deploy
 ```
 
 The deploy prints a URL such as `https://union-relay.<account>.workers.dev`. Paste it into **Operations → Relay** in Union, then tap **Check**.
+
+`wrangler.toml` also declares a `union-relay.cculture.net` custom domain. If you fork
+this for your own zone, replace that route (or remove it and use the `workers.dev`
+URL) and set `ALLOWED_ORIGINS` to your Pages origin.
 
 For CI, set `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` and run the same commands.
 
@@ -57,7 +78,7 @@ The relay handler is tested against an in-memory store, with no Cloudflare accou
 npm run test:relay
 ```
 
-The suite covers card signature and key/id binding, replay-window rejection, tampered bodies, handle uniqueness, delivery/acknowledgement, link ownership and revocation, and public/private room posting.
+The suite covers card signature and key/id binding, replay-window rejection, tampered bodies, handle uniqueness, delivery/acknowledgement, link ownership and revocation, public/private room posting, and refusal to echo a disallowed origin.
 
 ## API
 

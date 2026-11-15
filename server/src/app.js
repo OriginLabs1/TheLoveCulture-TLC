@@ -122,14 +122,17 @@ function corsHeaders(origin, allowed) {
     .split(',')
     .map((item) => item.trim())
     .filter(Boolean);
-  const allow = list.includes('*') ? '*' : list.includes(origin) ? origin : list[0] || '*';
-  return {
-    'access-control-allow-origin': allow,
+  const headers = {
     'access-control-allow-methods': 'GET, POST, OPTIONS',
     'access-control-allow-headers': 'content-type, x-union-id, x-union-ts, x-union-sig',
     'access-control-max-age': '86400',
     vary: 'origin'
   };
+  // Never echo an origin that is not on the list: a disallowed caller gets a
+  // response without the allow-origin header and the browser blocks it.
+  if (list.includes('*')) headers['access-control-allow-origin'] = '*';
+  else if (origin && list.includes(origin)) headers['access-control-allow-origin'] = origin;
+  return headers;
 }
 
 /** Coarse per-isolate limiter: bounded, cheap, and honest about being best-effort. */

@@ -29,7 +29,7 @@ Plus: onboarding, encrypted backup and restore, a service worker for offline use
 
 ### Android APK (recommended on a phone)
 
-Download `Union-0.0.1.apk` from the [releases page](https://github.com/OriginLabs1/Union/releases) and open it. Android 9 or newer. The APK asks for **one** permission — `INTERNET` — used for the loopback asset server and the optional relay. No storage, contacts, camera, microphone, location or advertising ID.
+Download [`Union-0.0.1.apk`](https://union-app-9ni.pages.dev/Union-0.0.1.apk) and open it. Android 9 or newer. The APK asks for **one** permission — `INTERNET` — used for the loopback asset server and the optional relay. No storage, contacts, camera, microphone, location or advertising ID.
 
 Verify before installing:
 
@@ -44,7 +44,7 @@ Signing certificate (SHA-256):
 
 ### Progressive web app
 
-Open the GitHub Pages site in a browser and choose **Add to Home screen**. The service worker caches the shell, fonts and WASM core, so it opens offline after the first load.
+Open **https://union-app-9ni.pages.dev** (or the custom address once its certificate is active) in a browser and choose **Add to Home screen**. The service worker caches the shell, fonts and WASM core, so it opens offline after the first load.
 
 ### From source
 
@@ -53,7 +53,7 @@ npm install
 npm run dev        # http://127.0.0.1:5173
 npm run build      # dist/ + service worker manifest + checksums
 npm test           # 10 app tests (Rolldown bundle + node:test)
-npm run test:relay # 8 relay tests (real handler, in-memory store)
+npm run test:relay # 9 relay tests (real handler, in-memory store)
 npm run check      # svelte-check, 0 errors
 ```
 
@@ -95,7 +95,7 @@ Union is complete without a server. A relay adds:
 - shared public rooms,
 - resolvable link URLs (`/l/<id>`).
 
-The relay is a Cloudflare Worker + D1 database in [`server/`](server/), with every write authenticated by an Ed25519 signature. Deploy notes: [docs/relay.md](docs/relay.md).
+The relay is a Cloudflare Worker + D1 database in [`server/`](server/), with every write authenticated by an Ed25519 signature. It runs at **https://union-relay.access1tutamailcom.workers.dev**; the intended first-party address is `https://union-relay.cculture.net`. It is optional and self-hostable. Deploy notes: [docs/relay.md](docs/relay.md).
 
 ## Repository layout
 

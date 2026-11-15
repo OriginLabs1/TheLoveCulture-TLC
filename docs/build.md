@@ -18,7 +18,7 @@ npm run preview   # serve dist/ on http://127.0.0.1:4173
 ```sh
 npm run check       # svelte-check: 0 errors, 0 warnings
 npm test            # 10 app tests
-npm run test:relay  # 8 relay tests
+npm run test:relay  # 9 relay tests
 ```
 
 The app tests are plain `node:test` against a Rolldown bundle of the pure library modules. No extra test dependency is added.

@@ -54,9 +54,9 @@ function setup() {
   const store = memoryStore();
   const app = createApp({ ...appDefaults, store, allowedOrigins: 'https://union.example,https://other.example' });
   const origin = 'https://union.example';
-  const call = async (method, path, { body, identity, timestamp, signature } = {}) => {
+  const call = async (method, path, { body, identity, timestamp, signature, origin: caller } = {}) => {
     const text = body === undefined ? '' : JSON.stringify(body);
-    const headers = { origin };
+    const headers = { origin: caller ?? origin };
     if (identity) {
       const ts = timestamp ?? Math.floor(Date.now() / 1000).toString();
       const digest = hex(sha256(enc.encode(text)));
@@ -90,6 +90,19 @@ test('health is public and CORS is present', async () => {
   assert.equal(response.status, 200);
   assert.equal(response.payload.service, 'union-relay');
   assert.equal(response.headers.get('access-control-allow-origin'), 'https://union.example');
+});
+
+test('a disallowed origin is never echoed back', async () => {
+  const { call } = setup();
+  const response = await call('GET', '/health', { origin: 'https://evil.example' });
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get('access-control-allow-origin'), null);
+  assert.equal(response.headers.get('vary'), 'origin');
+
+  const preflight = await call('OPTIONS', '/v1/messages', { origin: 'https://evil.example' });
+  assert.equal(preflight.status, 204);
+  assert.equal(preflight.headers.get('access-control-allow-origin'), null);
+  assert.match(preflight.headers.get('access-control-allow-methods'), /POST/);
 });
 
 test('a card must be signed by the key its id names', async () => {
