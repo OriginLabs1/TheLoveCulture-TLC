@@ -44,7 +44,7 @@ Signing certificate (SHA-256):
 
 ### Progressive web app
 
-Open **https://union-app-9ni.pages.dev** (or the custom address once its certificate is active) in a browser and choose **Add to Home screen**. The service worker caches the shell, fonts and WASM core, so it opens offline after the first load.
+Open **https://union-app-9ni.pages.dev** in a browser and choose **Add to Home screen**. (The custom addresses `union.cculture.net` and `union-app.cculture.net` point at the same deployment; see [docs/distribution.md](docs/distribution.md) for their status.) The service worker caches the shell, fonts and WASM core, so it opens offline after the first load.
 
 ### From source
 

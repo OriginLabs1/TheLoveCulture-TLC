@@ -6,6 +6,26 @@ Union ships three ways from the same source:
 2. **Signed APK** — `Union-0.0.1.apk` plus `SHA256SUMS`, served from the same site
 3. **Cloudflare Worker + D1** — the optional relay
 
+## Current status
+
+| Surface | State |
+|---|---|
+| Pages deployment | **Live** at <https://union-app-9ni.pages.dev> |
+| Signed APK | **Live** at `/Union-0.0.1.apk` (383,099 bytes, SHA-256 `a54a599e…f85fc8`) |
+| Relay | **Live** at <https://union-relay.access1tutamailcom.workers.dev> |
+| `union.cculture.net` | DNS verified; custom domain **pending** |
+| `union-app.cculture.net` | DNS verified; custom domain **pending** |
+| `union-relay.cculture.net` | Worker domain configured; hostname **redirects to itself** |
+| GitHub push / release | **Blocked** — the supplied PAT returns `401 Bad credentials` |
+
+Both custom hostnames are attached to the Pages project and their CNAMEs verify. They
+stay pending because a zone-level Redirect Rule on `cculture.net` returns
+`301 Location: <same URL>` for every hostname in the zone — including names that do
+not exist. Remove that rule under **Cloudflare → cculture.net → Rules → Redirect
+Rules** (and **Account Home → Bulk Redirects** if one is listed), or grant the API
+token **Zone → Zone Rulesets → Edit** and **Account → Account Rulesets → Edit**.
+No DNS change is needed.
+
 ## Cloudflare Pages (PWA)
 
 The site is a static `dist/` build. Vite uses `base: './'`, so the same output works
